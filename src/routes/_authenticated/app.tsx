@@ -1,6 +1,16 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { Dumbbell, Home, LineChart, LogOut, MessageSquareText, User } from "lucide-react";
+import {
+  Apple,
+  Camera,
+  Dumbbell,
+  Home,
+  LineChart,
+  LogOut,
+  MessageSquareText,
+  Trophy,
+  User,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/app")({
@@ -10,8 +20,11 @@ export const Route = createFileRoute("/_authenticated/app")({
 const NAV = [
   { to: "/app", label: "Início", icon: Home, exact: true },
   { to: "/app/treinos", label: "Treinos", icon: Dumbbell, exact: false },
-  { to: "/app/progresso", label: "Progresso", icon: LineChart, exact: false },
-  { to: "/app/coach", label: "Coach IA", icon: MessageSquareText, exact: false },
+  { to: "/app/coach", label: "Coach", icon: MessageSquareText, exact: false },
+  { to: "/app/nutricao", label: "Dieta", icon: Apple, exact: false },
+  { to: "/app/shape", label: "Shape", icon: Camera, exact: false },
+  { to: "/app/progresso", label: "Stats", icon: LineChart, exact: false },
+  { to: "/app/conquistas", label: "Medalhas", icon: Trophy, exact: false },
   { to: "/app/perfil", label: "Perfil", icon: User, exact: false },
 ] as const;
 
@@ -29,7 +42,7 @@ function AppLayout() {
 
   return (
     <div className="min-h-screen bg-ember md:flex">
-      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-border bg-surface/60 p-5 md:flex">
+      <aside className="sticky top-0 hidden h-screen w-56 shrink-0 flex-col border-r border-border bg-surface/50 p-5 backdrop-blur-xl md:flex">
         <Link to="/" className="text-display text-2xl">
           <span className="text-primary">AS</span>CEND
         </Link>
@@ -40,9 +53,9 @@ function AppLayout() {
               <Link
                 key={item.to}
                 to={item.to}
-                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors ${
+                className={`press flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors ${
                   active
-                    ? "bg-primary text-primary-foreground"
+                    ? "bg-primary text-primary-foreground shadow-glow"
                     : "text-muted-foreground hover:bg-elevated hover:text-foreground"
                 }`}
               >
@@ -64,14 +77,14 @@ function AppLayout() {
         <Outlet />
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-50 flex border-t border-border bg-surface/95 backdrop-blur md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-50 flex overflow-x-auto border-t border-border bg-surface/80 backdrop-blur-2xl md:hidden">
         {NAV.map((item) => {
           const active = item.exact ? pathname === item.to : pathname.startsWith(item.to);
           return (
             <Link
               key={item.to}
               to={item.to}
-              className={`flex flex-1 flex-col items-center gap-1 py-3 text-[10px] font-bold uppercase tracking-wide ${
+              className={`flex min-w-[4.5rem] flex-1 flex-col items-center gap-1 py-3 text-[9px] font-bold uppercase tracking-wide transition-colors ${
                 active ? "text-primary" : "text-muted-foreground"
               }`}
             >

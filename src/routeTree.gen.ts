@@ -15,9 +15,13 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as AuthenticatedAppCoachRouteImport } from './routes/_authenticated/app.coach'
+import { Route as AuthenticatedAppConquistasRouteImport } from './routes/_authenticated/app.conquistas'
+import { Route as AuthenticatedAppNutricaoRouteImport } from './routes/_authenticated/app.nutricao'
 import { Route as AuthenticatedAppPerfilRouteImport } from './routes/_authenticated/app.perfil'
 import { Route as AuthenticatedAppProgressoRouteImport } from './routes/_authenticated/app.progresso'
+import { Route as AuthenticatedAppShapeRouteImport } from './routes/_authenticated/app.shape'
 import { Route as AuthenticatedAppTreinosRouteImport } from './routes/_authenticated/app.treinos'
+import { Route as AuthenticatedAppTreinoSplitRouteImport } from './routes/_authenticated/app.treino.$split'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -48,6 +52,18 @@ const AuthenticatedAppCoachRoute = AuthenticatedAppCoachRouteImport.update({
   path: '/coach',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppConquistasRoute =
+  AuthenticatedAppConquistasRouteImport.update({
+    id: '/conquistas',
+    path: '/conquistas',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppNutricaoRoute =
+  AuthenticatedAppNutricaoRouteImport.update({
+    id: '/nutricao',
+    path: '/nutricao',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppPerfilRoute = AuthenticatedAppPerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
@@ -59,30 +75,49 @@ const AuthenticatedAppProgressoRoute =
     path: '/progresso',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppShapeRoute = AuthenticatedAppShapeRouteImport.update({
+  id: '/shape',
+  path: '/shape',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
 const AuthenticatedAppTreinosRoute = AuthenticatedAppTreinosRouteImport.update({
   id: '/treinos',
   path: '/treinos',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppTreinoSplitRoute =
+  AuthenticatedAppTreinoSplitRouteImport.update({
+    id: '/treino/$split',
+    path: '/treino/$split',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
   '/app/coach': typeof AuthenticatedAppCoachRoute
+  '/app/conquistas': typeof AuthenticatedAppConquistasRoute
+  '/app/nutricao': typeof AuthenticatedAppNutricaoRoute
   '/app/perfil': typeof AuthenticatedAppPerfilRoute
   '/app/progresso': typeof AuthenticatedAppProgressoRoute
+  '/app/shape': typeof AuthenticatedAppShapeRoute
   '/app/treinos': typeof AuthenticatedAppTreinosRoute
   '/app/': typeof AuthenticatedAppIndexRoute
+  '/app/treino/$split': typeof AuthenticatedAppTreinoSplitRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/app/coach': typeof AuthenticatedAppCoachRoute
+  '/app/conquistas': typeof AuthenticatedAppConquistasRoute
+  '/app/nutricao': typeof AuthenticatedAppNutricaoRoute
   '/app/perfil': typeof AuthenticatedAppPerfilRoute
   '/app/progresso': typeof AuthenticatedAppProgressoRoute
+  '/app/shape': typeof AuthenticatedAppShapeRoute
   '/app/treinos': typeof AuthenticatedAppTreinosRoute
   '/app': typeof AuthenticatedAppIndexRoute
+  '/app/treino/$split': typeof AuthenticatedAppTreinoSplitRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -91,10 +126,14 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
   '/_authenticated/app/coach': typeof AuthenticatedAppCoachRoute
+  '/_authenticated/app/conquistas': typeof AuthenticatedAppConquistasRoute
+  '/_authenticated/app/nutricao': typeof AuthenticatedAppNutricaoRoute
   '/_authenticated/app/perfil': typeof AuthenticatedAppPerfilRoute
   '/_authenticated/app/progresso': typeof AuthenticatedAppProgressoRoute
+  '/_authenticated/app/shape': typeof AuthenticatedAppShapeRoute
   '/_authenticated/app/treinos': typeof AuthenticatedAppTreinosRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
+  '/_authenticated/app/treino/$split': typeof AuthenticatedAppTreinoSplitRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -103,19 +142,27 @@ export interface FileRouteTypes {
     | '/auth'
     | '/app'
     | '/app/coach'
+    | '/app/conquistas'
+    | '/app/nutricao'
     | '/app/perfil'
     | '/app/progresso'
+    | '/app/shape'
     | '/app/treinos'
     | '/app/'
+    | '/app/treino/$split'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/app/coach'
+    | '/app/conquistas'
+    | '/app/nutricao'
     | '/app/perfil'
     | '/app/progresso'
+    | '/app/shape'
     | '/app/treinos'
     | '/app'
+    | '/app/treino/$split'
   id:
     | '__root__'
     | '/'
@@ -123,10 +170,14 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/app'
     | '/_authenticated/app/coach'
+    | '/_authenticated/app/conquistas'
+    | '/_authenticated/app/nutricao'
     | '/_authenticated/app/perfil'
     | '/_authenticated/app/progresso'
+    | '/_authenticated/app/shape'
     | '/_authenticated/app/treinos'
     | '/_authenticated/app/'
+    | '/_authenticated/app/treino/$split'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -179,6 +230,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppCoachRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/conquistas': {
+      id: '/_authenticated/app/conquistas'
+      path: '/conquistas'
+      fullPath: '/app/conquistas'
+      preLoaderRoute: typeof AuthenticatedAppConquistasRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/nutricao': {
+      id: '/_authenticated/app/nutricao'
+      path: '/nutricao'
+      fullPath: '/app/nutricao'
+      preLoaderRoute: typeof AuthenticatedAppNutricaoRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/perfil': {
       id: '/_authenticated/app/perfil'
       path: '/perfil'
@@ -193,6 +258,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppProgressoRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/shape': {
+      id: '/_authenticated/app/shape'
+      path: '/shape'
+      fullPath: '/app/shape'
+      preLoaderRoute: typeof AuthenticatedAppShapeRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/treinos': {
       id: '/_authenticated/app/treinos'
       path: '/treinos'
@@ -200,23 +272,38 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppTreinosRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/treino/$split': {
+      id: '/_authenticated/app/treino/$split'
+      path: '/treino/$split'
+      fullPath: '/app/treino/$split'
+      preLoaderRoute: typeof AuthenticatedAppTreinoSplitRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
   }
 }
 
 interface AuthenticatedAppRouteChildren {
   AuthenticatedAppCoachRoute: typeof AuthenticatedAppCoachRoute
+  AuthenticatedAppConquistasRoute: typeof AuthenticatedAppConquistasRoute
+  AuthenticatedAppNutricaoRoute: typeof AuthenticatedAppNutricaoRoute
   AuthenticatedAppPerfilRoute: typeof AuthenticatedAppPerfilRoute
   AuthenticatedAppProgressoRoute: typeof AuthenticatedAppProgressoRoute
+  AuthenticatedAppShapeRoute: typeof AuthenticatedAppShapeRoute
   AuthenticatedAppTreinosRoute: typeof AuthenticatedAppTreinosRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
+  AuthenticatedAppTreinoSplitRoute: typeof AuthenticatedAppTreinoSplitRoute
 }
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppCoachRoute: AuthenticatedAppCoachRoute,
+  AuthenticatedAppConquistasRoute: AuthenticatedAppConquistasRoute,
+  AuthenticatedAppNutricaoRoute: AuthenticatedAppNutricaoRoute,
   AuthenticatedAppPerfilRoute: AuthenticatedAppPerfilRoute,
   AuthenticatedAppProgressoRoute: AuthenticatedAppProgressoRoute,
+  AuthenticatedAppShapeRoute: AuthenticatedAppShapeRoute,
   AuthenticatedAppTreinosRoute: AuthenticatedAppTreinosRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
+  AuthenticatedAppTreinoSplitRoute: AuthenticatedAppTreinoSplitRoute,
 }
 
 const AuthenticatedAppRouteWithChildren =
