@@ -14,7 +14,159 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      chat_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          age: number | null
+          created_at: string
+          days_per_week: number
+          experience: string
+          goal: string
+          height_cm: number | null
+          id: string
+          name: string
+          onboarded: boolean
+          updated_at: string
+          weight_kg: number | null
+          xp: number
+        }
+        Insert: {
+          age?: number | null
+          created_at?: string
+          days_per_week?: number
+          experience?: string
+          goal?: string
+          height_cm?: number | null
+          id: string
+          name?: string
+          onboarded?: boolean
+          updated_at?: string
+          weight_kg?: number | null
+          xp?: number
+        }
+        Update: {
+          age?: number | null
+          created_at?: string
+          days_per_week?: number
+          experience?: string
+          goal?: string
+          height_cm?: number | null
+          id?: string
+          name?: string
+          onboarded?: boolean
+          updated_at?: string
+          weight_kg?: number | null
+          xp?: number
+        }
+        Relationships: []
+      }
+      records: {
+        Row: {
+          achieved_on: string
+          created_at: string
+          exercise: string
+          id: string
+          reps: number
+          user_id: string
+          weight_kg: number
+        }
+        Insert: {
+          achieved_on?: string
+          created_at?: string
+          exercise: string
+          id?: string
+          reps?: number
+          user_id: string
+          weight_kg: number
+        }
+        Update: {
+          achieved_on?: string
+          created_at?: string
+          exercise?: string
+          id?: string
+          reps?: number
+          user_id?: string
+          weight_kg?: number
+        }
+        Relationships: []
+      }
+      weight_logs: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          user_id: string
+          weight_kg: number
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          id?: string
+          user_id: string
+          weight_kg: number
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          user_id?: string
+          weight_kg?: number
+        }
+        Relationships: []
+      }
+      workouts: {
+        Row: {
+          created_at: string
+          date: string
+          duration_min: number
+          id: string
+          title: string
+          user_id: string
+          xp: number
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          duration_min?: number
+          id?: string
+          title?: string
+          user_id: string
+          xp?: number
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          duration_min?: number
+          id?: string
+          title?: string
+          user_id?: string
+          xp?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
