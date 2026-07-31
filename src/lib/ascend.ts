@@ -95,3 +95,137 @@ export const WEEK_PLAN = [
   { emoji: "⚡", name: "HIIT & Cardio", detail: "35 min · full body" },
   { emoji: "🧘", name: "Mobilidade", detail: "30 min · recuperação" },
 ];
+
+/* ---------------- Treinos: Push / Pull / Legs / Full Body ---------------- */
+
+export type Exercise = {
+  name: string;
+  emoji: string;
+  muscle: string;
+  sets: number;
+  reps: string;
+  rest: number; // segundos
+  tip: string;
+};
+
+export type Split = {
+  id: "push" | "pull" | "legs" | "full";
+  name: string;
+  emoji: string;
+  focus: string;
+  minutes: number;
+  exercises: Exercise[];
+};
+
+export const SPLITS: Split[] = [
+  {
+    id: "push",
+    name: "Push",
+    emoji: "🏋️",
+    focus: "Peito · Ombro · Tríceps",
+    minutes: 60,
+    exercises: [
+      { name: "Supino reto", emoji: "🏋️", muscle: "Peito", sets: 4, reps: "8-10", rest: 90, tip: "Escápulas retraídas, desça controlado até o peito." },
+      { name: "Supino inclinado com halteres", emoji: "💪", muscle: "Peito superior", sets: 3, reps: "10-12", rest: 75, tip: "Banco a 30°, não trave os cotovelos no topo." },
+      { name: "Desenvolvimento militar", emoji: "🤸", muscle: "Ombro", sets: 4, reps: "8-10", rest: 90, tip: "Core firme, evite arquear a lombar." },
+      { name: "Elevação lateral", emoji: "🕊️", muscle: "Deltoide lateral", sets: 3, reps: "12-15", rest: 45, tip: "Suba até a linha do ombro, sem embalo." },
+      { name: "Tríceps corda", emoji: "🪢", muscle: "Tríceps", sets: 3, reps: "12-15", rest: 45, tip: "Abra a corda no final do movimento." },
+    ],
+  },
+  {
+    id: "pull",
+    name: "Pull",
+    emoji: "🧗",
+    focus: "Costas · Bíceps",
+    minutes: 60,
+    exercises: [
+      { name: "Barra fixa / Puxada alta", emoji: "🧗", muscle: "Dorsal", sets: 4, reps: "8-10", rest: 90, tip: "Puxe com os cotovelos, peito para cima." },
+      { name: "Remada curvada", emoji: "🚣", muscle: "Costas", sets: 4, reps: "8-10", rest: 90, tip: "Tronco a 45°, coluna neutra." },
+      { name: "Remada unilateral", emoji: "💪", muscle: "Dorsal", sets: 3, reps: "10-12", rest: 60, tip: "Amplitude total, segure 1s na contração." },
+      { name: "Face pull", emoji: "🎯", muscle: "Posterior de ombro", sets: 3, reps: "15", rest: 45, tip: "Ótimo para postura e saúde do ombro." },
+      { name: "Rosca direta", emoji: "🦾", muscle: "Bíceps", sets: 3, reps: "10-12", rest: 45, tip: "Cotovelo fixo ao lado do corpo." },
+    ],
+  },
+  {
+    id: "legs",
+    name: "Legs",
+    emoji: "🦵",
+    focus: "Quadríceps · Posterior · Glúteo",
+    minutes: 70,
+    exercises: [
+      { name: "Agachamento livre", emoji: "🦵", muscle: "Quadríceps", sets: 4, reps: "6-10", rest: 120, tip: "Joelho na direção do pé, desça até a paralela." },
+      { name: "Leg press", emoji: "🛗", muscle: "Pernas", sets: 4, reps: "10-12", rest: 90, tip: "Não deixe a lombar sair do encosto." },
+      { name: "Stiff", emoji: "🧎", muscle: "Posterior", sets: 3, reps: "10-12", rest: 75, tip: "Empurre o quadril para trás, joelho semi-flexionado." },
+      { name: "Cadeira extensora", emoji: "🪑", muscle: "Quadríceps", sets: 3, reps: "12-15", rest: 45, tip: "Segure 1s no topo." },
+      { name: "Panturrilha em pé", emoji: "🦶", muscle: "Panturrilha", sets: 4, reps: "15-20", rest: 40, tip: "Amplitude completa, sem quicar." },
+    ],
+  },
+  {
+    id: "full",
+    name: "Full Body",
+    emoji: "⚡",
+    focus: "Corpo inteiro",
+    minutes: 50,
+    exercises: [
+      { name: "Agachamento", emoji: "🦵", muscle: "Pernas", sets: 3, reps: "10", rest: 75, tip: "Base da força de todo o corpo." },
+      { name: "Supino reto", emoji: "🏋️", muscle: "Peito", sets: 3, reps: "10", rest: 75, tip: "Controle a descida em 2s." },
+      { name: "Remada curvada", emoji: "🚣", muscle: "Costas", sets: 3, reps: "10", rest: 75, tip: "Puxe até o umbigo." },
+      { name: "Desenvolvimento", emoji: "🤸", muscle: "Ombro", sets: 3, reps: "10", rest: 60, tip: "Trajetória vertical." },
+      { name: "Prancha", emoji: "🧘", muscle: "Core", sets: 3, reps: "45s", rest: 40, tip: "Glúteo contraído, quadril alinhado." },
+    ],
+  },
+];
+
+export function splitOfDay(d = new Date()): Split {
+  const order: Split["id"][] = ["push", "pull", "legs", "full", "push", "pull", "legs"];
+  const id = order[d.getDay()]!;
+  return SPLITS.find((s) => s.id === id)!;
+}
+
+export function estimateCalories(minutes: number, weightKg: number | null) {
+  const w = Number(weightKg) || 75;
+  return Math.round((6 * 3.5 * w) / 200) * Math.max(1, Math.round(minutes));
+}
+
+/** Sugestão de progressão de carga com base no último registro do exercício. */
+export function suggestLoad(lastWeight: number | null, lastReps: number | null, targetReps: number) {
+  if (!lastWeight) return null;
+  if ((lastReps ?? 0) >= targetReps) {
+    return { weight: Math.round((lastWeight * 1.025) * 2) / 2, note: "Bateu as reps — suba a carga 2,5%." };
+  }
+  return { weight: lastWeight, note: "Mantenha a carga e feche todas as repetições." };
+}
+
+/* ---------------- Nutrição e água ---------------- */
+
+export function waterTarget(weightKg: number | null) {
+  return Math.round(((Number(weightKg) || 75) * 35) / 50) * 50;
+}
+
+/* ---------------- Gamificação ---------------- */
+
+export type Achievement = { code: string; label: string; emoji: string; desc: string };
+
+export const ACHIEVEMENTS: Achievement[] = [
+  { code: "first_workout", label: "Primeiro Passo", emoji: "🥇", desc: "Concluir o primeiro treino" },
+  { code: "streak_3", label: "Pegando Ritmo", emoji: "🔥", desc: "3 dias seguidos" },
+  { code: "streak_7", label: "Semana Perfeita", emoji: "⚡", desc: "7 dias seguidos" },
+  { code: "streak_30", label: "Inquebrável", emoji: "🛡️", desc: "30 dias seguidos" },
+  { code: "workouts_10", label: "Dez de Dez", emoji: "💪", desc: "10 treinos registrados" },
+  { code: "workouts_50", label: "Veterano", emoji: "🏆", desc: "50 treinos registrados" },
+  { code: "workouts_100", label: "Centurião", emoji: "👑", desc: "100 treinos registrados" },
+  { code: "level_10", label: "Guerreiro", emoji: "⚔️", desc: "Chegar ao nível 10" },
+  { code: "level_25", label: "Atleta", emoji: "🎖️", desc: "Chegar ao nível 25" },
+  { code: "first_pr", label: "Recorde Pessoal", emoji: "📈", desc: "Registrar o primeiro PR" },
+  { code: "photo_1", label: "Antes & Depois", emoji: "📸", desc: "Enviar a primeira foto de evolução" },
+  { code: "hydrated", label: "Hidratado", emoji: "💧", desc: "Bater a meta de água do dia" },
+];
+
+export type Mission = { id: string; label: string; xp: number; done: boolean };
+
+export const WEEKLY_CHALLENGES = [
+  { id: "w4", label: "Treinar 4 vezes na semana", target: 4, xp: 300 },
+  { id: "w_water", label: "Bater a meta de água 5 dias", target: 5, xp: 200 },
+  { id: "w_pr", label: "Registrar 1 novo recorde", target: 1, xp: 250 },
+];
+

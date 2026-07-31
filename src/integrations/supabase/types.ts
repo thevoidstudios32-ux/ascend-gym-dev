@@ -14,6 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          code: string
+          id: string
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          id?: string
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          id?: string
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      body_measurements: {
+        Row: {
+          arm_cm: number | null
+          chest_cm: number | null
+          created_at: string
+          date: string
+          hip_cm: number | null
+          id: string
+          thigh_cm: number | null
+          user_id: string
+          waist_cm: number | null
+        }
+        Insert: {
+          arm_cm?: number | null
+          chest_cm?: number | null
+          created_at?: string
+          date?: string
+          hip_cm?: number | null
+          id?: string
+          thigh_cm?: number | null
+          user_id: string
+          waist_cm?: number | null
+        }
+        Update: {
+          arm_cm?: number | null
+          chest_cm?: number | null
+          created_at?: string
+          date?: string
+          hip_cm?: number | null
+          id?: string
+          thigh_cm?: number | null
+          user_id?: string
+          waist_cm?: number | null
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           content: string
@@ -34,6 +91,86 @@ export type Database = {
           created_at?: string
           id?: string
           role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      exercise_sets: {
+        Row: {
+          created_at: string
+          date: string
+          exercise: string
+          id: string
+          reps: number
+          set_index: number
+          user_id: string
+          weight_kg: number
+          workout_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          exercise: string
+          id?: string
+          reps?: number
+          set_index?: number
+          user_id: string
+          weight_kg?: number
+          workout_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          exercise?: string
+          id?: string
+          reps?: number
+          set_index?: number
+          user_id?: string
+          weight_kg?: number
+          workout_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercise_sets_workout_id_fkey"
+            columns: ["workout_id"]
+            isOneToOne: false
+            referencedRelation: "workouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meal_logs: {
+        Row: {
+          carbs: number
+          created_at: string
+          date: string
+          fat: number
+          id: string
+          kcal: number
+          name: string
+          protein: number
+          user_id: string
+        }
+        Insert: {
+          carbs?: number
+          created_at?: string
+          date?: string
+          fat?: number
+          id?: string
+          kcal?: number
+          name: string
+          protein?: number
+          user_id: string
+        }
+        Update: {
+          carbs?: number
+          created_at?: string
+          date?: string
+          fat?: number
+          id?: string
+          kcal?: number
+          name?: string
+          protein?: number
           user_id?: string
         }
         Relationships: []
@@ -83,6 +220,36 @@ export type Database = {
         }
         Relationships: []
       }
+      progress_photos: {
+        Row: {
+          analysis: string | null
+          created_at: string
+          date: string
+          id: string
+          path: string
+          pose: string
+          user_id: string
+        }
+        Insert: {
+          analysis?: string | null
+          created_at?: string
+          date?: string
+          id?: string
+          path: string
+          pose?: string
+          user_id: string
+        }
+        Update: {
+          analysis?: string | null
+          created_at?: string
+          date?: string
+          id?: string
+          path?: string
+          pose?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       records: {
         Row: {
           achieved_on: string
@@ -113,6 +280,33 @@ export type Database = {
         }
         Relationships: []
       }
+      water_logs: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          ml: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          id?: string
+          ml?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          ml?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       weight_logs: {
         Row: {
           created_at: string
@@ -139,28 +333,34 @@ export type Database = {
       }
       workouts: {
         Row: {
+          calories: number
           created_at: string
           date: string
           duration_min: number
           id: string
+          kind: string
           title: string
           user_id: string
           xp: number
         }
         Insert: {
+          calories?: number
           created_at?: string
           date?: string
           duration_min?: number
           id?: string
+          kind?: string
           title?: string
           user_id: string
           xp?: number
         }
         Update: {
+          calories?: number
           created_at?: string
           date?: string
           duration_min?: number
           id?: string
+          kind?: string
           title?: string
           user_id?: string
           xp?: number

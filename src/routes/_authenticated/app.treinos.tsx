@@ -1,18 +1,14 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useMutation } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
-import { toast } from "sonner";
-import { useDashboard, useRefreshDashboard } from "@/hooks/use-dashboard";
-import { toggleWorkout } from "@/lib/ascend.functions";
-import { todayISO, WEEK_PLAN } from "@/lib/ascend";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useDashboard } from "@/hooks/use-dashboard";
+import { SPLITS, splitOfDay } from "@/lib/ascend";
 
 export const Route = createFileRoute("/_authenticated/app/treinos")({
   head: () => ({
     meta: [
-      { title: "Treinos da semana · ASCEND" },
-      { name: "description", content: "Seu plano semanal de treinos e histórico de sessões." },
-      { property: "og:title", content: "Treinos da semana · ASCEND" },
-      { property: "og:description", content: "Plano semanal e histórico de treinos." },
+      { title: "Treinos · ASCEND" },
+      { name: "description", content: "Push, Pull, Legs e Full Body com séries, cargas e descanso." },
+      { property: "og:title", content: "Treinos · ASCEND" },
+      { property: "og:description", content: "Divisões Push/Pull/Legs e Full Body." },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -21,47 +17,42 @@ export const Route = createFileRoute("/_authenticated/app/treinos")({
 
 function TreinosPage() {
   const { data, isLoading } = useDashboard();
-  const refresh = useRefreshDashboard();
-  const toggle = useServerFn(toggleWorkout);
-  const today = todayISO();
-
-  const mutation = useMutation({
-    mutationFn: (title: string) => toggle({ data: { date: today, title } }),
-    onSuccess: (res) => {
-      toast.success(res.added ? "Treino de hoje registrado! +120 XP" : "Treino de hoje removido.");
-      refresh();
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const doneToday = data?.workouts.some((w) => w.date === today) ?? false;
+  const today = splitOfDay();
 
   return (
-    <div className="space-y-5">
+    <div className="animate-rise space-y-5">
       <header>
         <h1 className="text-display text-4xl">TREINOS</h1>
-        <p className="text-sm text-muted-foreground">Seu plano semanal e o histórico de sessões.</p>
+        <p className="text-sm text-muted-foreground">
+          Escolha a divisão. Séries, descanso e cargas são registrados automaticamente.
+        </p>
       </header>
 
       <section className="space-y-3">
-        {WEEK_PLAN.map((p, i) => (
-          <div key={p.name} className="panel flex items-center gap-4 p-4">
-            <span className="text-2xl">{p.emoji}</span>
-            <div className="flex-1">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                Dia {i + 1}
+        {SPLITS.map((s) => (
+          <Link
+            key={s.id}
+            to="/app/treino/$split"
+            params={{ split: s.id }}
+            className="press panel flex items-center gap-4 p-4"
+          >
+            <span className="text-3xl">{s.emoji}</span>
+            <div className="min-w-0 flex-1">
+              <p className="flex items-center gap-2 font-bold">
+                {s.name}
+                {s.id === today.id && (
+                  <span className="rounded-full bg-primary px-2 py-0.5 text-[9px] font-bold uppercase text-primary-foreground">
+                    hoje
+                  </span>
+                )}
               </p>
-              <p className="font-bold">{p.name}</p>
-              <p className="text-xs text-muted-foreground">{p.detail}</p>
+              <p className="truncate text-xs text-muted-foreground">{s.focus}</p>
+              <p className="text-xs text-muted-foreground">
+                {s.minutes} min · {s.exercises.length} exercícios
+              </p>
             </div>
-            <button
-              onClick={() => mutation.mutate(p.name)}
-              disabled={mutation.isPending || doneToday}
-              className="rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground disabled:bg-elevated disabled:text-muted-foreground"
-            >
-              {doneToday ? "Hoje ✓" : "Fazer hoje"}
-            </button>
-          </div>
+            <span className="rounded-full bg-elevated px-4 py-2 text-xs font-bold">Iniciar</span>
+          </Link>
         ))}
       </section>
 
@@ -71,13 +62,14 @@ function TreinosPage() {
         <div className="mt-3 space-y-2">
           {(data?.workouts ?? []).slice(0, 20).map((w) => (
             <div key={w.id} className="flex items-center justify-between rounded-xl bg-elevated p-3">
-              <div>
-                <p className="text-sm font-bold">{w.title}</p>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-bold">{w.title}</p>
                 <p className="text-[11px] text-muted-foreground">
-                  {w.date.split("-").reverse().join("/")} · {w.duration_min} min
+                  {w.date.split("-").reverse().join("/")} · {w.duration_min} min ·{" "}
+                  {w.calories ?? 0} kcal
                 </p>
               </div>
-              <span className="text-xs font-extrabold text-primary">+{w.xp} XP</span>
+              <span className="shrink-0 text-xs font-extrabold text-primary">+{w.xp} XP</span>
             </div>
           ))}
           {!isLoading && (data?.workouts.length ?? 0) === 0 && (
