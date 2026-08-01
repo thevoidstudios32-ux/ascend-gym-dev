@@ -105,6 +105,12 @@ export const toggleWorkout = createServerFn({ method: "POST" })
     });
     if (error) throw new Error(error.message);
     await supabase.from("profiles").update({ xp: currentXp + xp }).eq("id", userId);
+    await supabase.from("posts").insert({
+      user_id: userId,
+      kind: "workout",
+      content: `${data.title ?? "Treino"} concluído · ${data.duration_min ?? 60} min`,
+      meta: { xp, date: data.date } as never,
+    });
     return { added: true, xp };
   });
 
