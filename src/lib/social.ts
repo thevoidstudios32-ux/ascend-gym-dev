@@ -116,7 +116,8 @@ export function initials(name: string) {
 }
 
 export function handleOf(p: { username: string | null; name: string }) {
-  return "@" + (p.username ?? p.name.toLowerCase().replace(/[^a-z0-9]+/g, "").slice(0, 14) || "bro");
+  const fallback = p.name.toLowerCase().replace(/[^a-z0-9]+/g, "").slice(0, 14) || "bro";
+  return "@" + (p.username ?? fallback);
 }
 
 export function timeAgo(iso: string) {
