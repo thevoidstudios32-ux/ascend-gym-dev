@@ -74,7 +74,7 @@ export const createPost = createServerFn({ method: "POST" })
       user_id: context.userId,
       kind: data.kind,
       content: data.content,
-      meta: data.meta ?? {},
+      meta: (data.meta ?? {}) as never,
     });
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -196,7 +196,7 @@ export const sendDm = createServerFn({ method: "POST" })
       sender_id: context.userId,
       recipient_id: data.broId,
       content: data.content,
-      attachment: data.attachment ?? null,
+      attachment: (data.attachment ?? null) as never,
     });
     if (error) throw new Error(error.message);
     return { ok: true };
