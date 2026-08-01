@@ -10,6 +10,7 @@ import {
   MessageSquareText,
   Trophy,
   User,
+  Users,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
