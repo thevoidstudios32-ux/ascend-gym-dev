@@ -20,6 +20,7 @@ export const Route = createFileRoute("/_authenticated/app")({
 const NAV = [
   { to: "/app", label: "Início", icon: Home, exact: true },
   { to: "/app/treinos", label: "Treinos", icon: Dumbbell, exact: false },
+  { to: "/app/bros", label: "Gym Bros", icon: Users, exact: false },
   { to: "/app/coach", label: "Coach", icon: MessageSquareText, exact: false },
   { to: "/app/nutricao", label: "Dieta", icon: Apple, exact: false },
   { to: "/app/shape", label: "Shape", icon: Camera, exact: false },
