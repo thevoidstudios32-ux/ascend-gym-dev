@@ -23,6 +23,7 @@ import { Route as AuthenticatedAppShapeRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedAppTreinosRouteImport } from './routes/_authenticated/app.treinos'
 import { Route as AuthenticatedAppBrosIndexRouteImport } from './routes/_authenticated/app.bros.index'
 import { Route as AuthenticatedAppTreinoSplitRouteImport } from './routes/_authenticated/app.treino.$split'
+import { Route as AuthenticatedAppBrosChatIdRouteImport } from './routes/_authenticated/app.bros.chat.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -98,6 +99,12 @@ const AuthenticatedAppTreinoSplitRoute =
     path: '/treino/$split',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppBrosChatIdRoute =
+  AuthenticatedAppBrosChatIdRouteImport.update({
+    id: '/bros/chat/$id',
+    path: '/bros/chat/$id',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -113,6 +120,7 @@ export interface FileRoutesByFullPath {
   '/app/': typeof AuthenticatedAppIndexRoute
   '/app/treino/$split': typeof AuthenticatedAppTreinoSplitRoute
   '/app/bros/': typeof AuthenticatedAppBrosIndexRoute
+  '/app/bros/chat/$id': typeof AuthenticatedAppBrosChatIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -127,6 +135,7 @@ export interface FileRoutesByTo {
   '/app': typeof AuthenticatedAppIndexRoute
   '/app/treino/$split': typeof AuthenticatedAppTreinoSplitRoute
   '/app/bros': typeof AuthenticatedAppBrosIndexRoute
+  '/app/bros/chat/$id': typeof AuthenticatedAppBrosChatIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -144,6 +153,7 @@ export interface FileRoutesById {
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/_authenticated/app/treino/$split': typeof AuthenticatedAppTreinoSplitRoute
   '/_authenticated/app/bros/': typeof AuthenticatedAppBrosIndexRoute
+  '/_authenticated/app/bros/chat/$id': typeof AuthenticatedAppBrosChatIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -161,6 +171,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/app/treino/$split'
     | '/app/bros/'
+    | '/app/bros/chat/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -175,6 +186,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/app/treino/$split'
     | '/app/bros'
+    | '/app/bros/chat/$id'
   id:
     | '__root__'
     | '/'
@@ -191,6 +203,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/'
     | '/_authenticated/app/treino/$split'
     | '/_authenticated/app/bros/'
+    | '/_authenticated/app/bros/chat/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -299,6 +312,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppTreinoSplitRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/bros/chat/$id': {
+      id: '/_authenticated/app/bros/chat/$id'
+      path: '/bros/chat/$id'
+      fullPath: '/app/bros/chat/$id'
+      preLoaderRoute: typeof AuthenticatedAppBrosChatIdRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
   }
 }
 
@@ -313,6 +333,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
   AuthenticatedAppTreinoSplitRoute: typeof AuthenticatedAppTreinoSplitRoute
   AuthenticatedAppBrosIndexRoute: typeof AuthenticatedAppBrosIndexRoute
+  AuthenticatedAppBrosChatIdRoute: typeof AuthenticatedAppBrosChatIdRoute
 }
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
@@ -326,6 +347,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
   AuthenticatedAppTreinoSplitRoute: AuthenticatedAppTreinoSplitRoute,
   AuthenticatedAppBrosIndexRoute: AuthenticatedAppBrosIndexRoute,
+  AuthenticatedAppBrosChatIdRoute: AuthenticatedAppBrosChatIdRoute,
 }
 
 const AuthenticatedAppRouteWithChildren =
