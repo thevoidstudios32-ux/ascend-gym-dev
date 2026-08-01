@@ -133,6 +133,12 @@ export const addRecord = createServerFn({ method: "POST" })
       reps: data.reps,
     });
     if (error) throw new Error(error.message);
+    await context.supabase.from("posts").insert({
+      user_id: context.userId,
+      kind: "pr",
+      content: `Novo PR: ${data.exercise} ${data.weight_kg}kg x${data.reps}`,
+      meta: { exercise: data.exercise, weight_kg: data.weight_kg, reps: data.reps } as never,
+    });
     return { ok: true };
   });
 
