@@ -204,7 +204,7 @@ function PostCard({
   post: Social["posts"][number];
   data: Social;
   profileOf: Lookup;
-  onDelete?: () => void;
+  onDelete?: (() => void) | undefined;
 }) {
   const [open, setOpen] = useState(false);
   const [comment, setComment] = useState("");

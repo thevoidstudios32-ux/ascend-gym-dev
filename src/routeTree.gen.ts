@@ -21,6 +21,7 @@ import { Route as AuthenticatedAppPerfilRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAppProgressoRouteImport } from './routes/_authenticated/app.progresso'
 import { Route as AuthenticatedAppShapeRouteImport } from './routes/_authenticated/app.shape'
 import { Route as AuthenticatedAppTreinosRouteImport } from './routes/_authenticated/app.treinos'
+import { Route as AuthenticatedAppBrosIndexRouteImport } from './routes/_authenticated/app.bros.index'
 import { Route as AuthenticatedAppTreinoSplitRouteImport } from './routes/_authenticated/app.treino.$split'
 
 const IndexRoute = IndexRouteImport.update({
@@ -85,6 +86,12 @@ const AuthenticatedAppTreinosRoute = AuthenticatedAppTreinosRouteImport.update({
   path: '/treinos',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppBrosIndexRoute =
+  AuthenticatedAppBrosIndexRouteImport.update({
+    id: '/bros/',
+    path: '/bros/',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppTreinoSplitRoute =
   AuthenticatedAppTreinoSplitRouteImport.update({
     id: '/treino/$split',
@@ -105,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/app/treinos': typeof AuthenticatedAppTreinosRoute
   '/app/': typeof AuthenticatedAppIndexRoute
   '/app/treino/$split': typeof AuthenticatedAppTreinoSplitRoute
+  '/app/bros/': typeof AuthenticatedAppBrosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -118,6 +126,7 @@ export interface FileRoutesByTo {
   '/app/treinos': typeof AuthenticatedAppTreinosRoute
   '/app': typeof AuthenticatedAppIndexRoute
   '/app/treino/$split': typeof AuthenticatedAppTreinoSplitRoute
+  '/app/bros': typeof AuthenticatedAppBrosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -134,6 +143,7 @@ export interface FileRoutesById {
   '/_authenticated/app/treinos': typeof AuthenticatedAppTreinosRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/_authenticated/app/treino/$split': typeof AuthenticatedAppTreinoSplitRoute
+  '/_authenticated/app/bros/': typeof AuthenticatedAppBrosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -150,6 +160,7 @@ export interface FileRouteTypes {
     | '/app/treinos'
     | '/app/'
     | '/app/treino/$split'
+    | '/app/bros/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -163,6 +174,7 @@ export interface FileRouteTypes {
     | '/app/treinos'
     | '/app'
     | '/app/treino/$split'
+    | '/app/bros'
   id:
     | '__root__'
     | '/'
@@ -178,6 +190,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/treinos'
     | '/_authenticated/app/'
     | '/_authenticated/app/treino/$split'
+    | '/_authenticated/app/bros/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -272,6 +285,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppTreinosRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/bros/': {
+      id: '/_authenticated/app/bros/'
+      path: '/bros'
+      fullPath: '/app/bros/'
+      preLoaderRoute: typeof AuthenticatedAppBrosIndexRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/treino/$split': {
       id: '/_authenticated/app/treino/$split'
       path: '/treino/$split'
@@ -292,6 +312,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppTreinosRoute: typeof AuthenticatedAppTreinosRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
   AuthenticatedAppTreinoSplitRoute: typeof AuthenticatedAppTreinoSplitRoute
+  AuthenticatedAppBrosIndexRoute: typeof AuthenticatedAppBrosIndexRoute
 }
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
@@ -304,6 +325,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppTreinosRoute: AuthenticatedAppTreinosRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
   AuthenticatedAppTreinoSplitRoute: AuthenticatedAppTreinoSplitRoute,
+  AuthenticatedAppBrosIndexRoute: AuthenticatedAppBrosIndexRoute,
 }
 
 const AuthenticatedAppRouteWithChildren =
