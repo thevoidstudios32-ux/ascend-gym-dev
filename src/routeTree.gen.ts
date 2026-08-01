@@ -21,7 +21,10 @@ import { Route as AuthenticatedAppPerfilRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAppProgressoRouteImport } from './routes/_authenticated/app.progresso'
 import { Route as AuthenticatedAppShapeRouteImport } from './routes/_authenticated/app.shape'
 import { Route as AuthenticatedAppTreinosRouteImport } from './routes/_authenticated/app.treinos'
+import { Route as AuthenticatedAppBrosIndexRouteImport } from './routes/_authenticated/app.bros.index'
+import { Route as AuthenticatedAppBrosIdRouteImport } from './routes/_authenticated/app.bros.$id'
 import { Route as AuthenticatedAppTreinoSplitRouteImport } from './routes/_authenticated/app.treino.$split'
+import { Route as AuthenticatedAppBrosChatIdRouteImport } from './routes/_authenticated/app.bros.chat.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -85,10 +88,27 @@ const AuthenticatedAppTreinosRoute = AuthenticatedAppTreinosRouteImport.update({
   path: '/treinos',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppBrosIndexRoute =
+  AuthenticatedAppBrosIndexRouteImport.update({
+    id: '/bros/',
+    path: '/bros/',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppBrosIdRoute = AuthenticatedAppBrosIdRouteImport.update({
+  id: '/bros/$id',
+  path: '/bros/$id',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
 const AuthenticatedAppTreinoSplitRoute =
   AuthenticatedAppTreinoSplitRouteImport.update({
     id: '/treino/$split',
     path: '/treino/$split',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppBrosChatIdRoute =
+  AuthenticatedAppBrosChatIdRouteImport.update({
+    id: '/bros/chat/$id',
+    path: '/bros/chat/$id',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
 
@@ -104,7 +124,10 @@ export interface FileRoutesByFullPath {
   '/app/shape': typeof AuthenticatedAppShapeRoute
   '/app/treinos': typeof AuthenticatedAppTreinosRoute
   '/app/': typeof AuthenticatedAppIndexRoute
+  '/app/bros/$id': typeof AuthenticatedAppBrosIdRoute
   '/app/treino/$split': typeof AuthenticatedAppTreinoSplitRoute
+  '/app/bros/': typeof AuthenticatedAppBrosIndexRoute
+  '/app/bros/chat/$id': typeof AuthenticatedAppBrosChatIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -117,7 +140,10 @@ export interface FileRoutesByTo {
   '/app/shape': typeof AuthenticatedAppShapeRoute
   '/app/treinos': typeof AuthenticatedAppTreinosRoute
   '/app': typeof AuthenticatedAppIndexRoute
+  '/app/bros/$id': typeof AuthenticatedAppBrosIdRoute
   '/app/treino/$split': typeof AuthenticatedAppTreinoSplitRoute
+  '/app/bros': typeof AuthenticatedAppBrosIndexRoute
+  '/app/bros/chat/$id': typeof AuthenticatedAppBrosChatIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -133,7 +159,10 @@ export interface FileRoutesById {
   '/_authenticated/app/shape': typeof AuthenticatedAppShapeRoute
   '/_authenticated/app/treinos': typeof AuthenticatedAppTreinosRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
+  '/_authenticated/app/bros/$id': typeof AuthenticatedAppBrosIdRoute
   '/_authenticated/app/treino/$split': typeof AuthenticatedAppTreinoSplitRoute
+  '/_authenticated/app/bros/': typeof AuthenticatedAppBrosIndexRoute
+  '/_authenticated/app/bros/chat/$id': typeof AuthenticatedAppBrosChatIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -149,7 +178,10 @@ export interface FileRouteTypes {
     | '/app/shape'
     | '/app/treinos'
     | '/app/'
+    | '/app/bros/$id'
     | '/app/treino/$split'
+    | '/app/bros/'
+    | '/app/bros/chat/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -162,7 +194,10 @@ export interface FileRouteTypes {
     | '/app/shape'
     | '/app/treinos'
     | '/app'
+    | '/app/bros/$id'
     | '/app/treino/$split'
+    | '/app/bros'
+    | '/app/bros/chat/$id'
   id:
     | '__root__'
     | '/'
@@ -177,7 +212,10 @@ export interface FileRouteTypes {
     | '/_authenticated/app/shape'
     | '/_authenticated/app/treinos'
     | '/_authenticated/app/'
+    | '/_authenticated/app/bros/$id'
     | '/_authenticated/app/treino/$split'
+    | '/_authenticated/app/bros/'
+    | '/_authenticated/app/bros/chat/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -272,11 +310,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppTreinosRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/bros/': {
+      id: '/_authenticated/app/bros/'
+      path: '/bros'
+      fullPath: '/app/bros/'
+      preLoaderRoute: typeof AuthenticatedAppBrosIndexRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/bros/$id': {
+      id: '/_authenticated/app/bros/$id'
+      path: '/bros/$id'
+      fullPath: '/app/bros/$id'
+      preLoaderRoute: typeof AuthenticatedAppBrosIdRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/treino/$split': {
       id: '/_authenticated/app/treino/$split'
       path: '/treino/$split'
       fullPath: '/app/treino/$split'
       preLoaderRoute: typeof AuthenticatedAppTreinoSplitRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/bros/chat/$id': {
+      id: '/_authenticated/app/bros/chat/$id'
+      path: '/bros/chat/$id'
+      fullPath: '/app/bros/chat/$id'
+      preLoaderRoute: typeof AuthenticatedAppBrosChatIdRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
   }
@@ -291,7 +350,10 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppShapeRoute: typeof AuthenticatedAppShapeRoute
   AuthenticatedAppTreinosRoute: typeof AuthenticatedAppTreinosRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
+  AuthenticatedAppBrosIdRoute: typeof AuthenticatedAppBrosIdRoute
   AuthenticatedAppTreinoSplitRoute: typeof AuthenticatedAppTreinoSplitRoute
+  AuthenticatedAppBrosIndexRoute: typeof AuthenticatedAppBrosIndexRoute
+  AuthenticatedAppBrosChatIdRoute: typeof AuthenticatedAppBrosChatIdRoute
 }
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
@@ -303,7 +365,10 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppShapeRoute: AuthenticatedAppShapeRoute,
   AuthenticatedAppTreinosRoute: AuthenticatedAppTreinosRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
+  AuthenticatedAppBrosIdRoute: AuthenticatedAppBrosIdRoute,
   AuthenticatedAppTreinoSplitRoute: AuthenticatedAppTreinoSplitRoute,
+  AuthenticatedAppBrosIndexRoute: AuthenticatedAppBrosIndexRoute,
+  AuthenticatedAppBrosChatIdRoute: AuthenticatedAppBrosChatIdRoute,
 }
 
 const AuthenticatedAppRouteWithChildren =

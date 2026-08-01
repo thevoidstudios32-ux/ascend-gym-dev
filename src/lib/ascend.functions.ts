@@ -105,6 +105,12 @@ export const toggleWorkout = createServerFn({ method: "POST" })
     });
     if (error) throw new Error(error.message);
     await supabase.from("profiles").update({ xp: currentXp + xp }).eq("id", userId);
+    await supabase.from("posts").insert({
+      user_id: userId,
+      kind: "workout",
+      content: `${data.title ?? "Treino"} concluído · ${data.duration_min ?? 60} min`,
+      meta: { xp, date: data.date } as never,
+    });
     return { added: true, xp };
   });
 
@@ -127,6 +133,12 @@ export const addRecord = createServerFn({ method: "POST" })
       reps: data.reps,
     });
     if (error) throw new Error(error.message);
+    await context.supabase.from("posts").insert({
+      user_id: context.userId,
+      kind: "pr",
+      content: `Novo PR: ${data.exercise} ${data.weight_kg}kg x${data.reps}`,
+      meta: { exercise: data.exercise, weight_kg: data.weight_kg, reps: data.reps } as never,
+    });
     return { ok: true };
   });
 

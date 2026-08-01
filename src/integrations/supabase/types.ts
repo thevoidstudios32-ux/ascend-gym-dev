@@ -71,6 +71,68 @@ export type Database = {
         }
         Relationships: []
       }
+      challenge_participants: {
+        Row: {
+          challenge_id: string
+          created_at: string
+          id: string
+          score: number
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          created_at?: string
+          id?: string
+          score?: number
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          created_at?: string
+          id?: string
+          score?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_participants_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenges: {
+        Row: {
+          created_at: string
+          ends_on: string
+          id: string
+          metric: string
+          owner_id: string
+          starts_on: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          ends_on?: string
+          id?: string
+          metric?: string
+          owner_id: string
+          starts_on?: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          ends_on?: string
+          id?: string
+          metric?: string
+          owner_id?: string
+          starts_on?: string
+          title?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           content: string
@@ -92,6 +154,36 @@ export type Database = {
           id?: string
           role?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      direct_messages: {
+        Row: {
+          attachment: Json | null
+          content: string
+          created_at: string
+          id: string
+          read_at: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Insert: {
+          attachment?: Json | null
+          content: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Update: {
+          attachment?: Json | null
+          content?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          recipient_id?: string
+          sender_id?: string
         }
         Relationships: []
       }
@@ -139,6 +231,33 @@ export type Database = {
           },
         ]
       }
+      friendships: {
+        Row: {
+          addressee_id: string
+          created_at: string
+          id: string
+          requester_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          addressee_id: string
+          created_at?: string
+          id?: string
+          requester_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          addressee_id?: string
+          created_at?: string
+          id?: string
+          requester_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       meal_logs: {
         Row: {
           carbs: number
@@ -175,46 +294,158 @@ export type Database = {
         }
         Relationships: []
       }
+      post_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_reactions: {
+        Row: {
+          created_at: string
+          emoji: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_reactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      posts: {
+        Row: {
+          content: string | null
+          created_at: string
+          id: string
+          image_path: string | null
+          kind: string
+          meta: Json
+          user_id: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          image_path?: string | null
+          kind?: string
+          meta?: Json
+          user_id: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          image_path?: string | null
+          kind?: string
+          meta?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age: number | null
+          avatar_url: string | null
+          bio: string | null
           created_at: string
           days_per_week: number
           experience: string
           goal: string
+          gym: string | null
           height_cm: number | null
           id: string
+          is_public: boolean
           name: string
           onboarded: boolean
+          training_since: string | null
           updated_at: string
+          username: string | null
           weight_kg: number | null
           xp: number
         }
         Insert: {
           age?: number | null
+          avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           days_per_week?: number
           experience?: string
           goal?: string
+          gym?: string | null
           height_cm?: number | null
           id: string
+          is_public?: boolean
           name?: string
           onboarded?: boolean
+          training_since?: string | null
           updated_at?: string
+          username?: string | null
           weight_kg?: number | null
           xp?: number
         }
         Update: {
           age?: number | null
+          avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           days_per_week?: number
           experience?: string
           goal?: string
+          gym?: string | null
           height_cm?: number | null
           id?: string
+          is_public?: boolean
           name?: string
           onboarded?: boolean
+          training_since?: string | null
           updated_at?: string
+          username?: string | null
           weight_kg?: number | null
           xp?: number
         }
@@ -372,7 +603,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      are_gym_bros: { Args: { _a: string; _b: string }; Returns: boolean }
+      is_challenge_member: {
+        Args: { _challenge: string; _user: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
