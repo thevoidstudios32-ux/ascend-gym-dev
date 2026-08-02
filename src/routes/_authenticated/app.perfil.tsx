@@ -3,9 +3,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useDashboard, useRefreshDashboard } from "@/hooks/use-dashboard";
+import { CountUp, LoadingPage, ProgressBar, StatCard } from "@/components/ui-kit";
+import { useDashboard, useExtras, useRefreshDashboard } from "@/hooks/use-dashboard";
 import { saveProfile } from "@/lib/ascend.functions";
-import { EXPERIENCES, GOALS, levelFromXp } from "@/lib/ascend";
+import { bmi, computeStreak, EXPERIENCES, GOALS, levelFromXp, titleFromLevel } from "@/lib/ascend";
+
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/app/perfil")({
