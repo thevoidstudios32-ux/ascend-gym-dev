@@ -1,14 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Confetti, PageHeader, ProgressBar } from "@/components/ui-kit";
 import { useDashboard, useExtras } from "@/hooks/use-dashboard";
 import {
   ACHIEVEMENTS,
   computeStreak,
   levelFromXp,
+  titleFromLevel,
+  TITLES,
   todayISO,
   waterTarget,
   WEEKLY_CHALLENGES,
 } from "@/lib/ascend";
+
 
 export const Route = createFileRoute("/_authenticated/app/conquistas")({
   head: () => ({
