@@ -1,12 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Trash2 } from "lucide-react";
-import { useDashboard, useRefreshDashboard } from "@/hooks/use-dashboard";
+import { Activity, CalendarDays, Dumbbell, Scale, Timer, Trash2, Trophy } from "lucide-react";
+import { CountUp, PageHeader, StatCard } from "@/components/ui-kit";
+import { useDashboard, useExtras, useRefreshDashboard } from "@/hooks/use-dashboard";
 import { addRecord, deleteRecord, logWeight } from "@/lib/ascend.functions";
-import { nutritionTargets } from "@/lib/ascend";
+import { bmi, nutritionTargets, totalVolume } from "@/lib/ascend";
+
 
 export const Route = createFileRoute("/_authenticated/app/progresso")({
   head: () => ({
@@ -25,6 +27,7 @@ const field = "w-full rounded-xl bg-elevated px-4 py-3 text-sm outline-none ring
 
 function ProgressoPage() {
   const { data } = useDashboard();
+  const { data: extras } = useExtras();
   const refresh = useRefreshDashboard();
   const add = useServerFn(addRecord);
   const remove = useServerFn(deleteRecord);
@@ -71,12 +74,89 @@ function ProgressoPage() {
   const max = Math.max(...weights.map((w) => w.weight_kg), -Infinity);
   const targets = data?.profile ? nutritionTargets(data.profile) : null;
 
+  const stats = useMemo(() => {
+    const workouts = data?.workouts ?? [];
+    const sets = extras?.sets ?? [];
+    const minutes = workouts.reduce((a, w) => a + (w.duration_min ?? 0), 0);
+    const weekVolume = totalVolume(
+      sets.filter((s) => new Date(s.created_at).getTime() > Date.now() - 7 * 86400000),
+    );
+    const monthVolume = totalVolume(
+      sets.filter((s) => new Date(s.created_at).getTime() > Date.now() - 30 * 86400000),
+    );
+    const monthDays = workouts.filter(
+      (w) => new Date(w.date).getTime() > Date.now() - 30 * 86400000,
+    ).length;
+    return {
+      minutes,
+      avg: workouts.length ? Math.round(minutes / workouts.length) : 0,
+      weekVolume,
+      monthVolume,
+      total: totalVolume(sets),
+      trained: workouts.length,
+      monthDays,
+      missed: Math.max(0, 30 - monthDays),
+    };
+  }, [data?.workouts, extras?.sets]);
+
+  const currentWeight = weights.length ? Number(weights[weights.length - 1]!.weight_kg) : null;
+  const imc = bmi(currentWeight, data?.profile?.height_cm ? Number(data.profile.height_cm) : null);
+
   return (
-    <div className="space-y-5">
-      <header>
-        <h1 className="text-display text-4xl">PROGRESSO</h1>
-        <p className="text-sm text-muted-foreground">Recordes, peso corporal e metas do dia.</p>
-      </header>
+    <div className="animate-rise space-y-5">
+      <PageHeader title="ESTATÍSTICAS" subtitle="Volume, recordes, peso e metas do dia." />
+
+      <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <StatCard
+          icon={Dumbbell}
+          value={<CountUp value={stats.weekVolume} />}
+          label="volume semanal"
+          hint="kg levantados"
+          delay={0}
+        />
+        <StatCard
+          icon={Activity}
+          value={<CountUp value={stats.monthVolume} />}
+          label="volume mensal"
+          hint={`total ${stats.total.toLocaleString("pt-BR")} kg`}
+          delay={60}
+        />
+        <StatCard
+          icon={Scale}
+          value={currentWeight ?? "—"}
+          label="peso atual"
+          hint={imc ? `IMC ${imc.value} · ${imc.label}` : "informe altura"}
+          delay={120}
+        />
+        <StatCard
+          icon={Trophy}
+          value={data?.records.length ?? 0}
+          label="recordes"
+          delay={180}
+        />
+        <StatCard
+          icon={CalendarDays}
+          value={stats.trained}
+          label="dias treinados"
+          hint={`${stats.monthDays} nos últimos 30 dias`}
+          delay={240}
+        />
+        <StatCard
+          icon={CalendarDays}
+          value={stats.missed}
+          label="dias perdidos"
+          hint="nos últimos 30 dias"
+          delay={300}
+        />
+        <StatCard
+          icon={Timer}
+          value={`${Math.round(stats.minutes / 60)}h`}
+          label="tempo total"
+          delay={360}
+        />
+        <StatCard icon={Timer} value={`${stats.avg}min`} label="tempo médio" delay={420} />
+      </section>
+
 
       <section className="panel p-5">
         <h2 className="font-bold">Novo recorde</h2>

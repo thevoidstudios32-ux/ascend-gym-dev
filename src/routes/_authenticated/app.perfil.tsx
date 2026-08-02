@@ -3,9 +3,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useDashboard, useRefreshDashboard } from "@/hooks/use-dashboard";
+import { CountUp, LoadingPage, ProgressBar, StatCard } from "@/components/ui-kit";
+import { useDashboard, useExtras, useRefreshDashboard } from "@/hooks/use-dashboard";
 import { saveProfile } from "@/lib/ascend.functions";
-import { EXPERIENCES, GOALS, levelFromXp } from "@/lib/ascend";
+import { bmi, computeStreak, EXPERIENCES, GOALS, levelFromXp, titleFromLevel } from "@/lib/ascend";
+
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/app/perfil")({
@@ -25,6 +27,7 @@ const field = "w-full rounded-xl bg-elevated px-4 py-3 text-sm outline-none ring
 
 function PerfilPage() {
   const { data } = useDashboard();
+  const { data: extras } = useExtras();
   const refresh = useRefreshDashboard();
   const save = useServerFn(saveProfile);
   const navigate = useNavigate();
@@ -82,18 +85,65 @@ function PerfilPage() {
     navigate({ to: "/auth", replace: true });
   }
 
-  if (!current || !p) return <p className="py-20 text-center text-muted-foreground">Carregando…</p>;
+  if (!current || !p) return <LoadingPage />;
 
   const level = levelFromXp(p.xp);
+  const title = titleFromLevel(level.level);
+  const streak = computeStreak((data?.workouts ?? []).map((w) => w.date));
+  const medals = extras?.achievements.length ?? 0;
+  const initials =
+    p.name
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((s) => s[0]!.toUpperCase())
+      .join("") || "A";
+  const imc = bmi(p.weight_kg ? Number(p.weight_kg) : null, p.height_cm ? Number(p.height_cm) : null);
 
   return (
-    <div className="space-y-5">
-      <header>
-        <h1 className="text-display text-4xl">PERFIL</h1>
-        <p className="text-sm text-muted-foreground">
-          Nível {level.level} · {level.name} · {p.xp} XP
-        </p>
-      </header>
+    <div className="animate-rise space-y-5">
+      <section className="card overflow-hidden">
+        <div className="h-28 bg-ember ember-border border-x-0 border-t-0" />
+        <div className="-mt-12 px-5 pb-5">
+          <div className="grid size-24 place-items-center rounded-3xl border-4 border-card bg-primary text-3xl font-extrabold text-primary-foreground shadow-glow">
+            {initials}
+          </div>
+          <h1 className="mt-3 truncate text-display text-4xl">{p.name}</h1>
+          <p className="text-sm text-muted-foreground">
+            {p.goal} · {p.experience}
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <span
+              className="rounded-full border border-border px-3 py-1 text-[11px] font-bold uppercase tracking-widest"
+              style={{ color: title.color }}
+            >
+              {title.emoji} {title.name}
+            </span>
+            <span className="rounded-full bg-elevated px-3 py-1 text-[11px] font-bold">
+              Nível {level.level}
+            </span>
+            <span className="rounded-full bg-elevated px-3 py-1 text-[11px] font-bold text-primary">
+              {p.xp} XP
+            </span>
+          </div>
+          <ProgressBar value={level.pct} className="mt-4" />
+          <p className="mt-2 text-[11px] text-muted-foreground">
+            {level.into}/{level.need} XP para o próximo nível
+          </p>
+        </div>
+      </section>
+
+      <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <StatCard value={<CountUp value={data?.workouts.length ?? 0} />} label="treinos" />
+        <StatCard value={`${streak}`} label="sequência" hint="dias seguidos" />
+        <StatCard value={`${medals}`} label="medalhas" />
+        <StatCard
+          value={imc ? imc.value : "—"}
+          label="IMC"
+          hint={imc ? imc.label : "informe peso e altura"}
+        />
+      </section>
+
 
       <section className="panel space-y-3 p-5">
         <input

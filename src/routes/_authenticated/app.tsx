@@ -86,16 +86,24 @@ function AppLayout() {
             <Link
               key={item.to}
               to={item.to}
-              className={`flex min-w-[4.5rem] flex-1 flex-col items-center gap-1 py-3 text-[9px] font-bold uppercase tracking-wide transition-colors ${
+              className={`press relative flex min-w-[4.5rem] flex-1 flex-col items-center gap-1 py-3 text-[9px] font-bold uppercase tracking-wide transition-colors duration-200 ${
                 active ? "text-primary" : "text-muted-foreground"
               }`}
             >
-              <item.icon className="size-5" />
+              <span
+                className={`absolute inset-x-4 top-0 h-0.5 rounded-full bg-primary transition-opacity duration-200 ${
+                  active ? "opacity-100" : "opacity-0"
+                }`}
+              />
+              <item.icon
+                className={`size-5 transition-transform duration-200 ${active ? "scale-110" : ""}`}
+              />
               {item.label}
             </Link>
           );
         })}
       </nav>
+
     </div>
   );
 }
