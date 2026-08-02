@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Apple, Bot, Camera, Dumbbell, Flame, Play, Timer, Trophy, Zap } from "lucide-react";
-import { CountUp, LoadingPage, PageHeader, ProgressBar, StatCard } from "@/components/ui-kit";
+import { CountUp, LoadingPage, ProgressBar, StatCard } from "@/components/ui-kit";
 import { useDashboard, useExtras, useRefreshDashboard } from "@/hooks/use-dashboard";
 import { saveProfile } from "@/lib/ascend.functions";
 import {
