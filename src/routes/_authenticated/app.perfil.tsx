@@ -27,6 +27,7 @@ const field = "w-full rounded-xl bg-elevated px-4 py-3 text-sm outline-none ring
 
 function PerfilPage() {
   const { data } = useDashboard();
+  const { data: extras } = useExtras();
   const refresh = useRefreshDashboard();
   const save = useServerFn(saveProfile);
   const navigate = useNavigate();
