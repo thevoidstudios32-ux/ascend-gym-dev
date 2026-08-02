@@ -50,10 +50,11 @@ export const TITLES = [
 ] as const;
 
 export function titleFromLevel(level: number) {
-  const idx = Math.max(
-    0,
-    TITLES.map((t) => t.min).findLastIndex((m) => level >= m),
-  );
+  let idx = 0;
+  TITLES.forEach((t, i) => {
+    if (level >= t.min) idx = i;
+  });
+
   const current = TITLES[idx]!;
   const next = TITLES[idx + 1] ?? null;
   const span = next ? next.min - current.min : 1;
