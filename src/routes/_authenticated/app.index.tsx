@@ -3,7 +3,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Flame, Play, Timer, Zap } from "lucide-react";
+import { Apple, Bot, Camera, Dumbbell, Flame, Play, Timer, Trophy, Zap } from "lucide-react";
+import { CountUp, LoadingPage, PageHeader, ProgressBar, StatCard } from "@/components/ui-kit";
 import { useDashboard, useExtras, useRefreshDashboard } from "@/hooks/use-dashboard";
 import { saveProfile } from "@/lib/ascend.functions";
 import {
@@ -13,8 +14,11 @@ import {
   levelFromXp,
   monthGrid,
   splitOfDay,
+  titleFromLevel,
   todayISO,
+  totalVolume,
 } from "@/lib/ascend";
+
 
 export const Route = createFileRoute("/_authenticated/app/")({
   head: () => ({
