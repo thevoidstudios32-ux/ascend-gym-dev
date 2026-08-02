@@ -40,6 +40,43 @@ export function levelFromXp(xp: number) {
   return { level, name, into, need: LEVEL_STEP, pct: Math.round((into / LEVEL_STEP) * 100) };
 }
 
+/** Títulos de gamificação (ASCEND 2.0) — sempre visíveis no perfil e na home. */
+export const TITLES = [
+  { min: 1, name: "Gym Rookie", emoji: "🐣", color: "#a3a3a3" },
+  { min: 8, name: "Iron Warrior", emoji: "⚔️", color: "#dc2626" },
+  { min: 20, name: "Elite Lifter", emoji: "🔥", color: "#f59e0b" },
+  { min: 40, name: "Titan", emoji: "🗿", color: "#38bdf8" },
+  { min: 65, name: "Legend", emoji: "👑", color: "#e9c46a" },
+] as const;
+
+export function titleFromLevel(level: number) {
+  const idx = Math.max(
+    0,
+    TITLES.map((t) => t.min).findLastIndex((m) => level >= m),
+  );
+  const current = TITLES[idx]!;
+  const next = TITLES[idx + 1] ?? null;
+  const span = next ? next.min - current.min : 1;
+  const pct = next ? Math.min(100, Math.round(((level - current.min) / span) * 100)) : 100;
+  return { ...current, next, pct, index: idx };
+}
+
+/** IMC simples — usado nas estatísticas premium. */
+export function bmi(weightKg: number | null, heightCm: number | null) {
+  if (!weightKg || !heightCm) return null;
+  const m = heightCm / 100;
+  const value = Math.round((weightKg / (m * m)) * 10) / 10;
+  const label =
+    value < 18.5 ? "Abaixo" : value < 25 ? "Saudável" : value < 30 ? "Sobrepeso" : "Obesidade";
+  return { value, label };
+}
+
+/** Volume total (kg levantados) de uma lista de séries. */
+export function totalVolume(sets: { reps: number; weight_kg: number; created_at?: string }[]) {
+  return Math.round(sets.reduce((a, s) => a + s.reps * Number(s.weight_kg), 0));
+}
+
+
 export function todayISO(d = new Date()) {
   return [
     d.getFullYear(),
