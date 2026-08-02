@@ -125,7 +125,7 @@
 }
 
 @utility bg-ember {
-  background-image: radial-gradient(ellipse 60% 40% at 50% -8%, rgb(176 0 32 / 0.18), transparent 70%),
+  background-image: radial-gradient(ellipse 60% 40% at 50% -8%, rgb(220 38 38 / 0.16), transparent 70%),
     linear-gradient(180deg, var(--background), var(--background));
 }
 
@@ -145,7 +145,7 @@
 }
 
 @utility ember-border {
-  border: 1px solid rgb(176 0 32 / 0.35);
+  border: 1px solid rgb(220 38 38 / 0.35);
 }
 
 @utility press {
@@ -204,4 +204,95 @@
 
 @utility animate-exercise {
   animation: exercise-move 1.6s ease-in-out infinite;
+}
+
+/* ---------------- ASCEND 2.0 — micro-interações e polimento ---------------- */
+
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  60% {
+    transform: scale(1.03);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes confetti-fall {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, -12vh, 0) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--drift, 0px), 92vh, 0) rotate(720deg);
+  }
+}
+
+@keyframes ring-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(220 38 38 / 0.45);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgb(220 38 38 / 0);
+  }
+}
+
+@utility animate-pop {
+  animation: pop-in 0.36s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@utility animate-glow-ring {
+  animation: ring-glow 2.4s ease-out infinite;
+}
+
+@utility skeleton {
+  background-image: linear-gradient(
+    90deg,
+    var(--elevated) 25%,
+    rgb(255 255 255 / 0.06) 37%,
+    var(--elevated) 63%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+  border-radius: var(--radius-lg);
+}
+
+@utility card {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-soft);
+  transition:
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 220ms ease,
+    box-shadow 220ms ease;
+  &:hover {
+    border-color: rgb(220 38 38 / 0.28);
+  }
+  &:active {
+    transform: scale(0.985);
+  }
+}
+
+@utility stagger {
+  animation: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@utility bar-fill {
+  transition: width 900ms cubic-bezier(0.22, 1, 0.36, 1);
 }
