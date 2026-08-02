@@ -1,12 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Trash2 } from "lucide-react";
-import { useDashboard, useRefreshDashboard } from "@/hooks/use-dashboard";
+import { Activity, CalendarDays, Dumbbell, Scale, Timer, Trash2, Trophy } from "lucide-react";
+import { CountUp, PageHeader, StatCard } from "@/components/ui-kit";
+import { useDashboard, useExtras, useRefreshDashboard } from "@/hooks/use-dashboard";
 import { addRecord, deleteRecord, logWeight } from "@/lib/ascend.functions";
-import { nutritionTargets } from "@/lib/ascend";
+import { bmi, nutritionTargets, totalVolume } from "@/lib/ascend";
+
 
 export const Route = createFileRoute("/_authenticated/app/progresso")({
   head: () => ({
