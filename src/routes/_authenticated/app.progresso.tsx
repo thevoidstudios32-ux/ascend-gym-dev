@@ -28,6 +28,7 @@ const field = "w-full rounded-xl bg-elevated px-4 py-3 text-sm outline-none ring
 function ProgressoPage() {
   const { data } = useDashboard();
   const { data: extras } = useExtras();
+  const refresh = useRefreshDashboard();
   const add = useServerFn(addRecord);
   const remove = useServerFn(deleteRecord);
   const weigh = useServerFn(logWeight);
