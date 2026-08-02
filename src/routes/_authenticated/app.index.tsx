@@ -37,9 +37,10 @@ function HomePage() {
   const { data, isLoading, error } = useDashboard();
   const refresh = useRefreshDashboard();
 
-  if (isLoading) return <p className="py-20 text-center text-muted-foreground">Carregando…</p>;
+  if (isLoading) return <LoadingPage />;
   if (error)
     return <p className="py-20 text-center text-destructive">Erro ao carregar seus dados.</p>;
+
   if (!data?.profile) return <p className="py-20 text-center">Perfil não encontrado.</p>;
 
   if (!data.profile.onboarded)
