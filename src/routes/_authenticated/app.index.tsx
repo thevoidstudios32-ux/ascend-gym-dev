@@ -189,6 +189,7 @@ function Dashboard({ data }: { data: DashboardData }) {
   const { data: extras } = useExtras();
   const profile = data.profile!;
   const level = levelFromXp(profile.xp);
+  const title = titleFromLevel(level.level);
   const dates = useMemo(() => data.workouts.map((w) => w.date), [data.workouts]);
   const streak = computeStreak(dates);
   const now = new Date();
@@ -198,14 +199,36 @@ function Dashboard({ data }: { data: DashboardData }) {
   const split = splitOfDay();
   const doneToday = doneSet.has(today);
 
+  const last7 = useMemo(() => {
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (6 - i));
+      const iso = todayISO(d);
+      return {
+        iso,
+        letter: ["D", "S", "T", "Q", "Q", "S", "S"][d.getDay()]!,
+        done: doneSet.has(iso),
+        isToday: iso === today,
+      };
+    });
+  }, [doneSet, today]);
+
   const totals = useMemo(() => {
     const cal = data.workouts.reduce((a, w) => a + (w.calories ?? 0), 0);
     const min = data.workouts.reduce((a, w) => a + (w.duration_min ?? 0), 0);
     const week = data.workouts.filter(
       (w) => new Date(w.date).getTime() > Date.now() - 7 * 86400000,
     ).length;
-    return { cal, min, week };
+    const avg = data.workouts.length ? Math.round(min / data.workouts.length) : 0;
+    return { cal, min, week, avg };
   }, [data.workouts]);
+
+  const weekVolume = useMemo(() => {
+    const sets = (extras?.sets ?? []).filter(
+      (s) => new Date(s.created_at).getTime() > Date.now() - 7 * 86400000,
+    );
+    return totalVolume(sets);
+  }, [extras?.sets]);
 
   const weightDelta = useMemo(() => {
     if (data.weights.length < 2) return null;
@@ -214,51 +237,86 @@ function Dashboard({ data }: { data: DashboardData }) {
     return Math.round((last - first) * 10) / 10;
   }, [data.weights]);
 
+  const lastWorkout = data.workouts[data.workouts.length - 1] ?? null;
   const monthDone = cells.filter((c) => c && doneSet.has(c)).length;
   const medals = extras?.achievements.length ?? 0;
+  const initials = profile.name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0]!.toUpperCase())
+    .join("");
 
   return (
     <div className="animate-rise space-y-4">
-      <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
-        <div className="min-w-0">
-          <p className="text-sm text-muted-foreground">{greeting()},</p>
-          <h1 className="truncate text-display text-4xl">{profile.name}</h1>
+      <header className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
+        <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-primary text-base font-extrabold text-primary-foreground shadow-glow">
+          {initials || "A"}
         </div>
-        <div className="glass flex shrink-0 items-center gap-2 rounded-full px-4 py-2">
+        <div className="min-w-0">
+          <p className="text-xs text-muted-foreground">{greeting()},</p>
+          <h1 className="truncate text-display text-3xl">{profile.name}</h1>
+        </div>
+        <div className="glass flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2">
           <Flame className="size-4 animate-flame text-primary" />
           <span className="font-extrabold">{streak}</span>
-          <span className="text-xs text-muted-foreground">dias</span>
+          <span className="text-[10px] uppercase text-muted-foreground">dias</span>
         </div>
       </header>
 
-      <section className="glass p-5">
-        <div className="flex items-baseline justify-between gap-3">
+      <section className="glass animate-pop p-5">
+        <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-              Nível
-            </p>
-            <p className="text-display text-4xl">
-              {level.name} <span className="text-primary">{level.level}</span>
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest"
+              style={{ color: title.color }}
+            >
+              {title.emoji} {title.name}
+            </span>
+            <p className="mt-2 text-display text-4xl">
+              Nível <span className="text-primary">{level.level}</span>
             </p>
           </div>
-          <p className="shrink-0 text-sm text-muted-foreground">
-            <b className="text-foreground">{level.into}</b> / {level.need} XP
+          <p className="shrink-0 text-right text-sm text-muted-foreground">
+            <b className="text-foreground">
+              <CountUp value={level.into} />
+            </b>
+            <br />
+            <span className="text-xs">de {level.need} XP</span>
           </p>
         </div>
-        <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-muted">
-          <div
-            className="h-full rounded-full bg-primary transition-all duration-700"
-            style={{ width: `${level.pct}%` }}
-          />
+        <ProgressBar value={level.pct} className="mt-4" />
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          {title.next
+            ? `Faltam ${Math.max(0, title.next.min - level.level)} níveis para ${title.next.name}`
+            : "Você alcançou o título máximo. Lenda. 👑"}
+        </p>
+
+        <div className="mt-5 grid grid-cols-7 gap-1.5">
+          {last7.map((d) => (
+            <div key={d.iso} className="text-center">
+              <div
+                className={`grid aspect-square place-items-center rounded-xl text-xs font-bold transition-colors ${
+                  d.done
+                    ? "bg-primary text-primary-foreground"
+                    : d.isToday
+                      ? "ember-border animate-glow-ring text-foreground"
+                      : "bg-elevated text-muted-foreground"
+                }`}
+              >
+                {d.done ? "🔥" : d.letter}
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
-      <section className="panel overflow-hidden">
+      <section className="card overflow-hidden">
         <div className="flex items-center gap-4 p-5">
-          <span className="text-3xl">{split.emoji}</span>
+          <span className="animate-exercise text-3xl">{split.emoji}</span>
           <div className="min-w-0 flex-1">
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
-              {doneToday ? "Treino de hoje concluído" : "Próximo treino"}
+              {doneToday ? "Treino de hoje concluído" : "Treino de hoje"}
             </p>
             <p className="truncate text-lg font-bold">{split.name}</p>
             <p className="truncate text-xs text-muted-foreground">
@@ -272,56 +330,99 @@ function Dashboard({ data }: { data: DashboardData }) {
           className="press flex items-center justify-center gap-2 bg-primary py-4 text-base font-extrabold uppercase tracking-wide text-primary-foreground"
         >
           <Play className="size-5 fill-current" />
-          {doneToday ? "Treinar de novo" : "Começar treino"}
+          {doneToday ? "Treinar de novo" : "Iniciar treino"}
         </Link>
       </section>
 
-      <section className="grid grid-cols-3 gap-3">
-        {[
-          { icon: Zap, v: totals.cal.toLocaleString("pt-BR"), l: "kcal queimadas" },
-          { icon: Timer, v: `${Math.round(totals.min / 60)}h`, l: "tempo treinado" },
-          {
-            icon: Flame,
-            v: weightDelta === null ? "—" : `${weightDelta > 0 ? "+" : ""}${weightDelta}kg`,
-            l: "evolução peso",
-          },
-        ].map((s) => (
-          <div key={s.l} className="panel p-4 text-center">
-            <s.icon className="mx-auto size-4 text-primary" />
-            <p className="mt-2 text-lg font-extrabold">{s.v}</p>
-            <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{s.l}</p>
+      <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <StatCard
+          icon={Dumbbell}
+          value={<CountUp value={weekVolume} />}
+          label="volume semanal"
+          hint="kg levantados"
+          delay={0}
+        />
+        <StatCard
+          icon={Timer}
+          value={`${Math.round(totals.min / 60)}h`}
+          label="tempo treinado"
+          hint={`média ${totals.avg} min`}
+          delay={60}
+        />
+        <StatCard
+          icon={Zap}
+          value={<CountUp value={totals.cal} />}
+          label="kcal queimadas"
+          hint={`${totals.week} treinos na semana`}
+          delay={120}
+        />
+        <StatCard
+          icon={Flame}
+          value={weightDelta === null ? "—" : `${weightDelta > 0 ? "+" : ""}${weightDelta}kg`}
+          label="evolução peso"
+          hint={
+            data.weights.length
+              ? `atual ${data.weights[data.weights.length - 1]!.weight_kg} kg`
+              : "sem registros"
+          }
+          delay={180}
+        />
+      </section>
+
+      {lastWorkout && (
+        <section className="card stagger flex items-center gap-4 p-5">
+          <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-elevated text-lg">
+            ✅
           </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Último treino
+            </p>
+            <p className="truncate text-sm font-bold">{lastWorkout.title}</p>
+            <p className="text-xs text-muted-foreground">
+              {lastWorkout.date.split("-").reverse().join("/")} · {lastWorkout.duration_min} min ·
+              +{lastWorkout.xp} XP
+            </p>
+          </div>
+        </section>
+      )}
+
+      <section className="grid grid-cols-2 gap-3">
+        {[
+          { to: "/app/nutricao", icon: Apple, t: "Alimentação", d: "Calorias, macros e água" },
+          { to: "/app/shape", icon: Camera, t: "Shape Tracker", d: "Fotos analisadas pela IA" },
+          {
+            to: "/app/conquistas",
+            icon: Trophy,
+            t: "Conquistas",
+            d: `${medals} medalhas · missões`,
+          },
+          { to: "/app/coach", icon: Bot, t: "Coach IA", d: "Treino sob medida agora" },
+        ].map((q, i) => (
+          <Link
+            key={q.to}
+            to={q.to}
+            className="press card stagger flex items-center gap-3 p-4"
+            style={{ animationDelay: `${i * 60}ms` }}
+          >
+            <q.icon className="size-5 shrink-0 text-primary" />
+            <div className="min-w-0">
+              <p className="truncate text-sm font-bold">{q.t}</p>
+              <p className="truncate text-[11px] text-muted-foreground">{q.d}</p>
+            </div>
+          </Link>
         ))}
       </section>
 
-      <section className="grid grid-cols-2 gap-3">
-        <Link to="/app/nutricao" className="press panel p-4">
-          <p className="text-sm font-bold">🥗 Alimentação</p>
-          <p className="text-xs text-muted-foreground">Calorias, macros e água</p>
-        </Link>
-        <Link to="/app/shape" className="press panel p-4">
-          <p className="text-sm font-bold">📸 Shape Tracker</p>
-          <p className="text-xs text-muted-foreground">Fotos analisadas pela IA</p>
-        </Link>
-        <Link to="/app/conquistas" className="press panel p-4">
-          <p className="text-sm font-bold">🏆 Conquistas</p>
-          <p className="text-xs text-muted-foreground">{medals} medalhas · missões</p>
-        </Link>
-        <Link to="/app/coach" className="press panel p-4">
-          <p className="text-sm font-bold">🤖 Coach IA</p>
-          <p className="text-xs text-muted-foreground">Treino sob medida agora</p>
-        </Link>
-      </section>
-
-      <section className="panel p-5">
-        <div className="flex items-center justify-between">
+      <section className="card p-5">
+        <div className="flex items-center justify-between gap-3">
           <h2 className="font-bold">
             {now
               .toLocaleDateString("pt-BR", { month: "long", year: "numeric" })
               .replace(/^./, (c) => c.toUpperCase())}
           </h2>
-          <span className="rounded-full bg-elevated px-3 py-1 text-xs font-bold text-muted-foreground">
-            {monthDone} treinos · {totals.week} nesta semana
+          <span className="shrink-0 rounded-full bg-elevated px-3 py-1 text-xs font-bold text-muted-foreground">
+            {monthDone} treinos
           </span>
         </div>
         <div className="mt-4 grid grid-cols-7 gap-1.5 text-center text-[10px] text-muted-foreground">
@@ -351,3 +452,4 @@ function Dashboard({ data }: { data: DashboardData }) {
     </div>
   );
 }
+
