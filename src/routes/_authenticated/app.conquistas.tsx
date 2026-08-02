@@ -59,13 +59,16 @@ function ConquistasPage() {
   const [celebrate, setCelebrate] = useState(false);
   const prevMedals = useRef<number | null>(null);
   useEffect(() => {
-    if (prevMedals.current !== null && owned.size > prevMedals.current) {
-      setCelebrate(true);
-      const t = setTimeout(() => setCelebrate(false), 2800);
-      return () => clearTimeout(t);
+    if (prevMedals.current === null || owned.size <= prevMedals.current) {
+      prevMedals.current = owned.size;
+      return undefined;
     }
     prevMedals.current = owned.size;
+    setCelebrate(true);
+    const t = setTimeout(() => setCelebrate(false), 2800);
+    return () => clearTimeout(t);
   }, [owned.size]);
+
 
   return (
     <div className="animate-rise space-y-4">
