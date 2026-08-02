@@ -55,14 +55,53 @@ function ConquistasPage() {
   ).length;
   const progressOf = (id: string) => (id === "w4" ? weekWorkouts : id === "w_water" ? weekWater : weekPr);
 
+  const title = titleFromLevel(level.level);
+  const [celebrate, setCelebrate] = useState(false);
+  const prevMedals = useRef<number | null>(null);
+  useEffect(() => {
+    if (prevMedals.current !== null && owned.size > prevMedals.current) {
+      setCelebrate(true);
+      const t = setTimeout(() => setCelebrate(false), 2800);
+      return () => clearTimeout(t);
+    }
+    prevMedals.current = owned.size;
+  }, [owned.size]);
+
   return (
     <div className="animate-rise space-y-4">
-      <header>
-        <h1 className="text-display text-4xl">CONQUISTAS</h1>
-        <p className="text-sm text-muted-foreground">
-          Nível {level.level} · {owned.size}/{ACHIEVEMENTS.length} medalhas
-        </p>
-      </header>
+      <Confetti fire={celebrate} />
+      <PageHeader
+        title="CONQUISTAS"
+        subtitle={`Nível ${level.level} · ${owned.size}/${ACHIEVEMENTS.length} medalhas`}
+      />
+
+      <section className="glass animate-pop p-5">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Título atual
+            </p>
+            <p className="text-display text-3xl" style={{ color: title.color }}>
+              {title.emoji} {title.name}
+            </p>
+          </div>
+          <span className="shrink-0 rounded-full bg-elevated px-3 py-1 text-xs font-bold">
+            {streak} 🔥
+          </span>
+        </div>
+        <ProgressBar value={title.pct} className="mt-4" tone="gold" />
+        <div className="mt-3 flex justify-between gap-1 text-center">
+          {TITLES.map((t, i) => (
+            <div key={t.name} className={`flex-1 ${i <= title.index ? "" : "opacity-35"}`}>
+              <p className="text-lg">{t.emoji}</p>
+              <p className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
+                {t.name}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
 
       <section className="panel p-5">
         <h2 className="font-bold">Missões de hoje</h2>
