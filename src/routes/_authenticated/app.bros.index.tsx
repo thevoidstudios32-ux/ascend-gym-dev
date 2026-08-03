@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { BroAvatar, BroIdentity, RankBadge } from "@/components/bro";
+import { StoriesRow } from "@/components/stories";
 import { useNudges, useSocial, useSocialAction } from "@/hooks/use-social";
 import {
   addComment,
@@ -125,6 +126,7 @@ function FeedTab({ data, profileOf }: { data: Social; profileOf: Lookup }) {
 
   return (
     <div className="space-y-4">
+      <StoriesRow />
       <section className="panel p-4">
         <div className="flex gap-3">
           <BroAvatar profile={data.me ?? undefined} />

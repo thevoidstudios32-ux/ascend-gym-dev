@@ -296,3 +296,58 @@
 @utility bar-fill {
   transition: width 900ms cubic-bezier(0.22, 1, 0.36, 1);
 }
+
+@keyframes zoom-in-soft {
+  from {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes sheet-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-fade {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes ring-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@utility animate-zoom-in {
+  animation: zoom-in-soft 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@utility animate-sheet-up {
+  animation: sheet-up 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@utility animate-slide-fade {
+  animation: slide-fade 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@utility story-ring {
+  background: conic-gradient(from 180deg, #e53935, #dc2626, #b91c1c, #e53935);
+}

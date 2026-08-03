@@ -42,6 +42,42 @@ export async function askCoach(history: CoachTurn[], contextSummary: string) {
   });
 }
 
+/** Escolhe a melhor substituição de exercício entre candidatos. */
+export async function pickSubstitution(
+  exercise: string,
+  muscle: string,
+  candidates: string[],
+  contextSummary: string,
+) {
+  const reply = await callGateway({
+    model: "google/gemini-3.6-flash",
+    messages: [
+      {
+        role: "system",
+        content:
+          "Você é o Coach IA do ASCEND. Escolha a MELHOR substituição para um exercício, considerando grupo " +
+          "muscular, objetivo, equipamentos disponíveis, histórico e lesões do atleta. Responda em português do " +
+          "Brasil, no formato exato:\nESCOLHA: <nome exatamente igual a um dos candidatos>\nMOTIVO: <1 a 2 " +
+          "frases curtas>\nNunca escolha algo fora da lista de candidatos.\n\nDADOS DO ATLETA:\n" +
+          contextSummary,
+      },
+      {
+        role: "user",
+        content:
+          `Exercício atual: ${exercise} (foco: ${muscle}).\nCandidatos: ${candidates.join(" | ")}`,
+      },
+    ],
+  });
+
+  const choiceLine = /ESCOLHA:\s*(.+)/i.exec(reply)?.[1]?.trim() ?? "";
+  const reason = /MOTIVO:\s*([\s\S]+)/i.exec(reply)?.[1]?.trim() ?? reply.trim();
+  const match =
+    candidates.find((c) => c.toLowerCase() === choiceLine.toLowerCase()) ??
+    candidates.find((c) => choiceLine.toLowerCase().includes(c.toLowerCase())) ??
+    candidates[0]!;
+  return { choice: match, reason };
+}
+
 /** Compara duas fotos de evolução e devolve uma análise curta em markdown. */
 export async function analyzeShape(
   beforeUrl: string,

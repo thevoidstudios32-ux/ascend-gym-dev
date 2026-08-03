@@ -3,7 +3,9 @@ import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { ChevronLeft, Pause, Play, RotateCcw } from "lucide-react";
+import { ChevronLeft, MoreVertical, Pause, Play, RotateCcw } from "lucide-react";
+import { ExerciseSwapSheet } from "@/components/exercise-swap";
+import { StoryComposer, type StoryDraft } from "@/components/stories";
 import { useDashboard, useExtras, useRefreshDashboard } from "@/hooks/use-dashboard";
 import { finishWorkout } from "@/lib/extras.functions";
 import { estimateCalories, SPLITS, suggestLoad, todayISO, type Split } from "@/lib/ascend";
@@ -32,6 +34,10 @@ function SessionPage() {
   const refresh = useRefreshDashboard();
   const finish = useServerFn(finishWorkout);
 
+  const [exercises, setExercises] = useState(() => split.exercises.map((e) => ({ ...e })));
+  const [swapping, setSwapping] = useState<string | null>(null);
+  const [share, setShare] = useState<StoryDraft | null>(null);
+  const [shareCard, setShareCard] = useState<{ volume: number; sets: number } | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const [running, setRunning] = useState(true);
   const [rest, setRest] = useState<number | null>(null);
@@ -102,13 +108,31 @@ function SessionPage() {
       if (res.newPrs.length) toast.success(`Novo recorde: ${res.newPrs.join(", ")} 🏆`);
       res.unlocked.forEach((a) => toast.success(`${a.emoji} Conquista: ${a.label}`));
       refresh();
-      navigate({ to: "/app" });
+      setShareCard({
+        volume: entries
+          .filter((e) => e.done)
+          .reduce((sum, e) => sum + e.reps * e.weight_kg, 0),
+        sets: doneCount,
+      });
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
   function update(i: number, patch: Partial<Entry>) {
     setEntries((prev) => prev.map((e, idx) => (idx === i ? { ...e, ...patch } : e)));
+  }
+
+  function swapExercise(oldName: string, next: { name: string; emoji: string; muscle?: string; tip: string }, keepLoad: boolean) {
+    setExercises((prev) =>
+      prev.map((e) => (e.name === oldName ? { ...e, name: next.name, emoji: next.emoji, tip: next.tip } : e)),
+    );
+    setEntries((prev) =>
+      prev.map((e) =>
+        e.exercise === oldName ? { ...e, exercise: next.name, weight_kg: keepLoad ? e.weight_kg : 0 } : e,
+      ),
+    );
+    setSwapping(null);
+    toast.success(`✓ Exercício substituído por ${next.name}`);
   }
 
   const clock = `${String(Math.floor(elapsed / 60)).padStart(2, "0")}:${String(elapsed % 60).padStart(2, "0")}`;
@@ -151,7 +175,7 @@ function SessionPage() {
         </div>
       )}
 
-      {split.exercises.map((ex) => {
+      {exercises.map((ex) => {
         const prev = last.get(ex.name) ?? null;
         const target = Number(ex.reps.split("-").pop()?.replace(/\D/g, "")) || 10;
         const sug = suggestLoad(prev?.weight ?? null, prev?.reps ?? null, target);
@@ -165,6 +189,13 @@ function SessionPage() {
                   {ex.muscle} · {ex.sets}x{ex.reps} · descanso {ex.rest}s
                 </p>
               </div>
+              <button
+                onClick={() => setSwapping(ex.name)}
+                className="press rounded-full bg-elevated p-2"
+                aria-label={`Mais opções de ${ex.name}`}
+              >
+                <MoreVertical className="size-4" />
+              </button>
             </div>
             <p className="mt-2 text-xs text-muted-foreground">💡 {ex.tip}</p>
             {sug && (
@@ -226,6 +257,70 @@ function SessionPage() {
           </button>
         </div>
       </div>
+
+      {swapping && (
+        <ExerciseSwapSheet
+          current={swapping}
+          muscle={exercises.find((e) => e.name === swapping)?.muscle ?? split.focus}
+          onClose={() => setSwapping(null)}
+          onSwap={(next, keepLoad) => swapExercise(swapping, next, keepLoad)}
+        />
+      )}
+
+      {shareCard && (
+        <div className="fixed inset-0 z-[75] grid place-items-center bg-black/80 p-6 backdrop-blur-sm">
+          <div className="animate-pop glass w-full max-w-sm space-y-4 p-6 text-center">
+            <p className="text-sm font-bold text-muted-foreground">Compartilhar nos Stories?</p>
+            <div
+              className="space-y-1 rounded-3xl p-6 text-primary-foreground"
+              style={{ background: "linear-gradient(150deg,#DC2626 0%,#7f1010 55%,#151515 100%)" }}
+            >
+              <p className="text-4xl">{split.emoji}</p>
+              <p className="text-display text-2xl">{split.name}</p>
+              <p className="text-xs opacity-80">
+                {minutes} min · {shareCard.sets} séries
+              </p>
+              <p className="text-xs opacity-80">
+                {Math.round(shareCard.volume)} kg de volume · {calories} kcal
+              </p>
+              <p className="pt-2 text-[11px] opacity-70">
+                {exercises.map((e) => e.name).slice(0, 4).join(" · ")}
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() =>
+                  setShare({
+                    kind: "workout",
+                    sticker: "workout",
+                    bg: "ember",
+                    content: `${split.emoji} ${split.name} — ${minutes} min · ${shareCard.sets} séries · ${Math.round(shareCard.volume)} kg · ${calories} kcal`,
+                  })
+                }
+                className="press flex-1 rounded-full bg-primary py-3 text-sm font-extrabold text-primary-foreground shadow-glow"
+              >
+                Compartilhar
+              </button>
+              <button
+                onClick={() => navigate({ to: "/app" })}
+                className="press flex-1 rounded-full bg-elevated py-3 text-sm font-bold"
+              >
+                Agora não
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {share && (
+        <StoryComposer
+          preset={share}
+          onClose={() => {
+            setShare(null);
+            navigate({ to: "/app" });
+          }}
+        />
+      )}
     </div>
   );
 }
