@@ -495,7 +495,10 @@ export function StoryComposer({ preset, onClose }: { preset: StoryDraft | null; 
 
   function choose(f: File | null) {
     if (!f) return;
-    if (f.size > 25 * 1024 * 1024) return toast.error("Arquivo muito grande (máx. 25MB).");
+    if (f.size > 25 * 1024 * 1024) {
+      toast.error("Arquivo muito grande (máx. 25MB).");
+      return;
+    }
     setFile(f);
     setPreviewUrl(URL.createObjectURL(f));
   }
