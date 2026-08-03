@@ -11,12 +11,14 @@ export const searchBros = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => z.object({ q: z.string().max(40) }).parse(data))
   .handler(async ({ context, data }) => {
-    const q = data.q.trim().replace(/^@/, "");
+    // Remove PostgREST filter metacharacters (, . ( ) * \ %) to avoid filter injection.
+    const q = data.q.trim().replace(/^@/, "").replace(/[^\p{L}\p{N} _-]/gu, "");
     if (q.length < 2) return [];
     const { data: rows } = await context.supabase
       .from("profiles")
       .select("id,name,username,avatar_url,bio,gym,goal,xp")
       .or(`name.ilike.%${q}%,username.ilike.%${q}%`)
+
       .neq("id", context.userId)
       .limit(20);
     return rows ?? [];
