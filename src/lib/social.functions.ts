@@ -11,12 +11,14 @@ export const searchBros = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => z.object({ q: z.string().max(40) }).parse(data))
   .handler(async ({ context, data }) => {
-    const q = data.q.trim().replace(/^@/, "");
+    // Remove PostgREST filter metacharacters (, . ( ) * \ %) to avoid filter injection.
+    const q = data.q.trim().replace(/^@/, "").replace(/[^\p{L}\p{N} _-]/gu, "");
     if (q.length < 2) return [];
     const { data: rows } = await context.supabase
       .from("profiles")
       .select("id,name,username,avatar_url,bio,gym,goal,xp")
       .or(`name.ilike.%${q}%,username.ilike.%${q}%`)
+
       .neq("id", context.userId)
       .limit(20);
     return rows ?? [];
@@ -41,13 +43,19 @@ export const respondBro = createServerFn({ method: "POST" })
     z.object({ id: z.string().uuid(), accept: z.boolean() }).parse(data),
   )
   .handler(async ({ context, data }) => {
-    const { error } = await context.supabase
+    // Somente o destinatário pode aceitar/recusar um pedido.
+    const { data: rows, error } = await context.supabase
       .from("friendships")
       .update({ status: data.accept ? "accepted" : "declined", updated_at: new Date().toISOString() })
-      .eq("id", data.id);
+      .eq("id", data.id)
+      .eq("addressee_id", context.userId)
+      .eq("status", "pending")
+      .select("id");
     if (error) throw new Error(error.message);
+    if (!rows || rows.length === 0) throw new Error("Pedido de amizade inválido.");
     return { ok: true };
   });
+
 
 export const removeBro = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
