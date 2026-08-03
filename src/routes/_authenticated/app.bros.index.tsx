@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { BroAvatar, BroIdentity, RankBadge } from "@/components/bro";
+import { StoriesRow } from "@/components/stories";
 import { useNudges, useSocial, useSocialAction } from "@/hooks/use-social";
 import {
   addComment,
