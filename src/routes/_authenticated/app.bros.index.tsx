@@ -125,6 +125,7 @@ function FeedTab({ data, profileOf }: { data: Social; profileOf: Lookup }) {
 
   return (
     <div className="space-y-4">
+      <StoriesRow />
       <section className="panel p-4">
         <div className="flex gap-3">
           <BroAvatar profile={data.me ?? undefined} />
