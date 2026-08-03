@@ -231,6 +231,27 @@ export type Database = {
           },
         ]
       }
+      favorite_exercises: {
+        Row: {
+          created_at: string
+          exercise: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          exercise: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          exercise?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       friendships: {
         Row: {
           addressee_id: string
@@ -395,11 +416,13 @@ export type Database = {
           bio: string | null
           created_at: string
           days_per_week: number
+          equipment: string[]
           experience: string
           goal: string
           gym: string | null
           height_cm: number | null
           id: string
+          injuries: string | null
           is_public: boolean
           name: string
           onboarded: boolean
@@ -415,11 +438,13 @@ export type Database = {
           bio?: string | null
           created_at?: string
           days_per_week?: number
+          equipment?: string[]
           experience?: string
           goal?: string
           gym?: string | null
           height_cm?: number | null
           id: string
+          injuries?: string | null
           is_public?: boolean
           name?: string
           onboarded?: boolean
@@ -435,11 +460,13 @@ export type Database = {
           bio?: string | null
           created_at?: string
           days_per_week?: number
+          equipment?: string[]
           experience?: string
           goal?: string
           gym?: string | null
           height_cm?: number | null
           id?: string
+          injuries?: string | null
           is_public?: boolean
           name?: string
           onboarded?: boolean
@@ -510,6 +537,83 @@ export type Database = {
           weight_kg?: number
         }
         Relationships: []
+      }
+      stories: {
+        Row: {
+          bg: string
+          content: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          kind: string
+          location: string | null
+          media_path: string | null
+          media_type: string | null
+          meta: Json
+          sticker: string | null
+          user_id: string
+        }
+        Insert: {
+          bg?: string
+          content?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          kind?: string
+          location?: string | null
+          media_path?: string | null
+          media_type?: string | null
+          meta?: Json
+          sticker?: string | null
+          user_id: string
+        }
+        Update: {
+          bg?: string
+          content?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          kind?: string
+          location?: string | null
+          media_path?: string | null
+          media_type?: string | null
+          meta?: Json
+          sticker?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      story_views: {
+        Row: {
+          created_at: string
+          id: string
+          reaction: string | null
+          story_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reaction?: string | null
+          story_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reaction?: string | null
+          story_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_views_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       water_logs: {
         Row: {
