@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { XP_PER_WIN } from "@/lib/arena";
-import { applyWinRewards, buildArena, buildRanking, pickBattle, refreshBestRanks } from "@/lib/arena.server";
+import { applyWinRewards, buildArena, buildRanking, pickBattle, refreshBestRank } from "@/lib/arena.server";
 
 export const getArena = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -112,6 +112,6 @@ export const castVote = createServerFn({ method: "POST" })
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await applyWinRewards(supabaseAdmin, data.winnerId, XP_PER_WIN);
-    await refreshBestRanks(supabase, supabaseAdmin, userId);
+    await refreshBestRank(supabase, supabaseAdmin, data.winnerId);
     return { ok: true };
   });

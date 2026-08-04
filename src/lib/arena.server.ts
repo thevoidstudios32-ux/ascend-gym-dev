@@ -230,31 +230,30 @@ export async function applyWinRewards(admin: DB, entryId: string, xpPerWin: numb
   }
 }
 
-/** Atualiza a melhor posição já alcançada pelas participações do usuário. */
-export async function refreshBestRanks(supabase: DB, admin: DB, userId: string) {
-  const { data: mine } = await supabase
+/** Atualiza a melhor posição já alcançada por uma participação. */
+export async function refreshBestRank(supabase: DB, admin: DB, entryId: string) {
+  const { data: entry } = await supabase
     .from("battle_entries")
-    .select("id,category,best_rank")
-    .eq("user_id", userId)
-    .eq("status", "active");
-  for (const entry of mine ?? []) {
-    const ranking = await buildRanking(supabase, admin, entry.category, "all");
-    const found = ranking.find((r) => r.entry.id === entry.id);
-    if (!found) continue;
-    if (entry.best_rank == null || found.position < entry.best_rank) {
-      await admin.from("battle_entries").update({ best_rank: found.position }).eq("id", entry.id);
-    }
-    const codes: string[] = [];
-    if (found.position <= 100) codes.push("arena_top100");
-    if (found.position <= 10) codes.push("arena_top10");
-    for (const code of codes) {
-      const { data: existing } = await admin
-        .from("achievements")
-        .select("id")
-        .eq("user_id", userId)
-        .eq("code", code)
-        .maybeSingle();
-      if (!existing) await admin.from("achievements").insert({ user_id: userId, code });
-    }
+    .select("id,user_id,category,best_rank")
+    .eq("id", entryId)
+    .maybeSingle();
+  if (!entry) return;
+  const ranking = await buildRanking(supabase, admin, entry.category, "all");
+  const found = ranking.find((r) => r.entry.id === entry.id);
+  if (!found) return;
+  if (entry.best_rank == null || found.position < entry.best_rank) {
+    await admin.from("battle_entries").update({ best_rank: found.position }).eq("id", entry.id);
+  }
+  const codes: string[] = [];
+  if (found.position <= 100) codes.push("arena_top100");
+  if (found.position <= 10) codes.push("arena_top10");
+  for (const code of codes) {
+    const { data: existing } = await admin
+      .from("achievements")
+      .select("id")
+      .eq("user_id", entry.user_id)
+      .eq("code", code)
+      .maybeSingle();
+    if (!existing) await admin.from("achievements").insert({ user_id: entry.user_id, code });
   }
 }
