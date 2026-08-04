@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
+import { Route as AuthenticatedAppArenaRouteImport } from './routes/_authenticated/app.arena'
 import { Route as AuthenticatedAppCoachRouteImport } from './routes/_authenticated/app.coach'
 import { Route as AuthenticatedAppConquistasRouteImport } from './routes/_authenticated/app.conquistas'
 import { Route as AuthenticatedAppNutricaoRouteImport } from './routes/_authenticated/app.nutricao'
@@ -48,6 +49,11 @@ const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
 const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppArenaRoute = AuthenticatedAppArenaRouteImport.update({
+  id: '/arena',
+  path: '/arena',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
 const AuthenticatedAppCoachRoute = AuthenticatedAppCoachRouteImport.update({
@@ -116,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
+  '/app/arena': typeof AuthenticatedAppArenaRoute
   '/app/coach': typeof AuthenticatedAppCoachRoute
   '/app/conquistas': typeof AuthenticatedAppConquistasRoute
   '/app/nutricao': typeof AuthenticatedAppNutricaoRoute
@@ -132,6 +139,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/app/arena': typeof AuthenticatedAppArenaRoute
   '/app/coach': typeof AuthenticatedAppCoachRoute
   '/app/conquistas': typeof AuthenticatedAppConquistasRoute
   '/app/nutricao': typeof AuthenticatedAppNutricaoRoute
@@ -151,6 +159,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
+  '/_authenticated/app/arena': typeof AuthenticatedAppArenaRoute
   '/_authenticated/app/coach': typeof AuthenticatedAppCoachRoute
   '/_authenticated/app/conquistas': typeof AuthenticatedAppConquistasRoute
   '/_authenticated/app/nutricao': typeof AuthenticatedAppNutricaoRoute
@@ -170,6 +179,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/app'
+    | '/app/arena'
     | '/app/coach'
     | '/app/conquistas'
     | '/app/nutricao'
@@ -186,6 +196,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/app/arena'
     | '/app/coach'
     | '/app/conquistas'
     | '/app/nutricao'
@@ -204,6 +215,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/app'
+    | '/_authenticated/app/arena'
     | '/_authenticated/app/coach'
     | '/_authenticated/app/conquistas'
     | '/_authenticated/app/nutricao'
@@ -259,6 +271,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/app/'
       preLoaderRoute: typeof AuthenticatedAppIndexRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/arena': {
+      id: '/_authenticated/app/arena'
+      path: '/arena'
+      fullPath: '/app/arena'
+      preLoaderRoute: typeof AuthenticatedAppArenaRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
     '/_authenticated/app/coach': {
@@ -342,6 +361,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAppRouteChildren {
+  AuthenticatedAppArenaRoute: typeof AuthenticatedAppArenaRoute
   AuthenticatedAppCoachRoute: typeof AuthenticatedAppCoachRoute
   AuthenticatedAppConquistasRoute: typeof AuthenticatedAppConquistasRoute
   AuthenticatedAppNutricaoRoute: typeof AuthenticatedAppNutricaoRoute
@@ -357,6 +377,7 @@ interface AuthenticatedAppRouteChildren {
 }
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
+  AuthenticatedAppArenaRoute: AuthenticatedAppArenaRoute,
   AuthenticatedAppCoachRoute: AuthenticatedAppCoachRoute,
   AuthenticatedAppConquistasRoute: AuthenticatedAppConquistasRoute,
   AuthenticatedAppNutricaoRoute: AuthenticatedAppNutricaoRoute,
