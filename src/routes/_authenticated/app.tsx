@@ -8,6 +8,7 @@ import {
   LineChart,
   LogOut,
   MessageSquareText,
+  Swords,
   Trophy,
   User,
   Users,
