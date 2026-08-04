@@ -76,17 +76,13 @@ export function ArenaBattle({ category }: { category: string }) {
         </button>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="relative grid grid-cols-2 gap-3">
         <BattleSide card={data.left} picked={picked} onPick={() => choose(data.left, data.right)} />
         <BattleSide card={data.right} picked={picked} onPick={() => choose(data.right, data.left)} />
-      </div>
-
-      <div className="relative -mt-[7.5rem] flex justify-center">
-        <span className="grid size-11 place-items-center rounded-full border border-border bg-background/90 text-primary shadow-glow backdrop-blur">
+        <span className="pointer-events-none absolute left-1/2 top-1/2 grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-border bg-background/90 text-primary shadow-glow backdrop-blur">
           <Swords className="size-5" />
         </span>
       </div>
-      <div className="h-[6.5rem]" aria-hidden />
     </div>
   );
 }
