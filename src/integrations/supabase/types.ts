@@ -35,6 +35,105 @@ export type Database = {
         }
         Relationships: []
       }
+      battle_entries: {
+        Row: {
+          battles: number
+          best_rank: number | null
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          losses: number
+          media_path: string
+          media_type: string
+          season: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          video_verified: boolean
+          wins: number
+        }
+        Insert: {
+          battles?: number
+          best_rank?: number | null
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          losses?: number
+          media_path: string
+          media_type?: string
+          season?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          video_verified?: boolean
+          wins?: number
+        }
+        Update: {
+          battles?: number
+          best_rank?: number | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          losses?: number
+          media_path?: string
+          media_type?: string
+          season?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          video_verified?: boolean
+          wins?: number
+        }
+        Relationships: []
+      }
+      battle_votes: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          loser_entry_id: string
+          season: string | null
+          voter_id: string
+          winner_entry_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          loser_entry_id: string
+          season?: string | null
+          voter_id: string
+          winner_entry_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          loser_entry_id?: string
+          season?: string | null
+          voter_id?: string
+          winner_entry_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "battle_votes_loser_entry_id_fkey"
+            columns: ["loser_entry_id"]
+            isOneToOne: false
+            referencedRelation: "battle_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "battle_votes_winner_entry_id_fkey"
+            columns: ["winner_entry_id"]
+            isOneToOne: false
+            referencedRelation: "battle_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       body_measurements: {
         Row: {
           arm_cm: number | null
