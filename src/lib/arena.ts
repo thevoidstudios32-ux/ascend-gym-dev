@@ -4,17 +4,17 @@
  * Esses recursos ainda NÃO estão ativos — apenas a arquitetura está pronta.
  */
 
-export const ARENA_CATEGORIES = [
-  { id: "geral", label: "Shape Geral", emoji: "🔥" },
-  { id: "costas", label: "Costas", emoji: "🦅" },
-  { id: "peitoral", label: "Peitoral", emoji: "🛡️" },
-  { id: "ombros", label: "Ombros", emoji: "🪨" },
-  { id: "bracos", label: "Braços", emoji: "💪" },
-  { id: "pernas", label: "Pernas", emoji: "🦵" },
-  { id: "evolucao", label: "Melhor Evolução", emoji: "📈" },
-] as const;
+export { ARENA_POSES, POSE_BY_ID, poseOf } from "@/lib/poses";
+import { ARENA_POSES } from "@/lib/poses";
 
-export type ArenaCategory = (typeof ARENA_CATEGORIES)[number]["id"];
+/** Categorias da Arena = poses de fisiculturismo. */
+export const ARENA_CATEGORIES = ARENA_POSES.map((p) => ({
+  id: p.id,
+  label: p.label,
+  emoji: p.emoji,
+}));
+
+export type ArenaCategory = string;
 
 export const CATEGORY_LABEL: Record<string, string> = Object.fromEntries(
   ARENA_CATEGORIES.map((c) => [c.id, c.label]),

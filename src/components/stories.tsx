@@ -2,7 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Camera, Heart, Loader2, Plus, Send, Share2, Trash2, Type, Video, X } from "lucide-react";
+import { Camera, Heart, Loader2, Music, Plus, Search, Send, Share2, Trash2, Type, Video, X } from "lucide-react";
+import { CameraCapture } from "@/components/camera-capture";
+import { searchMusic, type Track } from "@/lib/music.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { BroAvatar } from "@/components/bro";
 import { createStory, deleteStory, getStories, viewStory } from "@/lib/stories.functions";
@@ -452,6 +454,9 @@ export function StoryComposer({ preset, onClose }: { preset: StoryDraft | null; 
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [camera, setCamera] = useState(false);
+  const [musicOpen, setMusicOpen] = useState(false);
+  const [track, setTrack] = useState<Track | null>(null);
 
   const create = useServerFn(createStory);
   const publish = useMutation({
@@ -481,6 +486,9 @@ export function StoryComposer({ preset, onClose }: { preset: StoryDraft | null; 
           sticker,
           bg,
           location: location.trim() || null,
+          meta: track
+            ? { music: { title: track.title, artist: track.artist, artwork: track.artwork, preview: track.preview } }
+            : {},
         },
       });
     },
@@ -522,6 +530,19 @@ export function StoryComposer({ preset, onClose }: { preset: StoryDraft | null; 
           <img src={previewUrl} alt="Prévia" className="size-full object-contain" />
         ) : null}
 
+        {track ? (
+          <div className="absolute left-4 top-4 flex max-w-[70%] items-center gap-2 rounded-full bg-black/50 px-3 py-1.5 backdrop-blur">
+            {track.artwork ? (
+              <img src={track.artwork} alt="" className="size-6 rounded-md" />
+            ) : (
+              <Music className="size-4 text-white" />
+            )}
+            <span className="truncate text-[11px] font-bold text-white">
+              {track.title} · {track.artist}
+            </span>
+          </div>
+        ) : null}
+
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 text-center">
           {sticker && <span className="text-5xl drop-shadow">{stickerOf(sticker)?.icon}</span>}
           <textarea
@@ -536,16 +557,12 @@ export function StoryComposer({ preset, onClose }: { preset: StoryDraft | null; 
 
       <div className="space-y-3 overflow-y-auto p-4">
         <div className="grid grid-cols-4 gap-2">
-          <label className="press flex cursor-pointer flex-col items-center gap-1 rounded-2xl bg-white/10 py-3 text-[11px] font-bold text-white">
+          <button
+            onClick={() => setCamera(true)}
+            className="press flex flex-col items-center gap-1 rounded-2xl bg-white/10 py-3 text-[11px] font-bold text-white"
+          >
             <Camera className="size-4" /> Câmera
-            <input
-              type="file"
-              accept="image/*"
-              capture="environment"
-              className="hidden"
-              onChange={(e) => choose(e.target.files?.[0] ?? null)}
-            />
-          </label>
+          </button>
           <label className="press flex cursor-pointer flex-col items-center gap-1 rounded-2xl bg-white/10 py-3 text-[11px] font-bold text-white">
             <Plus className="size-4" /> Galeria
             <input
@@ -606,6 +623,43 @@ export function StoryComposer({ preset, onClose }: { preset: StoryDraft | null; 
           </div>
         )}
 
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {["🔥", "💪", "😤", "🏆", "⚡", "🥩", "😮‍💨", "🫡", "🐐"].map((e) => (
+            <button
+              key={e}
+              onClick={() => setText((t) => (t + " " + e).slice(0, 300))}
+              className="press shrink-0 rounded-full bg-white/10 px-3 py-1.5 text-base"
+            >
+              {e}
+            </button>
+          ))}
+        </div>
+
+        <button
+          onClick={() => setMusicOpen(true)}
+          className="press flex w-full items-center gap-2 rounded-2xl bg-white/10 px-4 py-3 text-sm font-bold text-white"
+        >
+          <Music className="size-4" />
+          <span className="min-w-0 flex-1 truncate text-left">
+            {track ? `${track.title} · ${track.artist}` : "Adicionar música"}
+          </span>
+          {track ? (
+            <span
+              role="button"
+              tabIndex={0}
+              onClick={(ev) => {
+                ev.stopPropagation();
+                setTrack(null);
+              }}
+              onKeyDown={(ev) => ev.key === "Enter" && setTrack(null)}
+              className="rounded-full bg-white/10 p-1"
+              aria-label="Remover música"
+            >
+              <X className="size-3" />
+            </span>
+          ) : null}
+        </button>
+
         <input
           value={location}
           onChange={(e) => setLocation(e.target.value)}
@@ -621,6 +675,124 @@ export function StoryComposer({ preset, onClose }: { preset: StoryDraft | null; 
           {publish.isPending || uploading ? <Loader2 className="size-4 animate-spin" /> : null}
           Publicar story
         </button>
+      </div>
+
+      {camera ? (
+        <CameraCapture
+          title="Foto do story"
+          hint="Mostre o treino, o shape ou o momento."
+          allowBurst={false}
+          onClose={() => setCamera(false)}
+          onUse={(f) => {
+            choose(f);
+            setCamera(false);
+          }}
+        />
+      ) : null}
+
+      {musicOpen ? (
+        <MusicPicker
+          onClose={() => setMusicOpen(false)}
+          onPick={(t) => {
+            setTrack(t);
+            setMusicOpen(false);
+          }}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+/* ------------------------------ Música ------------------------------ */
+
+function MusicPicker({ onClose, onPick }: { onClose: () => void; onPick: (t: Track) => void }) {
+  const search = useServerFn(searchMusic);
+  const [q, setQ] = useState("");
+  const [results, setResults] = useState<Track[]>([]);
+  const [loading, setLoading] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  async function run() {
+    if (!q.trim()) return;
+    setLoading(true);
+    try {
+      setResults(await search({ data: { q: q.trim() } }));
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Busca indisponível.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function preview(t: Track) {
+    if (!t.preview) return;
+    audioRef.current?.pause();
+    const audio = new Audio(t.preview);
+    audio.volume = 0.6;
+    void audio.play();
+    audioRef.current = audio;
+  }
+
+  useEffect(() => () => audioRef.current?.pause(), []);
+
+  return (
+    <div className="fixed inset-0 z-[92] flex items-end bg-black/70 backdrop-blur-sm">
+      <div className="animate-sheet-up max-h-[80vh] w-full overflow-y-auto rounded-t-3xl border-t border-white/10 bg-neutral-950 p-5">
+        <div className="flex items-center gap-3">
+          <h3 className="flex-1 text-lg font-extrabold text-white">Música</h3>
+          <button onClick={onClose} aria-label="Fechar" className="press rounded-full bg-white/10 p-2 text-white">
+            <X className="size-4" />
+          </button>
+        </div>
+
+        <div className="mt-3 flex gap-2">
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && void run()}
+            placeholder="Buscar artista ou faixa…"
+            className="min-w-0 flex-1 rounded-2xl bg-white/10 px-4 py-3 text-sm text-white outline-none placeholder:text-white/40"
+          />
+          <button
+            onClick={() => void run()}
+            className="press grid size-12 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground"
+            aria-label="Buscar"
+          >
+            {loading ? <Loader2 className="size-4 animate-spin" /> : <Search className="size-4" />}
+          </button>
+        </div>
+
+        <div className="mt-4 space-y-2">
+          {results.map((t) => (
+            <div key={t.id} className="flex items-center gap-3 rounded-2xl bg-white/5 p-2.5">
+              {t.artwork ? (
+                <img src={t.artwork} alt="" className="size-11 rounded-xl" />
+              ) : (
+                <span className="grid size-11 place-items-center rounded-xl bg-white/10 text-white">
+                  <Music className="size-4" />
+                </span>
+              )}
+              <button onClick={() => preview(t)} className="min-w-0 flex-1 text-left">
+                <p className="truncate text-sm font-bold text-white">{t.title}</p>
+                <p className="truncate text-[11px] text-white/50">{t.artist} · tocar prévia</p>
+              </button>
+              <button
+                onClick={() => {
+                  audioRef.current?.pause();
+                  onPick(t);
+                }}
+                className="press rounded-full bg-primary px-3 py-1.5 text-[11px] font-bold text-primary-foreground"
+              >
+                Usar
+              </button>
+            </div>
+          ))}
+          {!loading && results.length === 0 ? (
+            <p className="py-6 text-center text-sm text-white/50">
+              Busque uma faixa para embalar seu story.
+            </p>
+          ) : null}
+        </div>
       </div>
     </div>
   );
