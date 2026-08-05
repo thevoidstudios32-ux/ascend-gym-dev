@@ -16,6 +16,8 @@ import {
   XP_PER_WIN,
 } from "@/lib/arena";
 import { joinBattle, leaveBattle } from "@/lib/arena.functions";
+import { CameraCapture } from "@/components/camera-capture";
+import { poseOf } from "@/lib/poses";
 
 export const Route = createFileRoute("/_authenticated/app/arena")({
   head: () => ({
@@ -42,7 +44,7 @@ const TABS = [
 
 function ArenaPage() {
   const [tab, setTab] = useState<(typeof TABS)[number]["id"]>("votar");
-  const [category, setCategory] = useState<string>("geral");
+  const [category, setCategory] = useState<string>("front_double");
   const { data } = useArena();
 
   return (
@@ -110,7 +112,9 @@ function JoinPanel({ category }: { category: string }) {
   const leave = useArenaAction(useServerFn(leaveBattle));
   const [description, setDescription] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [camera, setCamera] = useState(false);
 
+  const pose = poseOf(category);
   const active = (data?.entries ?? []).filter((e) => e.status === "active");
   const current = active.find((e) => e.category === category);
 
@@ -119,12 +123,14 @@ function JoinPanel({ category }: { category: string }) {
     try {
       const { data: auth } = await supabase.auth.getUser();
       if (!auth.user) throw new Error("Sessão expirada.");
-      const ext = file.name.split(".").pop() || "jpg";
-      const path = `${auth.user.id}/${category}-${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from("battle-photos").upload(path, file);
+      const path = `${auth.user.id}/${category}-${Date.now()}.jpg`;
+      const { error } = await supabase.storage
+        .from("battle-photos")
+        .upload(path, file, { contentType: file.type || "image/jpeg" });
       if (error) throw new Error(error.message);
       await join.mutateAsync({ category, path, description: description.trim() || null });
       setDescription("");
+      setCamera(false);
       toast.success("Você entrou na Arena!");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Falha no envio.");
@@ -135,10 +141,43 @@ function JoinPanel({ category }: { category: string }) {
 
   return (
     <div className="space-y-3">
+      {camera ? (
+        <CameraCapture
+          title={`${pose.emoji} ${pose.label}`}
+          hint={pose.how}
+          silhouette={pose.silhouette}
+          busy={uploading}
+          onClose={() => setCamera(false)}
+          onUse={(f) => upload(f)}
+        />
+      ) : null}
+
+      <section className="panel space-y-3 p-5">
+        <div className="flex items-start gap-3">
+          <svg viewBox="0 0 100 150" className="h-24 shrink-0 text-primary" aria-hidden>
+            <path d={pose.silhouette} fill="currentColor" opacity={0.25} />
+            <path d={pose.silhouette} fill="none" stroke="currentColor" strokeWidth={1.4} />
+          </svg>
+          <div className="min-w-0">
+            <p className="text-xs font-extrabold uppercase tracking-wide text-muted-foreground">
+              Como fazer a pose
+            </p>
+            <p className="mt-1 text-sm font-bold">
+              {pose.emoji} {pose.label}
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">{pose.how}</p>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {pose.criteria.map((c) => (
+                <span key={c} className="rounded-full bg-elevated px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                  {c}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="glass space-y-3 p-5">
-        <p className="text-xs font-extrabold uppercase tracking-wide text-muted-foreground">
-          Participar · {CATEGORY_LABEL[category] ?? category}
-        </p>
         <input
           value={description}
           onChange={(e) => setDescription(e.target.value)}
@@ -146,9 +185,16 @@ function JoinPanel({ category }: { category: string }) {
           placeholder="Legenda (opcional): 6 meses de bulking…"
           className="w-full rounded-xl bg-elevated px-3 py-2.5 text-sm outline-none"
         />
-        <label className="press flex cursor-pointer items-center justify-center gap-2 rounded-full bg-primary py-3.5 text-sm font-bold text-primary-foreground">
-          <Upload className="size-4" />
-          {uploading ? "Enviando…" : current ? "Trocar minha foto" : "Enviar minha foto"}
+        <button
+          onClick={() => setCamera(true)}
+          disabled={uploading}
+          className="press flex w-full items-center justify-center gap-2 rounded-full bg-primary py-3.5 text-sm font-bold text-primary-foreground disabled:opacity-60"
+        >
+          <Camera className="size-4" />
+          {uploading ? "Enviando…" : current ? "Refazer minha foto" : "Abrir câmera e posar"}
+        </button>
+        <label className="press flex cursor-pointer items-center justify-center gap-2 rounded-full bg-elevated py-3 text-xs font-bold text-muted-foreground">
+          <Upload className="size-3.5" /> Enviar da galeria
           <input
             type="file"
             accept="image/*"
