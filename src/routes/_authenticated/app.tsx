@@ -1,5 +1,6 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import {
   Apple,
   Camera,
@@ -14,6 +15,7 @@ import {
   Users,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { getSocialBadge } from "@/lib/social.functions";
 
 export const Route = createFileRoute("/_authenticated/app")({
   component: AppLayout,
@@ -36,6 +38,15 @@ function AppLayout() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const badgeFn = useServerFn(getSocialBadge);
+  const { data: badge } = useQuery({
+    queryKey: ["social-badge"],
+    queryFn: () => badgeFn(),
+    refetchInterval: 60_000,
+    staleTime: 30_000,
+    retry: false,
+  });
+  const broBadge = badge?.total ?? 0;
 
   async function signOut() {
     await queryClient.cancelQueries();
@@ -65,6 +76,11 @@ function AppLayout() {
               >
                 <item.icon className="size-4" />
                 {item.label}
+                {item.to === "/app/bros" && broBadge > 0 ? (
+                  <span className="ml-auto grid min-w-5 place-items-center rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-black text-primary-foreground">
+                    {broBadge > 99 ? "99+" : broBadge}
+                  </span>
+                ) : null}
               </Link>
             );
           })}
@@ -97,9 +113,16 @@ function AppLayout() {
                   active ? "opacity-100" : "opacity-0"
                 }`}
               />
-              <item.icon
-                className={`size-5 transition-transform duration-200 ${active ? "scale-110" : ""}`}
-              />
+              <span className="relative">
+                <item.icon
+                  className={`size-5 transition-transform duration-200 ${active ? "scale-110" : ""}`}
+                />
+                {item.to === "/app/bros" && broBadge > 0 ? (
+                  <span className="animate-pop absolute -right-2.5 -top-1.5 grid min-w-4 place-items-center rounded-full bg-primary px-1 text-[9px] font-black leading-4 text-primary-foreground">
+                    {broBadge > 9 ? "9+" : broBadge}
+                  </span>
+                ) : null}
+              </span>
               {item.label}
             </Link>
           );
