@@ -256,3 +256,25 @@ export const leaveChallenge = createServerFn({ method: "POST" })
 export const getBroNudges = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => generateNudges(context.supabase, context.userId));
+
+/** Contadores para os badges de notificação da aba Gym Bros. */
+export const getSocialBadge = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const [dms, requests] = await Promise.all([
+      supabase
+        .from("direct_messages")
+        .select("id", { count: "exact", head: true })
+        .eq("recipient_id", userId)
+        .is("read_at", null),
+      supabase
+        .from("friendships")
+        .select("id", { count: "exact", head: true })
+        .eq("addressee_id", userId)
+        .eq("status", "pending"),
+    ]);
+    const messages = dms.count ?? 0;
+    const invites = requests.count ?? 0;
+    return { messages, invites, total: messages + invites };
+  });
