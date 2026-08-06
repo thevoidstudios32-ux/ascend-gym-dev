@@ -5,6 +5,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Barcode, Camera, Droplets, Loader2, Pencil, Plus, Sparkles, Trash2, X } from "lucide-react";
 import { CameraCapture } from "@/components/camera-capture";
+import { BarcodeScanner } from "@/components/barcode-scanner";
+
 import { useDashboard, useExtras, useRefreshDashboard } from "@/hooks/use-dashboard";
 import { addMeal, deleteMeal, setWater } from "@/lib/extras.functions";
 import { analyzeMealPhoto, scanBarcode } from "@/lib/nutrition.functions";
