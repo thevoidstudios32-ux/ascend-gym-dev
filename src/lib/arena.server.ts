@@ -143,23 +143,35 @@ export async function buildRanking(
   return rows.slice(0, 100).map((r, i) => ({ ...r, position: i + 1 }));
 }
 
-/** Pareamento: mesma categoria, nível parecido, nº de batalhas parecido, sem repetir confrontos. */
+/** Pareamento: mesma categoria, nível parecido, nº de batalhas parecido, sem repetir confrontos.
+ *  `category === "all"` procura confrontos em qualquer pose (sempre entre a mesma pose). */
 export async function pickBattle(supabase: DB, userId: string, category: string) {
-  const { data: entriesData } = await supabase
+  let query = supabase
     .from("battle_entries")
     .select("*")
     .eq("status", "active")
-    .eq("category", category)
-    .neq("user_id", userId)
-    .limit(500);
-  const entries = (entriesData ?? []) as ArenaEntry[];
-  if (entries.length < 2) return null;
+    .limit(800);
+  if (category !== "all") query = query.eq("category", category);
+  const { data: entriesData } = await query;
+
+  const all = (entriesData ?? []) as ArenaEntry[];
+  const participants = all.length;
+  const entries = all.filter((e) => e.user_id !== userId);
+
+  const empty = (reason: "few" | "voted") => ({
+    battle: null,
+    participants,
+    others: entries.length,
+    reason,
+  });
+
+  if (entries.length < 2) return empty("few");
 
   const { data: votes } = await supabase
     .from("battle_votes")
     .select("winner_entry_id,loser_entry_id")
     .eq("voter_id", userId)
-    .limit(2000);
+    .limit(5000);
   const seen = new Set<string>();
   for (const v of votes ?? []) {
     seen.add([v.winner_entry_id, v.loser_entry_id].sort().join("|"));
@@ -178,11 +190,12 @@ export async function pickBattle(supabase: DB, userId: string, category: string)
       const a = withXp[i]!;
       const b = withXp[j]!;
       if (a.entry.user_id === b.entry.user_id) continue;
+      if (a.entry.category !== b.entry.category) continue;
       if (seen.has([a.entry.id, b.entry.id].sort().join("|"))) continue;
       candidates.push({ a: a.entry, b: b.entry, score: pairScore(a, b) });
     }
   }
-  if (candidates.length === 0) return null;
+  if (candidates.length === 0) return empty("voted");
 
   candidates.sort((x, y) => x.score - y.score);
   const pool = candidates.slice(0, Math.min(12, candidates.length));
@@ -190,8 +203,15 @@ export async function pickBattle(supabase: DB, userId: string, category: string)
 
   const urls = await signPaths(supabase, [chosen.a.media_path, chosen.b.media_path]);
   const [left, right] = toCards([chosen.a, chosen.b], profiles, urls);
-  return { left: left!, right: right!, remaining: candidates.length };
+  return {
+    battle: { left: left!, right: right!, category: chosen.a.category },
+    participants,
+    others: entries.length,
+    remaining: candidates.length,
+    reason: null as null,
+  };
 }
+
 
 /** Recompensas por vitória: XP no perfil + conquistas da Arena. */
 export async function applyWinRewards(admin: DB, entryId: string, xpPerWin: number) {
