@@ -167,7 +167,68 @@ export function StoriesRow({ preset }: { preset?: StoryDraft | null }) {
   );
 }
 
-/* ------------------------------ Viewer ------------------------------ */
+/* --------------------------- Música do story --------------------------- */
+
+function StoryMusicBar({ music, paused }: { music: StoryMusic; paused: boolean }) {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [blocked, setBlocked] = useState(false);
+  const [muted, setMuted] = useState(false);
+
+  const start = useCallback(async () => {
+    const audio = audioRef.current;
+    if (!audio || !music.preview) return;
+    try {
+      audio.volume = music.volume ?? 0.7;
+      if (audio.currentTime < (music.start ?? 0)) audio.currentTime = music.start ?? 0;
+      await audio.play();
+      setBlocked(false);
+    } catch {
+      setBlocked(true);
+    }
+  }, [music.preview, music.volume, music.start]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (paused || muted) audio.pause();
+    else void start();
+  }, [paused, muted, start]);
+
+  if (!music.preview) return null;
+
+  return (
+    <div className="pointer-events-auto mt-3 flex items-center gap-2 rounded-full bg-black/50 px-3 py-1.5 backdrop-blur">
+      <audio
+        ref={audioRef}
+        src={music.preview}
+        preload="auto"
+        loop
+        onLoadedMetadata={() => void start()}
+        onError={() => setBlocked(true)}
+      />
+      {music.artwork ? (
+        <img src={music.artwork} alt="" className="size-6 rounded-md" />
+      ) : (
+        <Music className="size-4 text-white" />
+      )}
+      <span className="min-w-0 flex-1 truncate text-[11px] font-bold text-white">
+        {music.title} · {music.artist}
+      </span>
+      <button
+        onClick={() => {
+          if (blocked) void start();
+          else setMuted((m) => !m);
+        }}
+        aria-label={muted || blocked ? "Ativar som" : "Silenciar"}
+        className="press rounded-full bg-white/10 p-1.5 text-white"
+      >
+        {muted || blocked ? <VolumeX className="size-3.5" /> : <Volume2 className="size-3.5" />}
+      </button>
+    </div>
+  );
+}
+
+
 
 function StoryViewer({
   userId,
