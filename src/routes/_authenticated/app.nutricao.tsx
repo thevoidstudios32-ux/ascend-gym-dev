@@ -5,6 +5,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Barcode, Camera, Droplets, Loader2, Pencil, Plus, Sparkles, Trash2, X } from "lucide-react";
 import { CameraCapture } from "@/components/camera-capture";
+import { BarcodeScanner } from "@/components/barcode-scanner";
+
 import { useDashboard, useExtras, useRefreshDashboard } from "@/hooks/use-dashboard";
 import { addMeal, deleteMeal, setWater } from "@/lib/extras.functions";
 import { analyzeMealPhoto, scanBarcode } from "@/lib/nutrition.functions";
@@ -141,6 +143,20 @@ function NutricaoPage() {
     }
   }
 
+  /** Código lido ao vivo pelo scanner dedicado. */
+  async function handleCode(code: string) {
+    setBusy(true);
+    try {
+      setReview(await scan({ data: { code } }));
+      setMode(null);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Produto não encontrado para este código.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+
   const field = "w-full rounded-xl bg-elevated px-3 py-2.5 text-sm outline-none ring-ring focus:ring-2";
   const macros = [
     { l: "Proteína", v: eaten.protein, t: targets.protein, u: "g" },
@@ -150,20 +166,26 @@ function NutricaoPage() {
 
   return (
     <div className="animate-rise space-y-4">
-      {mode ? (
+      {mode === "barcode" ? (
+        <BarcodeScanner
+          busy={busy}
+          onClose={() => setMode(null)}
+          onCode={handleCode}
+          onPhoto={handleCapture}
+        />
+      ) : null}
+
+      {mode === "photo" ? (
         <CameraCapture
-          title={mode === "barcode" ? "Escanear código de barras" : "Foto da refeição"}
-          hint={
-            mode === "barcode"
-              ? "Enquadre o código de barras da embalagem e mantenha firme."
-              : "Fotografe o prato de cima, com boa luz. A IA estima os macros."
-          }
+          title="Foto da refeição"
+          hint="Fotografe o prato de cima, com boa luz. A IA estima os macros."
           allowBurst={false}
           busy={busy}
           onClose={() => setMode(null)}
           onUse={(f) => handleCapture(f)}
         />
       ) : null}
+
 
       {review ? (
         <ReviewSheet

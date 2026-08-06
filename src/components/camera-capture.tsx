@@ -177,21 +177,40 @@ export function CameraCapture({
   const grab = useCallback(async (): Promise<{ url: string; file: File } | null> => {
     const video = videoRef.current;
     if (!video || !video.videoWidth) return null;
+
+    /* O vídeo é exibido com object-cover: recortamos exatamente a área visível
+       para que a foto final seja idêntica à pré-visualização (sem "zoom"). */
+    const rect = video.getBoundingClientRect();
+    const vw = video.videoWidth;
+    const vh = video.videoHeight;
+    const target = rect.width > 0 && rect.height > 0 ? rect.width / rect.height : vw / vh;
+    let sw = vw;
+    let sh = vh;
+    if (vw / vh > target) sw = vh * target;
+    else sh = vw / target;
+    const sx = (vw - sw) / 2;
+    const sy = (vh - sh) / 2;
+
+    // Mantém boa resolução sem gerar arquivos gigantes.
+    const MAX = 1600;
+    const scale = Math.min(1, MAX / Math.max(sw, sh));
     const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    canvas.width = Math.max(1, Math.round(sw * scale));
+    canvas.height = Math.max(1, Math.round(sh * scale));
     const ctx = canvas.getContext("2d");
     if (!ctx) return null;
+    ctx.imageSmoothingQuality = "high";
     if (facing === "user") {
       ctx.translate(canvas.width, 0);
       ctx.scale(-1, 1);
     }
-    ctx.drawImage(video, 0, 0);
-    const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/jpeg", 0.92));
+    ctx.drawImage(video, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/jpeg", 0.95));
     if (!blob) return null;
     const file = new File([blob], `ascend-${Date.now()}.jpg`, { type: "image/jpeg" });
     return { url: URL.createObjectURL(blob), file };
   }, [facing]);
+
 
   const shoot = useCallback(async () => {
     vibrate(20);

@@ -12,12 +12,13 @@ export function ArenaBattle({ category }: { category: string }) {
   const { data, isLoading, refetch, isFetching } = useBattle(category);
   const vote = useArenaAction(useServerFn(castVote));
   const [picked, setPicked] = useState<string | null>(null);
+  const battle = data?.battle ?? null;
 
   function choose(winner: ArenaCard, loser: ArenaCard) {
-    if (vote.isPending || picked) return;
+    if (vote.isPending || picked || !battle) return;
     setPicked(winner.entry.id);
     vote.mutate(
-      { winnerId: winner.entry.id, loserId: loser.entry.id, category },
+      { winnerId: winner.entry.id, loserId: loser.entry.id, category: battle.category },
       {
         onSuccess: () => {
           setTimeout(() => {
@@ -41,15 +42,28 @@ export function ArenaBattle({ category }: { category: string }) {
     );
   }
 
-  if (!data) {
+  if (!battle) {
+    const label = category === "all" ? "todas as poses" : (CATEGORY_LABEL[category] ?? category);
+    const participants = data?.participants ?? 0;
+    const others = data?.others ?? 0;
     return (
       <div className="glass space-y-3 p-6 text-center">
-        <p className="text-4xl">{CATEGORY_EMOJI[category] ?? "🔥"}</p>
-        <p className="font-bold">Sem confrontos disponíveis</p>
-        <p className="text-sm text-muted-foreground">
-          Ainda não há participantes suficientes em {CATEGORY_LABEL[category] ?? category} — ou você já
-          votou em todos. Volte mais tarde ou participe você mesmo.
+        <p className="text-4xl">{category === "all" ? "🏟️" : (CATEGORY_EMOJI[category] ?? "🔥")}</p>
+        <p className="font-bold">
+          {data?.reason === "voted" ? "Você já votou em todos os confrontos" : "Sem confrontos disponíveis"}
         </p>
+        <p className="text-sm text-muted-foreground">
+          {data?.reason === "voted"
+            ? `Já avaliamos tudo que existe em ${label}. Volte quando novos atletas entrarem.`
+            : `Em ${label} há ${participants} ${participants === 1 ? "participação" : "participações"}${
+                others < 2 ? ` (${others} de outros atletas)` : ""
+              }. São necessários 2 atletas diferentes na mesma pose para abrir uma batalha.`}
+        </p>
+        {category !== "all" ? (
+          <p className="text-[11px] text-muted-foreground">
+            Dica: use o filtro <b>Todas as poses</b> para encontrar batalhas em qualquer categoria.
+          </p>
+        ) : null}
         <button
           onClick={() => void refetch()}
           className="press mx-auto flex items-center gap-2 rounded-full bg-elevated px-4 py-2 text-xs font-bold"
@@ -65,7 +79,8 @@ export function ArenaBattle({ category }: { category: string }) {
       <Confetti fire={vote.isSuccess && picked !== null} />
       <div className="flex items-center justify-between">
         <p className="text-xs font-extrabold uppercase tracking-wide text-muted-foreground">
-          Quem está com o melhor shape?
+          {CATEGORY_EMOJI[battle.category] ?? "🔥"} {CATEGORY_LABEL[battle.category] ?? battle.category} · quem
+          está com o melhor shape?
         </p>
         <button
           onClick={() => void refetch()}
@@ -77,8 +92,8 @@ export function ArenaBattle({ category }: { category: string }) {
       </div>
 
       <div className="relative grid grid-cols-2 gap-3">
-        <BattleSide card={data.left} picked={picked} onPick={() => choose(data.left, data.right)} />
-        <BattleSide card={data.right} picked={picked} onPick={() => choose(data.right, data.left)} />
+        <BattleSide card={battle.left} picked={picked} onPick={() => choose(battle.left, battle.right)} />
+        <BattleSide card={battle.right} picked={picked} onPick={() => choose(battle.right, battle.left)} />
         <span className="pointer-events-none absolute left-1/2 top-1/2 grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-border bg-background/90 text-primary shadow-glow backdrop-blur">
           <Swords className="size-5" />
         </span>
@@ -86,6 +101,7 @@ export function ArenaBattle({ category }: { category: string }) {
     </div>
   );
 }
+
 
 function BattleSide({
   card,

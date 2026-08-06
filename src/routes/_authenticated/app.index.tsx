@@ -189,7 +189,7 @@ function Dashboard({ data }: { data: DashboardData }) {
   const { data: extras } = useExtras();
   const profile = data.profile!;
   const level = levelFromXp(profile.xp);
-  const title = titleFromLevel(level.level);
+  const title = titleFromLevel(level.level, profile.xp);
   const dates = useMemo(() => data.workouts.map((w) => w.date), [data.workouts]);
   const streak = computeStreak(dates);
   const now = new Date();

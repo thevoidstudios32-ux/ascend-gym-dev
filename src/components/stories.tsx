@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Camera, Heart, Loader2, Music, Plus, Search, Send, Share2, Trash2, Type, Video, X } from "lucide-react";
+import { Camera, Heart, Loader2, Music, Pause, Play, Plus, Search, Send, Share2, Trash2, Type, Video, Volume2, VolumeX, X } from "lucide-react";
 import { CameraCapture } from "@/components/camera-capture";
 import { searchMusic, type Track } from "@/lib/music.functions";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,6 +32,8 @@ type StoryRow = {
   location: string | null;
   created_at: string;
   expires_at: string;
+  meta?: Record<string, unknown> | null;
+
 };
 
 type MiniProfile = { id: string; name: string; username: string | null; avatar_url: string | null; xp: number };
@@ -165,7 +167,68 @@ export function StoriesRow({ preset }: { preset?: StoryDraft | null }) {
   );
 }
 
-/* ------------------------------ Viewer ------------------------------ */
+/* --------------------------- Música do story --------------------------- */
+
+function StoryMusicBar({ music, paused }: { music: StoryMusic; paused: boolean }) {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [blocked, setBlocked] = useState(false);
+  const [muted, setMuted] = useState(false);
+
+  const start = useCallback(async () => {
+    const audio = audioRef.current;
+    if (!audio || !music.preview) return;
+    try {
+      audio.volume = music.volume ?? 0.7;
+      if (audio.currentTime < (music.start ?? 0)) audio.currentTime = music.start ?? 0;
+      await audio.play();
+      setBlocked(false);
+    } catch {
+      setBlocked(true);
+    }
+  }, [music.preview, music.volume, music.start]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (paused || muted) audio.pause();
+    else void start();
+  }, [paused, muted, start]);
+
+  if (!music.preview) return null;
+
+  return (
+    <div className="pointer-events-auto mt-3 flex items-center gap-2 rounded-full bg-black/50 px-3 py-1.5 backdrop-blur">
+      <audio
+        ref={audioRef}
+        src={music.preview}
+        preload="auto"
+        loop
+        onLoadedMetadata={() => void start()}
+        onError={() => setBlocked(true)}
+      />
+      {music.artwork ? (
+        <img src={music.artwork} alt="" className="size-6 rounded-md" />
+      ) : (
+        <Music className="size-4 text-white" />
+      )}
+      <span className="min-w-0 flex-1 truncate text-[11px] font-bold text-white">
+        {music.title} · {music.artist}
+      </span>
+      <button
+        onClick={() => {
+          if (blocked) void start();
+          else setMuted((m) => !m);
+        }}
+        aria-label={muted || blocked ? "Ativar som" : "Silenciar"}
+        className="press rounded-full bg-white/10 p-1.5 text-white"
+      >
+        {muted || blocked ? <VolumeX className="size-3.5" /> : <Volume2 className="size-3.5" />}
+      </button>
+    </div>
+  );
+}
+
+
 
 function StoryViewer({
   userId,
@@ -265,6 +328,8 @@ function StoryViewer({
   if (!story) return null;
 
   const sticker = stickerOf(story.sticker);
+  const music = (story.meta as { music?: StoryMusic } | null | undefined)?.music ?? null;
+
 
   return (
     <div
@@ -362,8 +427,10 @@ function StoryViewer({
               <X className="size-4" />
             </button>
           </div>
+          {music ? <StoryMusicBar key={story.id} music={music} paused={paused} /> : null}
         </div>
       </div>
+
 
       {/* rodapé */}
       <div className="space-y-3 bg-black p-4 pb-6">
@@ -456,7 +523,7 @@ export function StoryComposer({ preset, onClose }: { preset: StoryDraft | null; 
   const [uploading, setUploading] = useState(false);
   const [camera, setCamera] = useState(false);
   const [musicOpen, setMusicOpen] = useState(false);
-  const [track, setTrack] = useState<Track | null>(null);
+  const [track, setTrack] = useState<StoryMusic | null>(null);
 
   const create = useServerFn(createStory);
   const publish = useMutation({
@@ -487,8 +554,18 @@ export function StoryComposer({ preset, onClose }: { preset: StoryDraft | null; 
           bg,
           location: location.trim() || null,
           meta: track
-            ? { music: { title: track.title, artist: track.artist, artwork: track.artwork, preview: track.preview } }
+            ? {
+                music: {
+                  title: track.title,
+                  artist: track.artist,
+                  artwork: track.artwork,
+                  preview: track.preview,
+                  start: track.start,
+                  volume: track.volume,
+                },
+              }
             : {},
+
         },
       });
     },
@@ -705,11 +782,30 @@ export function StoryComposer({ preset, onClose }: { preset: StoryDraft | null; 
 
 /* ------------------------------ Música ------------------------------ */
 
-function MusicPicker({ onClose, onPick }: { onClose: () => void; onPick: (t: Track) => void }) {
+export type StoryMusic = {
+  title: string;
+  artist: string;
+  artwork: string | null;
+  preview: string | null;
+  /** Trecho escolhido (segundos dentro da prévia de 30s). */
+  start: number;
+  /** Volume 0–1. */
+  volume: number;
+};
+
+const CLIP_MAX = 30;
+
+function MusicPicker({ onClose, onPick }: { onClose: () => void; onPick: (m: StoryMusic) => void }) {
   const search = useServerFn(searchMusic);
   const [q, setQ] = useState("");
   const [results, setResults] = useState<Track[]>([]);
   const [loading, setLoading] = useState(false);
+  const [selected, setSelected] = useState<Track | null>(null);
+  const [playing, setPlaying] = useState(false);
+  const [start, setStart] = useState(0);
+  const [volume, setVolume] = useState(0.7);
+  const [duration, setDuration] = useState(CLIP_MAX);
+  const [position, setPosition] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   async function run() {
@@ -724,23 +820,52 @@ function MusicPicker({ onClose, onPick }: { onClose: () => void; onPick: (t: Tra
     }
   }
 
-  function preview(t: Track) {
-    if (!t.preview) return;
-    audioRef.current?.pause();
-    const audio = new Audio(t.preview);
-    audio.volume = 0.6;
-    void audio.play();
-    audioRef.current = audio;
+  const play = useCallback(async (from: number) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    try {
+      audio.volume = volume;
+      if (Number.isFinite(audio.duration) && from < audio.duration) audio.currentTime = from;
+      await audio.play();
+      setPlaying(true);
+    } catch {
+      setPlaying(false);
+      toast.error("Não foi possível tocar a prévia. Verifique o volume do aparelho e tente de novo.");
+    }
+  }, [volume]);
+
+  function choose(t: Track) {
+    if (!t.preview) {
+      toast.error("Esta faixa não tem prévia disponível.");
+      return;
+    }
+    setSelected(t);
+    setStart(0);
+    setPosition(0);
+    setPlaying(false);
+    // O <audio> troca de src no próximo render; tocamos no onLoadedMetadata.
   }
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (audio) audio.volume = volume;
+  }, [volume]);
 
   useEffect(() => () => audioRef.current?.pause(), []);
 
   return (
     <div className="fixed inset-0 z-[92] flex items-end bg-black/70 backdrop-blur-sm">
-      <div className="animate-sheet-up max-h-[80vh] w-full overflow-y-auto rounded-t-3xl border-t border-white/10 bg-neutral-950 p-5">
+      <div className="animate-sheet-up max-h-[85vh] w-full overflow-y-auto rounded-t-3xl border-t border-white/10 bg-neutral-950 p-5">
         <div className="flex items-center gap-3">
           <h3 className="flex-1 text-lg font-extrabold text-white">Música</h3>
-          <button onClick={onClose} aria-label="Fechar" className="press rounded-full bg-white/10 p-2 text-white">
+          <button
+            onClick={() => {
+              audioRef.current?.pause();
+              onClose();
+            }}
+            aria-label="Fechar"
+            className="press rounded-full bg-white/10 p-2 text-white"
+          >
             <X className="size-4" />
           </button>
         </div>
@@ -762,9 +887,120 @@ function MusicPicker({ onClose, onPick }: { onClose: () => void; onPick: (t: Tra
           </button>
         </div>
 
+        {/* player do trecho selecionado */}
+        {selected ? (
+          <div className="mt-4 space-y-3 rounded-2xl border border-white/10 bg-white/5 p-4">
+            <div className="flex items-center gap-3">
+              {selected.artwork ? (
+                <img src={selected.artwork} alt="" className="size-12 rounded-xl" />
+              ) : (
+                <span className="grid size-12 place-items-center rounded-xl bg-white/10 text-white">
+                  <Music className="size-4" />
+                </span>
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-bold text-white">{selected.title}</p>
+                <p className="truncate text-[11px] text-white/50">{selected.artist}</p>
+              </div>
+              <button
+                onClick={() => {
+                  if (playing) {
+                    audioRef.current?.pause();
+                    setPlaying(false);
+                  } else {
+                    void play(start);
+                  }
+                }}
+                aria-label={playing ? "Pausar" : "Tocar"}
+                className="press grid size-11 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground"
+              >
+                {playing ? <Pause className="size-4" /> : <Play className="size-4" />}
+              </button>
+            </div>
+
+            <audio
+              ref={audioRef}
+              src={selected.preview ?? undefined}
+              preload="auto"
+              onLoadedMetadata={(e) => {
+                const d = e.currentTarget.duration;
+                setDuration(Number.isFinite(d) ? d : CLIP_MAX);
+                void play(start);
+              }}
+              onTimeUpdate={(e) => setPosition(e.currentTarget.currentTime)}
+              onEnded={() => setPlaying(false)}
+              onError={() => {
+                setPlaying(false);
+                toast.error("Prévia indisponível para esta faixa.");
+              }}
+            />
+
+            <label className="block text-[11px] font-bold text-white/70">
+              Trecho: começa em {Math.round(start)}s
+              <input
+                type="range"
+                min={0}
+                max={Math.max(0, Math.floor(duration) - 5)}
+                step={1}
+                value={start}
+                onChange={(e) => {
+                  const v = Number(e.target.value);
+                  setStart(v);
+                  void play(v);
+                }}
+                className="mt-1 w-full accent-[#DC2626]"
+              />
+            </label>
+
+            <div className="h-1 overflow-hidden rounded-full bg-white/15">
+              <div
+                className="h-full bg-primary transition-[width] duration-150"
+                style={{ width: `${Math.min(100, (position / (duration || 1)) * 100)}%` }}
+              />
+            </div>
+
+            <label className="flex items-center gap-2 text-[11px] font-bold text-white/70">
+              <Volume2 className="size-3.5" />
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.05}
+                value={volume}
+                onChange={(e) => setVolume(Number(e.target.value))}
+                className="w-full accent-[#DC2626]"
+              />
+              {Math.round(volume * 100)}%
+            </label>
+
+            <button
+              onClick={() => {
+                audioRef.current?.pause();
+                onPick({
+                  title: selected.title,
+                  artist: selected.artist,
+                  artwork: selected.artwork,
+                  preview: selected.preview,
+                  start,
+                  volume,
+                });
+              }}
+              className="press w-full rounded-full bg-primary py-3 text-sm font-extrabold text-primary-foreground"
+            >
+              Usar este trecho
+            </button>
+          </div>
+        ) : null}
+
         <div className="mt-4 space-y-2">
           {results.map((t) => (
-            <div key={t.id} className="flex items-center gap-3 rounded-2xl bg-white/5 p-2.5">
+            <button
+              key={t.id}
+              onClick={() => choose(t)}
+              className={`press flex w-full items-center gap-3 rounded-2xl p-2.5 text-left ${
+                selected?.id === t.id ? "bg-primary/20" : "bg-white/5"
+              }`}
+            >
               {t.artwork ? (
                 <img src={t.artwork} alt="" className="size-11 rounded-xl" />
               ) : (
@@ -772,20 +1008,14 @@ function MusicPicker({ onClose, onPick }: { onClose: () => void; onPick: (t: Tra
                   <Music className="size-4" />
                 </span>
               )}
-              <button onClick={() => preview(t)} className="min-w-0 flex-1 text-left">
-                <p className="truncate text-sm font-bold text-white">{t.title}</p>
-                <p className="truncate text-[11px] text-white/50">{t.artist} · tocar prévia</p>
-              </button>
-              <button
-                onClick={() => {
-                  audioRef.current?.pause();
-                  onPick(t);
-                }}
-                className="press rounded-full bg-primary px-3 py-1.5 text-[11px] font-bold text-primary-foreground"
-              >
-                Usar
-              </button>
-            </div>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-bold text-white">{t.title}</span>
+                <span className="block truncate text-[11px] text-white/50">
+                  {t.artist} · {t.preview ? "tocar prévia" : "sem prévia"}
+                </span>
+              </span>
+              <Play className="size-4 shrink-0 text-white/60" />
+            </button>
           ))}
           {!loading && results.length === 0 ? (
             <p className="py-6 text-center text-sm text-white/50">
@@ -797,3 +1027,4 @@ function MusicPicker({ onClose, onPick }: { onClose: () => void; onPick: (t: Tra
     </div>
   );
 }
+

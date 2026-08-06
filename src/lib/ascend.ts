@@ -49,7 +49,8 @@ export const TITLES = [
   { min: 65, name: "Legend", emoji: "👑", color: "#e9c46a" },
 ] as const;
 
-export function titleFromLevel(level: number) {
+/** Título atual + progresso real até o próximo (em XP, quando informado). */
+export function titleFromLevel(level: number, xp?: number) {
   let idx = 0;
   TITLES.forEach((t, i) => {
     if (level >= t.min) idx = i;
@@ -57,10 +58,22 @@ export function titleFromLevel(level: number) {
 
   const current = TITLES[idx]!;
   const next = TITLES[idx + 1] ?? null;
-  const span = next ? next.min - current.min : 1;
-  const pct = next ? Math.min(100, Math.round(((level - current.min) / span) * 100)) : 100;
-  return { ...current, next, pct, index: idx };
+
+  // XP necessário para atingir o nível mínimo de cada título.
+  const xpFor = (lvl: number) => (lvl - 1) * LEVEL_STEP;
+  const currentXp = typeof xp === "number" ? xp : xpFor(level);
+  const baseXp = xpFor(current.min);
+  const nextXp = next ? xpFor(next.min) : baseXp;
+
+  const pct = next
+    ? Math.max(0, Math.min(100, Math.round(((currentXp - baseXp) / Math.max(1, nextXp - baseXp)) * 100)))
+    : 100;
+  const xpToNext = next ? Math.max(0, nextXp - currentXp) : 0;
+  const levelsToNext = next ? Math.max(0, next.min - level) : 0;
+
+  return { ...current, next, pct, index: idx, xpToNext, levelsToNext, nextLevel: next?.min ?? level };
 }
+
 
 /** IMC simples — usado nas estatísticas premium. */
 export function bmi(weightKg: number | null, heightCm: number | null) {

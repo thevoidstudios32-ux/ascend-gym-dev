@@ -55,7 +55,7 @@ function ConquistasPage() {
   ).length;
   const progressOf = (id: string) => (id === "w4" ? weekWorkouts : id === "w_water" ? weekWater : weekPr);
 
-  const title = titleFromLevel(level.level);
+  const title = titleFromLevel(level.level, data?.profile?.xp ?? 0);
   const [celebrate, setCelebrate] = useState(false);
   const prevMedals = useRef<number | null>(null);
   useEffect(() => {
@@ -93,6 +93,14 @@ function ConquistasPage() {
           </span>
         </div>
         <ProgressBar value={title.pct} className="mt-4" tone="gold" />
+        <div className="mt-2 flex items-center justify-between text-[11px] font-semibold text-muted-foreground">
+          <span>
+            {title.next
+              ? `Faltam ${title.xpToNext} XP (${title.levelsToNext} ${title.levelsToNext === 1 ? "nível" : "níveis"}) para ${title.next.emoji} ${title.next.name}`
+              : "Título máximo alcançado — você é Lenda 👑"}
+          </span>
+          <span className="shrink-0 text-foreground">{title.pct}%</span>
+        </div>
         <div className="mt-3 flex justify-between gap-1 text-center">
           {TITLES.map((t, i) => (
             <div key={t.name} className={`flex-1 ${i <= title.index ? "" : "opacity-35"}`}>
@@ -100,9 +108,11 @@ function ConquistasPage() {
               <p className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
                 {t.name}
               </p>
+              <p className="text-[9px] text-muted-foreground">Nv {t.min}</p>
             </div>
           ))}
         </div>
+
       </section>
 
 
