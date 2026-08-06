@@ -32,6 +32,8 @@ type StoryRow = {
   location: string | null;
   created_at: string;
   expires_at: string;
+  meta?: Record<string, unknown> | null;
+
 };
 
 type MiniProfile = { id: string; name: string; username: string | null; avatar_url: string | null; xp: number };
