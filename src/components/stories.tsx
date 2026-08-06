@@ -366,8 +366,10 @@ function StoryViewer({
               <X className="size-4" />
             </button>
           </div>
+          {music ? <StoryMusicBar key={story.id} music={music} paused={paused} /> : null}
         </div>
       </div>
+
 
       {/* rodapé */}
       <div className="space-y-3 bg-black p-4 pb-6">
