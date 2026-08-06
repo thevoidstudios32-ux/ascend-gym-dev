@@ -141,6 +141,20 @@ function NutricaoPage() {
     }
   }
 
+  /** Código lido ao vivo pelo scanner dedicado. */
+  async function handleCode(code: string) {
+    setBusy(true);
+    try {
+      setReview(await scan({ data: { code } }));
+      setMode(null);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Produto não encontrado para este código.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+
   const field = "w-full rounded-xl bg-elevated px-3 py-2.5 text-sm outline-none ring-ring focus:ring-2";
   const macros = [
     { l: "Proteína", v: eaten.protein, t: targets.protein, u: "g" },
