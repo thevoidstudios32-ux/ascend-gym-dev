@@ -119,7 +119,7 @@ export function BarcodeScanner({ onCode, onPhoto, onClose, busy = false }: Barco
     const track = trackRef.current;
     if (!track) return;
     try {
-      await track.applyConstraints({ advanced: [{ torch: !torch }] } as MediaTrackConstraints);
+      await track.applyConstraints({ advanced: [{ torch: !torch } as unknown as MediaTrackConstraintSet] });
       setTorch((t) => !t);
     } catch {
       /* dispositivo sem lanterna */
