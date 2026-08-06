@@ -88,7 +88,7 @@ function PerfilPage() {
   if (!current || !p) return <LoadingPage />;
 
   const level = levelFromXp(p.xp);
-  const title = titleFromLevel(level.level);
+  const title = titleFromLevel(level.level, p.xp);
   const streak = computeStreak((data?.workouts ?? []).map((w) => w.date));
   const medals = extras?.achievements.length ?? 0;
   const initials =
