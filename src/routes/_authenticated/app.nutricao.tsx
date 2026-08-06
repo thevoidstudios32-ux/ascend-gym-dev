@@ -164,20 +164,26 @@ function NutricaoPage() {
 
   return (
     <div className="animate-rise space-y-4">
-      {mode ? (
+      {mode === "barcode" ? (
+        <BarcodeScanner
+          busy={busy}
+          onClose={() => setMode(null)}
+          onCode={handleCode}
+          onPhoto={handleCapture}
+        />
+      ) : null}
+
+      {mode === "photo" ? (
         <CameraCapture
-          title={mode === "barcode" ? "Escanear código de barras" : "Foto da refeição"}
-          hint={
-            mode === "barcode"
-              ? "Enquadre o código de barras da embalagem e mantenha firme."
-              : "Fotografe o prato de cima, com boa luz. A IA estima os macros."
-          }
+          title="Foto da refeição"
+          hint="Fotografe o prato de cima, com boa luz. A IA estima os macros."
           allowBurst={false}
           busy={busy}
           onClose={() => setMode(null)}
           onUse={(f) => handleCapture(f)}
         />
       ) : null}
+
 
       {review ? (
         <ReviewSheet
