@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Camera, Heart, Loader2, Music, Plus, Search, Send, Share2, Trash2, Type, Video, X } from "lucide-react";
+import { Camera, Heart, Loader2, Music, Pause, Play, Plus, Search, Send, Share2, Trash2, Type, Video, Volume2, VolumeX, X } from "lucide-react";
 import { CameraCapture } from "@/components/camera-capture";
 import { searchMusic, type Track } from "@/lib/music.functions";
 import { supabase } from "@/integrations/supabase/client";
@@ -456,7 +456,7 @@ export function StoryComposer({ preset, onClose }: { preset: StoryDraft | null; 
   const [uploading, setUploading] = useState(false);
   const [camera, setCamera] = useState(false);
   const [musicOpen, setMusicOpen] = useState(false);
-  const [track, setTrack] = useState<Track | null>(null);
+  const [track, setTrack] = useState<StoryMusic | null>(null);
 
   const create = useServerFn(createStory);
   const publish = useMutation({
@@ -487,8 +487,18 @@ export function StoryComposer({ preset, onClose }: { preset: StoryDraft | null; 
           bg,
           location: location.trim() || null,
           meta: track
-            ? { music: { title: track.title, artist: track.artist, artwork: track.artwork, preview: track.preview } }
+            ? {
+                music: {
+                  title: track.title,
+                  artist: track.artist,
+                  artwork: track.artwork,
+                  preview: track.preview,
+                  start: track.start,
+                  volume: track.volume,
+                },
+              }
             : {},
+
         },
       });
     },
