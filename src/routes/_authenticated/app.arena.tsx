@@ -79,7 +79,7 @@ function ArenaPage() {
 
       {tab !== "regras" ? (
         <div className="flex gap-2 overflow-x-auto pb-1">
-          {ARENA_CATEGORIES.map((c) => (
+          {(tab === "votar" ? [{ id: "all", label: "Todas as poses", emoji: "🏟️" }, ...ARENA_CATEGORIES] : ARENA_CATEGORIES).map((c) => (
             <button
               key={c.id}
               onClick={() => setCategory(c.id)}
@@ -92,6 +92,8 @@ function ArenaPage() {
               {c.emoji} {c.label}
               {data?.counts[c.id] ? (
                 <span className="ml-1 text-[10px] text-muted-foreground">· {data.counts[c.id]}</span>
+              ) : c.id === "all" && data?.totalEntries ? (
+                <span className="ml-1 text-[10px] text-muted-foreground">· {data.totalEntries}</span>
               ) : null}
             </button>
           ))}
@@ -99,9 +101,10 @@ function ArenaPage() {
       ) : null}
 
       {tab === "votar" ? <ArenaBattle key={category} category={category} /> : null}
-      {tab === "participar" ? <JoinPanel category={category} /> : null}
-      {tab === "ranking" ? <ArenaRanking category={category} myId={data?.me?.id} /> : null}
+      {tab === "participar" ? <JoinPanel category={poseCategory} /> : null}
+      {tab === "ranking" ? <ArenaRanking category={poseCategory} myId={data?.me?.id} /> : null}
       {tab === "regras" ? <RulesPanel /> : null}
+
     </div>
   );
 }
