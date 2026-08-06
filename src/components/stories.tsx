@@ -267,6 +267,8 @@ function StoryViewer({
   if (!story) return null;
 
   const sticker = stickerOf(story.sticker);
+  const music = (story.meta as { music?: StoryMusic } | null | undefined)?.music ?? null;
+
 
   return (
     <div
