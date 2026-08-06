@@ -45,7 +45,9 @@ const TABS = [
 function ArenaPage() {
   const [tab, setTab] = useState<(typeof TABS)[number]["id"]>("votar");
   const [category, setCategory] = useState<string>("front_double");
+  const poseCategory = category === "all" ? "front_double" : category;
   const { data } = useArena();
+
 
   return (
     <div className="animate-rise space-y-4">
