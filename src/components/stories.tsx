@@ -344,12 +344,20 @@ function StoryViewer({
         const dy = (e.touches[0]?.clientY ?? 0) - startY.current;
         if (dy > 0) setDragY(dy);
       }}
-      onTouchEnd={() => {
+      onTouchEnd={(e) => {
         setPaused(false);
+        const endY = e.changedTouches[0]?.clientY ?? null;
+        const dy = startY.current !== null && endY !== null ? endY - startY.current : 0;
         if (dragY > 110) onClose();
+        // Deslizar para cima abre a lista de quem visualizou (só o dono).
+        else if (dy < -60 && isMine) {
+          haptic();
+          setViewersOpen(true);
+        }
         setDragY(0);
         startY.current = null;
       }}
+
     >
       <div className="relative flex-1 overflow-hidden">
         <div
