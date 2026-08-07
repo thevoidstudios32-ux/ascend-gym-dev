@@ -124,3 +124,29 @@ export async function proposeWorkout(input: {
     changes: (parsed.changes ?? []).slice(0, 12).map((c) => String(c).slice(0, 120)),
   };
 }
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/** Guarda uma cópia da versão atual do treino antes de sobrescrevê-la. */
+export async function snapshotWorkout(
+  supabase: any,
+  userId: string,
+  workoutId: string,
+  reason: string,
+) {
+  const { data: current } = await supabase
+    .from("custom_workouts")
+    .select("*")
+    .eq("id", workoutId)
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (!current) return;
+  await supabase.from("custom_workout_versions").insert({
+    workout_id: workoutId,
+    user_id: userId,
+    name: current.name,
+    focus: current.focus,
+    notes: current.notes,
+    exercises: current.exercises,
+    reason,
+  });
+}
