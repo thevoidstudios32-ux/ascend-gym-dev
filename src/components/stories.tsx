@@ -787,15 +787,25 @@ export type StoryMusic = {
   artist: string;
   artwork: string | null;
   preview: string | null;
-  /** Trecho escolhido (segundos dentro da prévia de 30s). */
+  /** Início do trecho (segundos dentro da prévia). */
   start: number;
+  /** Fim do trecho (segundos). */
+  end?: number;
   /** Volume 0–1. */
   volume: number;
 };
 
 const CLIP_MAX = 30;
 
-function MusicPicker({ onClose, onPick }: { onClose: () => void; onPick: (m: StoryMusic) => void }) {
+function MusicPicker({
+  clip,
+  onClose,
+  onPick,
+}: {
+  clip: number;
+  onClose: () => void;
+  onPick: (m: StoryMusic) => void;
+}) {
   const search = useServerFn(searchMusic);
   const [q, setQ] = useState("");
   const [results, setResults] = useState<Track[]>([]);
@@ -806,7 +816,14 @@ function MusicPicker({ onClose, onPick }: { onClose: () => void; onPick: (m: Sto
   const [volume, setVolume] = useState(0.7);
   const [duration, setDuration] = useState(CLIP_MAX);
   const [position, setPosition] = useState(0);
+  const [hook, setHook] = useState(0);
+  const [dragging, setDragging] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const trackRef = useRef<HTMLDivElement | null>(null);
+
+  const clipLen = Math.min(clip, duration || clip);
+  const maxStart = Math.max(0, (duration || clip) - clipLen);
+  const end = Math.min(duration || clip, start + clipLen);
 
   const searchRef = useRef(search);
   searchRef.current = search;
@@ -865,20 +882,22 @@ function MusicPicker({ onClose, onPick }: { onClose: () => void; onPick: (m: Sto
     return () => clearTimeout(t);
   }, [q, run]);
 
-
-  const play = useCallback(async (from: number) => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    try {
-      audio.volume = volume;
-      if (Number.isFinite(audio.duration) && from < audio.duration) audio.currentTime = from;
-      await audio.play();
-      setPlaying(true);
-    } catch {
-      setPlaying(false);
-      toast.error("Não foi possível tocar a prévia. Verifique o volume do aparelho e tente de novo.");
-    }
-  }, [volume]);
+  const play = useCallback(
+    async (from: number) => {
+      const audio = audioRef.current;
+      if (!audio) return;
+      try {
+        audio.volume = volume;
+        if (Number.isFinite(audio.duration) && from < audio.duration) audio.currentTime = from;
+        await audio.play();
+        setPlaying(true);
+      } catch {
+        setPlaying(false);
+        toast.error("Não foi possível tocar a prévia. Verifique o volume do aparelho e tente de novo.");
+      }
+    },
+    [volume],
+  );
 
   function choose(t: Track) {
     if (!t.preview) {
@@ -892,12 +911,37 @@ function MusicPicker({ onClose, onPick }: { onClose: () => void; onPick: (m: Sto
     // O <audio> troca de src no próximo render; tocamos no onLoadedMetadata.
   }
 
+  /** Arrastar na waveform move o início do trecho. */
+  const seekFromPointer = useCallback(
+    (clientX: number, preview = true) => {
+      const el = trackRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+      const center = ratio * (duration || clip);
+      const next = Math.min(maxStart, Math.max(0, Math.round(center - clipLen / 2)));
+      setStart(next);
+      if (preview) void play(next);
+    },
+    [duration, clip, clipLen, maxStart, play],
+  );
+
   useEffect(() => {
     const audio = audioRef.current;
     if (audio) audio.volume = volume;
   }, [volume]);
 
+  // Mantém a prévia dentro do trecho escolhido (loop start → end).
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !playing) return;
+    if (position >= end - 0.05) void play(start);
+  }, [position, end, start, playing, play]);
+
   useEffect(() => () => audioRef.current?.pause(), []);
+
+  const bars = useMemo(() => waveformBars(selected?.id ?? "ascend"), [selected?.id]);
+  const total = duration || clip;
 
   return (
     <div className="fixed inset-0 z-[92] flex items-end bg-black/70 backdrop-blur-sm">
@@ -933,7 +977,7 @@ function MusicPicker({ onClose, onPick }: { onClose: () => void; onPick: (m: Sto
           </button>
         </div>
 
-        {/* player do trecho selecionado */}
+        {/* player + waveform do trecho selecionado */}
         {selected ? (
           <div className="mt-4 space-y-3 rounded-2xl border border-white/10 bg-white/5 p-4">
             <div className="flex items-center gap-3">
@@ -970,8 +1014,12 @@ function MusicPicker({ onClose, onPick }: { onClose: () => void; onPick: (m: Sto
               preload="auto"
               onLoadedMetadata={(e) => {
                 const d = e.currentTarget.duration;
-                setDuration(Number.isFinite(d) ? d : CLIP_MAX);
-                void play(start);
+                const dur = Number.isFinite(d) ? d : CLIP_MAX;
+                setDuration(dur);
+                const suggestion = hookStart(dur, Math.min(clip, dur));
+                setHook(suggestion);
+                setStart(suggestion);
+                void play(suggestion);
               }}
               onTimeUpdate={(e) => setPosition(e.currentTarget.currentTime)}
               onEnded={() => setPlaying(false)}
@@ -981,28 +1029,71 @@ function MusicPicker({ onClose, onPick }: { onClose: () => void; onPick: (m: Sto
               }}
             />
 
-            <label className="block text-[11px] font-bold text-white/70">
-              Trecho: começa em {Math.round(start)}s
-              <input
-                type="range"
-                min={0}
-                max={Math.max(0, Math.floor(duration) - 5)}
-                step={1}
-                value={start}
-                onChange={(e) => {
-                  const v = Number(e.target.value);
-                  setStart(v);
-                  void play(v);
-                }}
-                className="mt-1 w-full accent-[#DC2626]"
+            {/* waveform com trecho em destaque */}
+            <div
+              ref={trackRef}
+              role="slider"
+              tabIndex={0}
+              aria-label="Trecho da música"
+              aria-valuemin={0}
+              aria-valuemax={Math.round(maxStart)}
+              aria-valuenow={Math.round(start)}
+              onKeyDown={(e) => {
+                if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+                  e.preventDefault();
+                  const next = Math.min(maxStart, Math.max(0, start + (e.key === "ArrowLeft" ? -1 : 1)));
+                  setStart(next);
+                  void play(next);
+                }
+              }}
+              onPointerDown={(e) => {
+                e.currentTarget.setPointerCapture(e.pointerId);
+                setDragging(true);
+                haptic(8);
+                seekFromPointer(e.clientX, false);
+              }}
+              onPointerMove={(e) => {
+                if (dragging) seekFromPointer(e.clientX, false);
+              }}
+              onPointerUp={(e) => {
+                setDragging(false);
+                haptic(10);
+                seekFromPointer(e.clientX);
+              }}
+              className="relative h-16 cursor-pointer touch-none select-none overflow-hidden rounded-2xl bg-black/50 p-2"
+            >
+              <div className="flex h-full items-center gap-[2px]">
+                {bars.map((b, i) => {
+                  const t = (i / bars.length) * total;
+                  const inClip = t >= start && t <= end;
+                  const inHook = t >= hook && t <= hook + clipLen;
+                  return (
+                    <span
+                      key={i}
+                      className={`flex-1 rounded-full transition-all duration-200 ${
+                        inClip ? "bg-primary" : inHook ? "bg-primary/35" : "bg-white/20"
+                      }`}
+                      style={{ height: `${b * 100}%` }}
+                    />
+                  );
+                })}
+              </div>
+              {/* seleção */}
+              <span
+                className="pointer-events-none absolute inset-y-1 rounded-xl border-2 border-primary bg-primary/10 transition-all duration-150"
+                style={{ left: `${(start / total) * 100}%`, width: `${(clipLen / total) * 100}%` }}
               />
-            </label>
+              {/* cursor de reprodução */}
+              <span
+                className="pointer-events-none absolute inset-y-1 w-[2px] bg-white/80"
+                style={{ left: `${Math.min(100, (position / total) * 100)}%` }}
+              />
+            </div>
 
-            <div className="h-1 overflow-hidden rounded-full bg-white/15">
-              <div
-                className="h-full bg-primary transition-[width] duration-150"
-                style={{ width: `${Math.min(100, (position / (duration || 1)) * 100)}%` }}
-              />
+            <div className="flex items-center justify-between text-[11px] font-bold text-white/60">
+              <span>Início {fmtTime(start)}</span>
+              <span className="text-primary">Trecho em destaque sugerido</span>
+              <span>Fim {fmtTime(end)}</span>
             </div>
 
             <label className="flex items-center gap-2 text-[11px] font-bold text-white/70">
@@ -1022,18 +1113,20 @@ function MusicPicker({ onClose, onPick }: { onClose: () => void; onPick: (m: Sto
             <button
               onClick={() => {
                 audioRef.current?.pause();
+                haptic();
                 onPick({
                   title: selected.title,
                   artist: selected.artist,
                   artwork: selected.artwork,
                   preview: selected.preview,
                   start,
+                  end,
                   volume,
                 });
               }}
               className="press w-full rounded-full bg-primary py-3 text-sm font-extrabold text-primary-foreground"
             >
-              Usar este trecho
+              Usar este trecho ({Math.round(clipLen)}s)
             </button>
           </div>
         ) : null}
@@ -1073,4 +1166,73 @@ function MusicPicker({ onClose, onPick }: { onClose: () => void; onPick: (m: Sto
     </div>
   );
 }
+
+/* -------------------------- Quem visualizou -------------------------- */
+
+function StoryViewersSheet({ storyId, onClose }: { storyId: string; onClose: () => void }) {
+  const qc = useQueryClient();
+  const fetcher = useServerFn(getStoryViewers);
+  const { data, isLoading } = useQuery({
+    queryKey: ["story-viewers", storyId],
+    queryFn: () => fetcher({ data: { storyId } }),
+    staleTime: 10_000,
+  });
+
+  // Tempo real: novas visualizações entram na lista automaticamente.
+  useEffect(() => {
+    const channel = supabase
+      .channel(`story-views-${storyId}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "story_views", filter: `story_id=eq.${storyId}` },
+        () => qc.invalidateQueries({ queryKey: ["story-viewers", storyId] }),
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [storyId, qc]);
+
+  return (
+    <div className="fixed inset-0 z-[94] flex items-end bg-black/70 backdrop-blur-sm" onClick={onClose}>
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="animate-sheet-up max-h-[70vh] w-full overflow-y-auto rounded-t-3xl border-t border-white/10 bg-neutral-950 p-5"
+      >
+        <div className="flex items-center gap-3">
+          <Eye className="size-4 text-primary" />
+          <h3 className="flex-1 text-lg font-extrabold text-white">
+            {data?.total ?? 0} {(data?.total ?? 0) === 1 ? "visualização" : "visualizações"}
+          </h3>
+          <button onClick={onClose} aria-label="Fechar" className="press rounded-full bg-white/10 p-2 text-white">
+            <X className="size-4" />
+          </button>
+        </div>
+
+        <div className="mt-4 space-y-2">
+          {isLoading ? (
+            Array.from({ length: 4 }).map((_, i) => <div key={i} className="skeleton h-14 rounded-2xl" />)
+          ) : (data?.viewers.length ?? 0) === 0 ? (
+            <p className="py-8 text-center text-sm text-white/50">Ainda ninguém viu esse story.</p>
+          ) : (
+            data!.viewers.map((v) => (
+              <div key={v.userId} className="flex items-center gap-3 rounded-2xl bg-white/5 p-2.5">
+                <BroAvatar profile={v.profile ?? undefined} size="sm" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-bold text-white">{v.profile?.name ?? "Gym Bro"}</p>
+                  <p className="truncate text-[11px] text-white/50">
+                    {v.profile?.username ? `@${v.profile.username} · ` : ""}
+                    {new Date(v.viewedAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                  </p>
+                </div>
+                {v.reaction ? <span className="text-lg">{v.reaction}</span> : null}
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
