@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { proposeWorkout } from "@/lib/custom.server";
+import { proposeWorkout, snapshotWorkout as snapshot } from "@/lib/custom.server";
 import { SPLITS } from "@/lib/ascend";
 import { z } from "zod";
 import type { CustomExercise, CustomWorkout, WorkoutVersion } from "@/lib/custom";
@@ -237,23 +237,3 @@ export const restoreWorkoutVersion = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { id: version.workout_id };
   });
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
-async function snapshot(supabase: any, userId: string, workoutId: string, reason: string) {
-  const { data: current } = await supabase
-    .from("custom_workouts")
-    .select("*")
-    .eq("id", workoutId)
-    .eq("user_id", userId)
-    .maybeSingle();
-  if (!current) return;
-  await supabase.from("custom_workout_versions").insert({
-    workout_id: workoutId,
-    user_id: userId,
-    name: current.name,
-    focus: current.focus,
-    notes: current.notes,
-    exercises: current.exercises,
-    reason,
-  });
-}
