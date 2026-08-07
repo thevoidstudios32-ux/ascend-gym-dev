@@ -27,7 +27,14 @@ type Entry = { exercise: string; set_index: number; reps: number; weight_kg: num
 
 function SessionPage() {
   const { split: splitId } = useParams({ from: "/_authenticated/app/treino/$split" });
-  const split: Split = SPLITS.find((s) => s.id === splitId) ?? SPLITS[0]!;
+  const custom = useCustomWorkouts();
+  const customWorkout = isUuid(splitId)
+    ? (custom.data?.workouts.find((w) => w.id === splitId) ?? null)
+    : null;
+  const split: Split = customWorkout
+    ? customToSplit(customWorkout)
+    : (SPLITS.find((s) => s.id === splitId) ?? SPLITS[0]!);
+  const workoutKind = customWorkout ? `custom:${customWorkout.id}` : split.id;
   const navigate = useNavigate();
   const { data } = useDashboard();
   const { data: extras } = useExtras();
@@ -35,6 +42,7 @@ function SessionPage() {
   const finish = useServerFn(finishWorkout);
 
   const [exercises, setExercises] = useState(() => split.exercises.map((e) => ({ ...e })));
+
   const [swapping, setSwapping] = useState<string | null>(null);
   const [share, setShare] = useState<StoryDraft | null>(null);
   const [shareCard, setShareCard] = useState<{ volume: number; sets: number } | null>(null);
