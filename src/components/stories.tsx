@@ -434,7 +434,24 @@ function StoryViewer({
 
       {/* rodapé */}
       <div className="space-y-3 bg-black p-4 pb-6">
+        {isMine ? (
+          <button
+            onClick={() => {
+              haptic();
+              setViewersOpen(true);
+            }}
+            className="press mx-auto flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-white"
+          >
+            <Eye className="size-4 text-primary" />
+            {viewCount}
+            <span className="text-[11px] font-semibold text-white/50">
+              {viewCount === 1 ? "visualização" : "visualizações"}
+            </span>
+            <ChevronUp className="size-3.5 text-white/50" />
+          </button>
+        ) : null}
         <div className="flex flex-wrap justify-center gap-2">
+
           {STORY_REACTIONS.map((emoji) => (
             <button
               key={emoji}
