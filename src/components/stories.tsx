@@ -524,6 +524,8 @@ export function StoryComposer({ preset, onClose }: { preset: StoryDraft | null; 
   const [camera, setCamera] = useState(false);
   const [musicOpen, setMusicOpen] = useState(false);
   const [track, setTrack] = useState<StoryMusic | null>(null);
+  const [duration, setDuration] = useState<number>(DEFAULT_STORY_DURATION);
+
 
   const create = useServerFn(createStory);
   const publish = useMutation({
