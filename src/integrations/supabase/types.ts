@@ -806,11 +806,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      are_gym_bros: { Args: { _a: string; _b: string }; Returns: boolean }
-      is_challenge_member: {
-        Args: { _challenge: string; _user: string }
-        Returns: boolean
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
