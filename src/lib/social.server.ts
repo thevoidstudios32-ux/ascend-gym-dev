@@ -113,13 +113,18 @@ export async function buildSocialSnapshot(supabase: DB, userId: string) {
     const parts = (participantsRes.data ?? []).filter((p) => p.challenge_id === c.id);
     const board = parts
       .map((p) => {
-        const count = weekPosts.filter(
-          (w) =>
-            w.user_id === p.user_id &&
-            (c.metric === "prs" ? w.kind === "pr" : w.kind === "workout") &&
-            w.created_at.slice(0, 10) >= c.starts_on &&
-            w.created_at.slice(0, 10) <= c.ends_on,
-        ).length;
+        const count =
+          c.metric === "prs"
+            ? weekPosts.filter(
+                (w) =>
+                  w.user_id === p.user_id &&
+                  w.kind === "pr" &&
+                  w.created_at.slice(0, 10) >= c.starts_on &&
+                  w.created_at.slice(0, 10) <= c.ends_on,
+              ).length
+            : recentWorkouts.filter(
+                (w) => w.user_id === p.user_id && w.date >= c.starts_on && w.date <= c.ends_on,
+              ).length;
         return { userId: p.user_id, score: count };
       })
       .sort((a, b) => b.score - a.score);
