@@ -2,23 +2,29 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Camera, Heart, Loader2, Music, Pause, Play, Plus, Search, Send, Share2, Trash2, Type, Video, Volume2, VolumeX, X } from "lucide-react";
+import { Camera, ChevronUp, Eye, Heart, Loader2, Music, Pause, Play, Plus, Search, Send, Share2, Trash2, Type, Video, Volume2, VolumeX, X } from "lucide-react";
 import { CameraCapture } from "@/components/camera-capture";
 import { searchMusic, type Track } from "@/lib/music.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { BroAvatar } from "@/components/bro";
-import { createStory, deleteStory, getStories, viewStory } from "@/lib/stories.functions";
+import { createStory, deleteStory, getStories, getStoryViewers, viewStory } from "@/lib/stories.functions";
 import { sendDm } from "@/lib/social.functions";
 import {
   backgroundCss,
+  DEFAULT_STORY_DURATION,
+  fmtTime,
+  hookStart,
   hoursLeft,
   MOTIVATION_QUOTES,
   STORY_BACKGROUNDS,
-  STORY_DURATION_MS,
+  STORY_DURATIONS,
   STORY_REACTIONS,
   STORY_STICKERS,
   stickerOf,
+  storyDurationMs,
+  waveformBars,
 } from "@/lib/stories";
+
 
 type StoryRow = {
   id: string;
