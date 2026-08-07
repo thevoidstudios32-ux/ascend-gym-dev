@@ -174,18 +174,21 @@ function StoryMusicBar({ music, paused }: { music: StoryMusic; paused: boolean }
   const [blocked, setBlocked] = useState(false);
   const [muted, setMuted] = useState(false);
 
+  const from = music.start ?? 0;
+  const to = music.end && music.end > from ? music.end : from + 15;
+
   const start = useCallback(async () => {
     const audio = audioRef.current;
     if (!audio || !music.preview) return;
     try {
       audio.volume = music.volume ?? 0.7;
-      if (audio.currentTime < (music.start ?? 0)) audio.currentTime = music.start ?? 0;
+      if (audio.currentTime < from || audio.currentTime > to) audio.currentTime = from;
       await audio.play();
       setBlocked(false);
     } catch {
       setBlocked(true);
     }
-  }, [music.preview, music.volume, music.start]);
+  }, [music.preview, music.volume, from, to]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -204,6 +207,10 @@ function StoryMusicBar({ music, paused }: { music: StoryMusic; paused: boolean }
         preload="auto"
         loop
         onLoadedMetadata={() => void start()}
+        // Toca somente o trecho escolhido, repetindo enquanto o story durar.
+        onTimeUpdate={(e) => {
+          if (e.currentTarget.currentTime >= to) e.currentTarget.currentTime = from;
+        }}
         onError={() => setBlocked(true)}
       />
       {music.artwork ? (
@@ -227,6 +234,7 @@ function StoryMusicBar({ music, paused }: { music: StoryMusic; paused: boolean }
     </div>
   );
 }
+
 
 
 
