@@ -48,6 +48,47 @@ export function hoursLeft(expiresAt: string) {
 
 export const STORY_DURATION_MS = 6000;
 
+/** Durações que o usuário pode escolher ao publicar (segundos). */
+export const STORY_DURATIONS = [10, 15, 20, 30] as const;
+export const DEFAULT_STORY_DURATION = 15;
+
+/** Duração (ms) de um story, lida do meta com fallback seguro. */
+export function storyDurationMs(meta: unknown): number {
+  const raw = (meta as { duration?: unknown } | null | undefined)?.duration;
+  const secs = typeof raw === "number" && Number.isFinite(raw) ? raw : DEFAULT_STORY_DURATION;
+  return Math.min(30, Math.max(5, secs)) * 1000;
+}
+
+/** Sugestão de "trecho em destaque" (refrão) dentro da prévia. */
+export function hookStart(previewDuration: number, clip: number) {
+  if (!Number.isFinite(previewDuration) || previewDuration <= clip) return 0;
+  return Math.round((previewDuration - clip) / 2);
+}
+
+/** Barras determinísticas para desenhar a waveform de uma faixa. */
+export function waveformBars(seed: string, count = 56): number[] {
+  let h = 2166136261;
+  for (let i = 0; i < seed.length; i++) {
+    h ^= seed.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  const out: number[] = [];
+  for (let i = 0; i < count; i++) {
+    h = Math.imul(h ^ (h >>> 15), 2246822507);
+    h ^= h >>> 13;
+    const n = (h >>> 0) / 4294967295;
+    const wave = 0.55 + 0.45 * Math.sin((i / count) * Math.PI * 3);
+    out.push(Math.max(0.18, Math.min(1, n * 0.7 + wave * 0.5)));
+  }
+  return out;
+}
+
+export function fmtTime(s: number) {
+  const t = Math.max(0, Math.round(s));
+  return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}`;
+}
+
+
 export const MOTIVATION_QUOTES = [
   "Disciplina vence motivação. Todo santo dia.",
   "Você não precisa estar pronto, precisa começar.",

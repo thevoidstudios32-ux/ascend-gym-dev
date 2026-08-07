@@ -133,3 +133,42 @@ export const viewStory = createServerFn({ method: "POST" })
     }
     return { reaction: existing.reaction };
   });
+
+/** Lista quem viu um story. Só o dono do story pode consultar. */
+export const getStoryViewers = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({ storyId: z.string().uuid() }).parse(data))
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+
+    const { data: story } = await supabase
+      .from("stories")
+      .select("id,user_id")
+      .eq("id", data.storyId)
+      .maybeSingle();
+    if (!story || story.user_id !== userId) throw new Error("Só o dono do story vê as visualizações.");
+
+    const { data: views } = await supabase
+      .from("story_views")
+      .select("user_id,reaction,created_at")
+      .eq("story_id", data.storyId)
+      .order("created_at", { ascending: false });
+
+    const rows = views ?? [];
+    const ids = [...new Set(rows.map((v) => v.user_id))];
+    const { data: profiles } = ids.length
+      ? await supabase.from("profiles").select("id,name,username,avatar_url,xp").in("id", ids)
+      : { data: [] as never[] };
+
+    const byId = new Map((profiles ?? []).map((p) => [p.id, p]));
+    return {
+      total: rows.length,
+      viewers: rows.map((v) => ({
+        userId: v.user_id,
+        reaction: v.reaction,
+        viewedAt: v.created_at,
+        profile: byId.get(v.user_id) ?? null,
+      })),
+    };
+  });
+
