@@ -920,12 +920,12 @@ function MusicPicker({ onClose, onPick }: { onClose: () => void; onPick: (m: Sto
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && void run()}
+            onKeyDown={(e) => e.key === "Enter" && void run(q)}
             placeholder="Buscar artista ou faixa…"
             className="min-w-0 flex-1 rounded-2xl bg-white/10 px-4 py-3 text-sm text-white outline-none placeholder:text-white/40"
           />
           <button
-            onClick={() => void run()}
+            onClick={() => void run(q)}
             className="press grid size-12 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground"
             aria-label="Buscar"
           >
