@@ -7,6 +7,8 @@ import { ChevronLeft, MoreVertical, Pause, Play, RotateCcw } from "lucide-react"
 import { ExerciseSwapSheet } from "@/components/exercise-swap";
 import { StoryComposer, type StoryDraft } from "@/components/stories";
 import { useDashboard, useExtras, useRefreshDashboard } from "@/hooks/use-dashboard";
+import { useCustomWorkouts } from "@/hooks/use-custom";
+import { customToSplit, isUuid } from "@/lib/custom";
 import { finishWorkout } from "@/lib/extras.functions";
 import { estimateCalories, SPLITS, suggestLoad, todayISO, type Split } from "@/lib/ascend";
 
@@ -27,7 +29,14 @@ type Entry = { exercise: string; set_index: number; reps: number; weight_kg: num
 
 function SessionPage() {
   const { split: splitId } = useParams({ from: "/_authenticated/app/treino/$split" });
-  const split: Split = SPLITS.find((s) => s.id === splitId) ?? SPLITS[0]!;
+  const custom = useCustomWorkouts();
+  const customWorkout = isUuid(splitId)
+    ? (custom.data?.workouts.find((w) => w.id === splitId) ?? null)
+    : null;
+  const split: Split = customWorkout
+    ? customToSplit(customWorkout)
+    : (SPLITS.find((s) => s.id === splitId) ?? SPLITS[0]!);
+  const workoutKind = customWorkout ? `custom:${customWorkout.id}` : split.id;
   const navigate = useNavigate();
   const { data } = useDashboard();
   const { data: extras } = useExtras();
@@ -35,6 +44,7 @@ function SessionPage() {
   const finish = useServerFn(finishWorkout);
 
   const [exercises, setExercises] = useState(() => split.exercises.map((e) => ({ ...e })));
+
   const [swapping, setSwapping] = useState<string | null>(null);
   const [share, setShare] = useState<StoryDraft | null>(null);
   const [shareCard, setShareCard] = useState<{ volume: number; sets: number } | null>(null);
@@ -52,6 +62,27 @@ function SessionPage() {
       })),
     ),
   );
+
+  // O treino personalizado chega depois do primeiro render: recarrega séries.
+  const customKey = customWorkout ? `${customWorkout.id}:${customWorkout.updated_at}` : null;
+  useEffect(() => {
+    if (!customKey || !customWorkout) return;
+    const list = customToSplit(customWorkout).exercises;
+    setExercises(list.map((e) => ({ ...e })));
+    setEntries(
+      list.flatMap((ex) =>
+        Array.from({ length: ex.sets }, (_, i) => ({
+          exercise: ex.name,
+          set_index: i + 1,
+          reps: Number(ex.reps.split("-")[0]?.replace(/\D/g, "")) || 10,
+          weight_kg: 0,
+          done: false,
+        })),
+      ),
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [customKey]);
+
 
   useEffect(() => {
     if (!running) return;
@@ -95,7 +126,7 @@ function SessionPage() {
         data: {
           date: todayISO(),
           title: split.name,
-          kind: split.id,
+          kind: workoutKind,
           duration_min: minutes,
           calories,
           sets: entries
@@ -104,7 +135,11 @@ function SessionPage() {
         },
       }),
     onSuccess: (res) => {
-      toast.success(`Treino salvo! +${res.xp} XP`);
+      if (res.duplicate) {
+        toast.info("Este treino já foi contabilizado hoje — nada foi duplicado.");
+      } else {
+        toast.success(`Treino salvo! +${res.xp} XP`);
+      }
       if (res.newPrs.length) toast.success(`Novo recorde: ${res.newPrs.join(", ")} 🏆`);
       res.unlocked.forEach((a) => toast.success(`${a.emoji} Conquista: ${a.label}`));
       refresh();

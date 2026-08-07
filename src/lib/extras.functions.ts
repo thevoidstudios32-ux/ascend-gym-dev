@@ -55,7 +55,7 @@ export const finishWorkout = createServerFn({ method: "POST" })
       .object({
         date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
         title: z.string().min(1).max(60),
-        kind: z.enum(["push", "pull", "legs", "full"]),
+        kind: z.string().min(1).max(60),
         duration_min: z.number().int().min(1).max(400),
         calories: z.number().int().min(0).max(5000),
         sets: z.array(setSchema).max(80),
@@ -66,6 +66,26 @@ export const finishWorkout = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const volume = data.sets.reduce((acc, s) => acc + s.reps * s.weight_kg, 0);
     const xp = 120 + Math.min(200, Math.round(volume / 100)) + data.sets.length * 5;
+
+    // Anti-duplicação: um registro por usuário/dia/tipo de treino.
+    const { data: already } = await supabase
+      .from("workouts")
+      .select("id,xp")
+      .eq("user_id", userId)
+      .eq("date", data.date)
+      .eq("kind", data.kind)
+      .maybeSingle();
+
+    if (already) {
+      const { data: prof } = await supabase.from("profiles").select("xp").eq("id", userId).maybeSingle();
+      return {
+        xp: 0,
+        duplicate: true,
+        newPrs: [] as string[],
+        unlocked: [] as { code: string; label: string; emoji: string; desc: string }[],
+        totalXp: prof?.xp ?? 0,
+      };
+    }
 
     const { data: workout, error } = await supabase
       .from("workouts")
@@ -80,7 +100,14 @@ export const finishWorkout = createServerFn({ method: "POST" })
       })
       .select()
       .single();
-    if (error) throw new Error(error.message);
+    if (error) {
+      // Corrida com outro clique: trata como duplicado, sem pontuar de novo.
+      if (error.code === "23505") {
+        const { data: prof } = await supabase.from("profiles").select("xp").eq("id", userId).maybeSingle();
+        return { xp: 0, duplicate: true, newPrs: [], unlocked: [], totalXp: prof?.xp ?? 0 };
+      }
+      throw new Error(error.message);
+    }
 
     if (data.sets.length) {
       await supabase.from("exercise_sets").insert(
@@ -115,9 +142,18 @@ export const finishWorkout = createServerFn({ method: "POST" })
     const totalXp = (profile?.xp ?? 0) + xp;
     await supabase.from("profiles").update({ xp: totalXp }).eq("id", userId);
 
+    // Publica no feed dos Gym Bros (histórico social do treino concluído).
+    await supabase.from("posts").insert({
+      user_id: userId,
+      kind: "workout",
+      content: `${data.title} concluído · ${data.duration_min} min · ${data.calories} kcal`,
+      meta: { xp, date: data.date, kind: data.kind, sets: data.sets.length, volume } as never,
+    });
+
     const unlocked = await unlockFor(supabase, userId, totalXp, newPrs.length > 0);
-    return { xp, newPrs, unlocked, totalXp };
+    return { xp, duplicate: false, newPrs, unlocked, totalXp };
   });
+
 
 async function unlockFor(
   supabase: { from: (t: string) => any },

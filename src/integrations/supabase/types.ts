@@ -256,6 +256,89 @@ export type Database = {
         }
         Relationships: []
       }
+      custom_workout_versions: {
+        Row: {
+          created_at: string
+          exercises: Json
+          focus: string
+          id: string
+          name: string
+          notes: string | null
+          reason: string | null
+          user_id: string
+          workout_id: string
+        }
+        Insert: {
+          created_at?: string
+          exercises?: Json
+          focus?: string
+          id?: string
+          name: string
+          notes?: string | null
+          reason?: string | null
+          user_id: string
+          workout_id: string
+        }
+        Update: {
+          created_at?: string
+          exercises?: Json
+          focus?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          reason?: string | null
+          user_id?: string
+          workout_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_workout_versions_workout_id_fkey"
+            columns: ["workout_id"]
+            isOneToOne: false
+            referencedRelation: "custom_workouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_workouts: {
+        Row: {
+          created_at: string
+          difficulty: string
+          emoji: string
+          exercises: Json
+          focus: string
+          id: string
+          name: string
+          notes: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          difficulty?: string
+          emoji?: string
+          exercises?: Json
+          focus?: string
+          id?: string
+          name: string
+          notes?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          difficulty?: string
+          emoji?: string
+          exercises?: Json
+          focus?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       direct_messages: {
         Row: {
           attachment: Json | null

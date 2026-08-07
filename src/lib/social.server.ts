@@ -49,7 +49,8 @@ export async function buildSocialSnapshot(supabase: DB, userId: string) {
   const postIds = posts.map((p) => p.id);
 
   const challengeIds = (myChallengesRes.data ?? []).map((c) => c.challenge_id);
-  const [reactionsRes, commentsRes, dmsRes, challengesRes, participantsRes, weekPostsRes] =
+  const since30 = new Date(Date.now() - 30 * day);
+  const [reactionsRes, commentsRes, dmsRes, challengesRes, participantsRes, weekPostsRes, workoutsRes] =
     await Promise.all([
       postIds.length
         ? supabase.from("post_reactions").select("*").in("post_id", postIds)
@@ -73,44 +74,57 @@ export async function buildSocialSnapshot(supabase: DB, userId: string) {
         .from("posts")
         .select("user_id,kind,created_at")
         .in("user_id", circle)
-        .gte("created_at", new Date(Date.now() - 30 * day).toISOString()),
+        .gte("created_at", since30.toISOString()),
+      // Fonte de verdade do ranking: treinos realmente registrados no banco.
+      supabase
+        .from("workouts")
+        .select("user_id,date,xp")
+        .in("user_id", circle)
+        .gte("date", iso(since30)),
     ]);
 
   const profiles = profilesRes.data ?? [];
   const weekPosts = weekPostsRes.data ?? [];
+  const recentWorkouts = workoutsRes.data ?? [];
   const since7 = Date.now() - 7 * day;
+  const since7Str = iso(new Date(since7));
   const todayStr = iso(new Date());
 
   const ranking = circle
     .map((id) => {
-      const mine = weekPosts.filter((p) => p.user_id === id);
-      const workouts = mine.filter(
-        (p) => p.kind === "workout" && new Date(p.created_at).getTime() > since7,
+      const mineWorkouts = recentWorkouts.filter((w) => w.user_id === id);
+      const workouts = mineWorkouts.filter((w) => w.date >= since7Str).length;
+      const totalWorkouts = mineWorkouts.length;
+      const prs = weekPosts.filter(
+        (p) => p.user_id === id && p.kind === "pr" && new Date(p.created_at).getTime() > since7,
       ).length;
-      const prs = mine.filter((p) => p.kind === "pr" && new Date(p.created_at).getTime() > since7).length;
       const profile = profiles.find((p) => p.id === id);
       const score = broScore({ xp: profile?.xp ?? 0, workouts, achievements: prs, challenges: 0 });
-      return { userId: id, workouts, prs, score, rank: broRank(score) };
+      return { userId: id, workouts, totalWorkouts, prs, score, rank: broRank(score) };
     })
     .sort((a, b) => b.workouts - a.workouts || b.score - a.score);
 
   const trainedToday = circle.filter((id) =>
-    weekPosts.some(
-      (p) => p.user_id === id && p.kind === "workout" && p.created_at.slice(0, 10) === todayStr,
-    ),
+    recentWorkouts.some((w) => w.user_id === id && w.date === todayStr),
   );
+
 
   const challenges = (challengesRes.data ?? []).map((c) => {
     const parts = (participantsRes.data ?? []).filter((p) => p.challenge_id === c.id);
     const board = parts
       .map((p) => {
-        const count = weekPosts.filter(
-          (w) =>
-            w.user_id === p.user_id &&
-            (c.metric === "prs" ? w.kind === "pr" : w.kind === "workout") &&
-            w.created_at.slice(0, 10) >= c.starts_on &&
-            w.created_at.slice(0, 10) <= c.ends_on,
-        ).length;
+        const count =
+          c.metric === "prs"
+            ? weekPosts.filter(
+                (w) =>
+                  w.user_id === p.user_id &&
+                  w.kind === "pr" &&
+                  w.created_at.slice(0, 10) >= c.starts_on &&
+                  w.created_at.slice(0, 10) <= c.ends_on,
+              ).length
+            : recentWorkouts.filter(
+                (w) => w.user_id === p.user_id && w.date >= c.starts_on && w.date <= c.ends_on,
+              ).length;
         return { userId: p.user_id, score: count };
       })
       .sort((a, b) => b.score - a.score);
