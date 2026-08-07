@@ -1,5 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Plus } from "lucide-react";
 import { useDashboard } from "@/hooks/use-dashboard";
+import { useCustomWorkouts } from "@/hooks/use-custom";
+import { estimateMinutes } from "@/lib/custom";
 import { SPLITS, splitOfDay } from "@/lib/ascend";
 
 export const Route = createFileRoute("/_authenticated/app/treinos")({
