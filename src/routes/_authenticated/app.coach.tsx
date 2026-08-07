@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import { clearMessages, getMessages, sendMessage } from "@/lib/ascend.functions";
 import { useRefreshDashboard } from "@/hooks/use-dashboard";
+import { WorkoutTuner } from "@/components/workout-tuner";
 
 export const Route = createFileRoute("/_authenticated/app/coach")({
   head: () => ({
@@ -87,6 +88,10 @@ function CoachPage() {
           </button>
         )}
       </header>
+
+      <div className="mt-5">
+        <WorkoutTuner />
+      </div>
 
       <div className="mt-5 flex-1 space-y-3">
         {messages.length === 0 && (
