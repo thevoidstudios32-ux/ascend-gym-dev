@@ -498,7 +498,12 @@ function StoryViewer({
           </button>
         </div>
       </div>
+
+      {viewersOpen && isMine ? (
+        <StoryViewersSheet storyId={story.id} onClose={() => setViewersOpen(false)} />
+      ) : null}
     </div>
+
   );
 }
 
