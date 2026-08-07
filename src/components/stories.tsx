@@ -769,6 +769,7 @@ export function StoryComposer({ preset, onClose }: { preset: StoryDraft | null; 
 
       {musicOpen ? (
         <MusicPicker
+          clip={duration}
           onClose={() => setMusicOpen(false)}
           onPick={(t) => {
             setTrack(t);
@@ -776,6 +777,7 @@ export function StoryComposer({ preset, onClose }: { preset: StoryDraft | null; 
           }}
         />
       ) : null}
+
     </div>
   );
 }
