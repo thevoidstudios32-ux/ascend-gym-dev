@@ -63,6 +63,27 @@ function SessionPage() {
     ),
   );
 
+  // O treino personalizado chega depois do primeiro render: recarrega séries.
+  const customKey = customWorkout ? `${customWorkout.id}:${customWorkout.updated_at}` : null;
+  useEffect(() => {
+    if (!customKey || !customWorkout) return;
+    const list = customToSplit(customWorkout).exercises;
+    setExercises(list.map((e) => ({ ...e })));
+    setEntries(
+      list.flatMap((ex) =>
+        Array.from({ length: ex.sets }, (_, i) => ({
+          exercise: ex.name,
+          set_index: i + 1,
+          reps: Number(ex.reps.split("-")[0]?.replace(/\D/g, "")) || 10,
+          weight_kg: 0,
+          done: false,
+        })),
+      ),
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [customKey]);
+
+
   useEffect(() => {
     if (!running) return;
     const t = setInterval(() => setElapsed((e) => e + 1), 1000);
