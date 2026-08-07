@@ -309,12 +309,14 @@ function StoryViewer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [story?.id]);
 
+  const durationMs = storyDurationMs(story?.meta);
+
   useEffect(() => {
     if (paused || !story) return;
     const step = 60;
     const t = setInterval(() => {
       setProgress((p) => {
-        const next = p + (step / STORY_DURATION_MS) * 100;
+        const next = p + (step / durationMs) * 100;
         if (next >= 100) {
           advance(1);
           return 0;
@@ -323,12 +325,13 @@ function StoryViewer({
       });
     }, step);
     return () => clearInterval(t);
-  }, [paused, story, advance]);
+  }, [paused, story, advance, durationMs]);
 
   if (!story) return null;
 
   const sticker = stickerOf(story.sticker);
   const music = (story.meta as { music?: StoryMusic } | null | undefined)?.music ?? null;
+
 
 
   return (
