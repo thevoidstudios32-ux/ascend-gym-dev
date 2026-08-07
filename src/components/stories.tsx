@@ -808,17 +808,63 @@ function MusicPicker({ onClose, onPick }: { onClose: () => void; onPick: (m: Sto
   const [position, setPosition] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  async function run() {
-    if (!q.trim()) return;
+  const searchRef = useRef(search);
+  searchRef.current = search;
+  /** Cache local por termo + controle de requisição ativa (só a última vale). */
+  const cacheRef = useRef(new Map<string, Track[]>());
+  const reqIdRef = useRef(0);
+  const lastQueryRef = useRef("");
+  const lastErrorAtRef = useRef(0);
+
+  const run = useCallback(async (raw: string) => {
+    const term = raw.trim();
+    if (!term) {
+      setResults([]);
+      setLoading(false);
+      return;
+    }
+    const key = term.toLowerCase();
+    const cached = cacheRef.current.get(key);
+    if (cached) {
+      setResults(cached);
+      setLoading(false);
+      return;
+    }
+    if (lastQueryRef.current === key) return; // já há uma busca idêntica em voo
+    lastQueryRef.current = key;
+    const id = ++reqIdRef.current;
     setLoading(true);
     try {
-      setResults(await search({ data: { q: q.trim() } }));
+      const tracks = await searchRef.current({ data: { q: term } });
+      if (id !== reqIdRef.current) return; // resposta obsoleta
+      cacheRef.current.set(key, tracks);
+      setResults(tracks);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Busca indisponível.");
+      if (id !== reqIdRef.current) return;
+      const now = Date.now();
+      if (now - lastErrorAtRef.current > 4000) {
+        lastErrorAtRef.current = now;
+        toast.error(e instanceof Error ? e.message : "Busca indisponível.");
+      }
     } finally {
-      setLoading(false);
+      if (id === reqIdRef.current) {
+        setLoading(false);
+        lastQueryRef.current = "";
+      }
     }
-  }
+  }, []);
+
+  // Debounce: uma única requisição depois que o usuário para de digitar.
+  useEffect(() => {
+    const term = q.trim();
+    if (!term) {
+      setResults([]);
+      return;
+    }
+    const t = setTimeout(() => void run(term), 450);
+    return () => clearTimeout(t);
+  }, [q, run]);
+
 
   const play = useCallback(async (from: number) => {
     const audio = audioRef.current;
