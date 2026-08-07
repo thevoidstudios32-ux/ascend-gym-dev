@@ -74,7 +74,10 @@ function CustomWorkoutPage() {
 
   function submit() {
     const list = exercises.filter((e) => e.name.trim());
-    if (!list.length) return toast.error("Adicione pelo menos um exercício.");
+    if (!list.length) {
+      toast.error("Adicione pelo menos um exercício.");
+      return;
+    }
     save.mutate(
       {
         id: isNew ? null : id,
