@@ -20,7 +20,10 @@ export const Route = createFileRoute("/_authenticated/app/treinos")({
 
 function TreinosPage() {
   const { data, isLoading } = useDashboard();
+  const custom = useCustomWorkouts();
+  const mine = custom.data?.workouts ?? [];
   const today = splitOfDay();
+
 
   return (
     <div className="animate-rise space-y-5">
