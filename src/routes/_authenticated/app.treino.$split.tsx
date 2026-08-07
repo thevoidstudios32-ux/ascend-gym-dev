@@ -126,7 +126,7 @@ function SessionPage() {
         data: {
           date: todayISO(),
           title: split.name,
-          kind: split.id,
+          kind: workoutKind,
           duration_min: minutes,
           calories,
           sets: entries
@@ -135,7 +135,11 @@ function SessionPage() {
         },
       }),
     onSuccess: (res) => {
-      toast.success(`Treino salvo! +${res.xp} XP`);
+      if (res.duplicate) {
+        toast.info("Este treino já foi contabilizado hoje — nada foi duplicado.");
+      } else {
+        toast.success(`Treino salvo! +${res.xp} XP`);
+      }
       if (res.newPrs.length) toast.success(`Novo recorde: ${res.newPrs.join(", ")} 🏆`);
       res.unlocked.forEach((a) => toast.success(`${a.emoji} Conquista: ${a.label}`));
       refresh();
