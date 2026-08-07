@@ -259,9 +259,11 @@ function StoryViewer({
   const isMine = data?.me === userId;
   const mediaUrl = story ? (data?.media as Record<string, string>)[story.id] : undefined;
 
-  const myView = (data?.views as { story_id: string; user_id: string; reaction: string | null }[] | undefined)?.find(
-    (v) => v.story_id === story?.id && v.user_id === data?.me,
-  );
+  const allViews = (data?.views ?? []) as { story_id: string; user_id: string; reaction: string | null }[];
+  const myView = allViews.find((v) => v.story_id === story?.id && v.user_id === data?.me);
+  /** Uma visualização por usuário (a tabela já é única por story+user). */
+  const viewCount = story ? allViews.filter((v) => v.story_id === story.id).length : 0;
+
 
   const mark = useServerFn(viewStory);
   const react = useMutation({
