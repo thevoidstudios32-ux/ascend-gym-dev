@@ -246,7 +246,9 @@ function StoryViewer({
   const [paused, setPaused] = useState(false);
   const [dragY, setDragY] = useState(0);
   const [reply, setReply] = useState("");
+  const [viewersOpen, setViewersOpen] = useState(false);
   const startY = useRef<number | null>(null);
+
 
   const stories = useMemo(
     () => ((data?.stories ?? []) as StoryRow[]).filter((s) => s.user_id === userId),
