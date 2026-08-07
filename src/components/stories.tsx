@@ -553,18 +553,23 @@ export function StoryComposer({ preset, onClose }: { preset: StoryDraft | null; 
           sticker,
           bg,
           location: location.trim() || null,
-          meta: track
-            ? {
-                music: {
-                  title: track.title,
-                  artist: track.artist,
-                  artwork: track.artwork,
-                  preview: track.preview,
-                  start: track.start,
-                  volume: track.volume,
-                },
-              }
-            : {},
+          meta: {
+            duration,
+            ...(track
+              ? {
+                  music: {
+                    title: track.title,
+                    artist: track.artist,
+                    artwork: track.artwork,
+                    preview: track.preview,
+                    start: track.start,
+                    end: track.end ?? track.start + duration,
+                    volume: track.volume,
+                  },
+                }
+              : {}),
+          },
+
 
         },
       });
