@@ -7,6 +7,8 @@ import { ChevronLeft, MoreVertical, Pause, Play, RotateCcw } from "lucide-react"
 import { ExerciseSwapSheet } from "@/components/exercise-swap";
 import { StoryComposer, type StoryDraft } from "@/components/stories";
 import { useDashboard, useExtras, useRefreshDashboard } from "@/hooks/use-dashboard";
+import { useCustomWorkouts } from "@/hooks/use-custom";
+import { customToSplit, isUuid } from "@/lib/custom";
 import { finishWorkout } from "@/lib/extras.functions";
 import { estimateCalories, SPLITS, suggestLoad, todayISO, type Split } from "@/lib/ascend";
 
