@@ -156,16 +156,18 @@ export async function pickBattle(supabase: DB, userId: string, category: string)
 
   const all = (entriesData ?? []) as ArenaEntry[];
   const participants = all.length;
-  const entries = all.filter((e) => e.user_id !== userId);
+  const others = all.filter((e) => e.user_id !== userId);
 
   const empty = (reason: "few" | "voted") => ({
     battle: null,
     participants,
-    others: entries.length,
+    others: others.length,
     reason,
   });
 
-  if (entries.length < 2) return empty("few");
+  // Basta haver 2 participações de atletas diferentes (mesmo que uma seja sua).
+  const distinctUsers = new Set(all.map((e) => e.user_id));
+  if (all.length < 2 || distinctUsers.size < 2) return empty("few");
 
   const { data: votes } = await supabase
     .from("battle_votes")
@@ -177,8 +179,8 @@ export async function pickBattle(supabase: DB, userId: string, category: string)
     seen.add([v.winner_entry_id, v.loser_entry_id].sort().join("|"));
   }
 
-  const profiles = await profilesByIds(supabase, entries.map((e) => e.user_id));
-  const withXp = entries.map((e) => ({
+  const profiles = await profilesByIds(supabase, all.map((e) => e.user_id));
+  const withXp = all.map((e) => ({
     entry: e,
     xp: profiles.get(e.user_id)?.xp ?? 0,
     battles: e.battles,
@@ -192,13 +194,17 @@ export async function pickBattle(supabase: DB, userId: string, category: string)
       if (a.entry.user_id === b.entry.user_id) continue;
       if (a.entry.category !== b.entry.category) continue;
       if (seen.has([a.entry.id, b.entry.id].sort().join("|"))) continue;
-      candidates.push({ a: a.entry, b: b.entry, score: pairScore(a, b) });
+      // Confrontos entre outros atletas têm prioridade; os seus entram como reserva.
+      const mine = a.entry.user_id === userId || b.entry.user_id === userId;
+      candidates.push({ a: a.entry, b: b.entry, score: pairScore(a, b) + (mine ? 10_000 : 0) });
     }
   }
   if (candidates.length === 0) return empty("voted");
 
   candidates.sort((x, y) => x.score - y.score);
-  const pool = candidates.slice(0, Math.min(12, candidates.length));
+  const best = candidates.filter((c) => c.score < 10_000);
+  const source = best.length > 0 ? best : candidates;
+  const pool = source.slice(0, Math.min(12, source.length));
   const chosen = pool[Math.floor(Math.random() * pool.length)]!;
 
   const urls = await signPaths(supabase, [chosen.a.media_path, chosen.b.media_path]);
@@ -206,11 +212,12 @@ export async function pickBattle(supabase: DB, userId: string, category: string)
   return {
     battle: { left: left!, right: right!, category: chosen.a.category },
     participants,
-    others: entries.length,
+    others: others.length,
     remaining: candidates.length,
     reason: null as null,
   };
 }
+
 
 
 /** Recompensas por vitória: XP no perfil + conquistas da Arena. */

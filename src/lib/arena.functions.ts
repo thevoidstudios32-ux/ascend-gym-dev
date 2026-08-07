@@ -98,7 +98,7 @@ export const castVote = createServerFn({ method: "POST" })
       .select("id,user_id,category,status")
       .in("id", [data.winnerId, data.loserId]);
     if (!pair || pair.length !== 2) throw new Error("Batalha indisponível.");
-    if (pair.some((e) => e.user_id === userId)) throw new Error("Você não pode votar em si mesmo.");
+    if (pair.every((e) => e.user_id === userId)) throw new Error("Você não pode votar em si mesmo.");
     if (pair.some((e) => e.status !== "active" || e.category !== data.category))
       throw new Error("Batalha indisponível.");
 
