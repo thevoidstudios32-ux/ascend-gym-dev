@@ -62,7 +62,53 @@ function TreinosPage() {
         ))}
       </section>
 
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="font-bold">Meus treinos</h2>
+          <Link
+            to="/app/personalizado/$id"
+            params={{ id: "novo" }}
+            className="press flex items-center gap-1 rounded-full bg-primary px-3.5 py-1.5 text-xs font-extrabold text-primary-foreground shadow-glow"
+          >
+            <Plus className="size-3.5" /> Criar
+          </Link>
+        </div>
+
+        {mine.length === 0 ? (
+          <p className="panel p-5 text-sm text-muted-foreground">
+            Monte treinos de calistenia do seu jeito — ou peça ao Coach IA para criar e ajustar por você.
+          </p>
+        ) : (
+          mine.map((w) => (
+            <div key={w.id} className="panel flex items-center gap-4 p-4">
+              <span className="text-3xl">{w.emoji}</span>
+              <Link
+                to="/app/treino/$split"
+                params={{ split: w.id }}
+                className="min-w-0 flex-1"
+              >
+                <p className="truncate font-bold">{w.name}</p>
+                <p className="truncate text-xs text-muted-foreground">
+                  {w.focus} · {w.difficulty}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  ~{estimateMinutes(w.exercises)} min · {w.exercises.length} exercícios
+                </p>
+              </Link>
+              <Link
+                to="/app/personalizado/$id"
+                params={{ id: w.id }}
+                className="press shrink-0 rounded-full bg-elevated px-3.5 py-2 text-xs font-bold"
+              >
+                Editar
+              </Link>
+            </div>
+          ))
+        )}
+      </section>
+
       <section className="panel p-5">
+
         <h2 className="font-bold">Histórico</h2>
         {isLoading && <p className="mt-3 text-sm text-muted-foreground">Carregando…</p>}
         <div className="mt-3 space-y-2">
