@@ -428,6 +428,7 @@ function StoryViewer({
             </button>
           </div>
           {music ? <StoryMusicBar key={story.id} music={music} paused={paused} /> : null}
+
         </div>
       </div>
 
