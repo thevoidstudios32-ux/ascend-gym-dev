@@ -24,5 +24,6 @@ export function useRefreshDashboard() {
   return () => {
     qc.invalidateQueries({ queryKey: ["dashboard"] });
     qc.invalidateQueries({ queryKey: ["extras"] });
+    qc.invalidateQueries({ queryKey: ["social"] });
   };
 }
