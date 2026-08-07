@@ -712,6 +712,38 @@ export function StoryComposer({ preset, onClose }: { preset: StoryDraft | null; 
           ))}
         </div>
 
+        <div className="rounded-2xl bg-white/5 p-3">
+          <p className="text-[11px] font-bold uppercase tracking-wide text-white/50">Duração do story</p>
+          <div className="mt-2 flex gap-2">
+            {STORY_DURATIONS.map((d) => (
+              <button
+                key={d}
+                onClick={() => {
+                  haptic(8);
+                  setDuration(d);
+                }}
+                className={`press flex-1 rounded-xl py-2 text-xs font-extrabold transition-colors ${
+                  duration === d ? "bg-primary text-primary-foreground" : "bg-white/10 text-white"
+                }`}
+              >
+                {d}s
+              </button>
+            ))}
+          </div>
+          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
+            <div
+              className="h-full rounded-full bg-primary transition-[width] duration-300"
+              style={{ width: `${(duration / 30) * 100}%` }}
+            />
+          </div>
+          {track?.preview ? (
+            <p className="mt-2 text-[11px] text-white/50">
+              🎵 Trecho: {fmtTime(track.start)} → {fmtTime(track.end ?? track.start + duration)} ·{" "}
+              {Math.round((track.end ?? track.start + duration) - track.start)}s de música
+            </p>
+          ) : null}
+        </div>
+
         <button
           onClick={() => setMusicOpen(true)}
           className="press flex w-full items-center gap-2 rounded-2xl bg-white/10 px-4 py-3 text-sm font-bold text-white"
@@ -736,6 +768,7 @@ export function StoryComposer({ preset, onClose }: { preset: StoryDraft | null; 
             </span>
           ) : null}
         </button>
+
 
         <input
           value={location}
