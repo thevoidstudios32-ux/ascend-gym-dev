@@ -18,12 +18,27 @@ async function fetchJson(url: string, timeoutMs = 8000) {
       signal: ctrl.signal,
       headers: { Accept: "application/json", "User-Agent": "ASCEND/1.0 (stories music search)" },
     });
-    if (res.status === 429) throw new Error("Limite de buscas atingido. Tente de novo em alguns segundos.");
+    // 429 é recuperável: deixamos o próximo provedor tentar em vez de abortar a busca.
+    if (res.status === 429) throw new Error("rate_limited");
     if (!res.ok) throw new Error(`upstream_${res.status}`);
     return (await res.json()) as unknown;
   } finally {
     clearTimeout(timer);
   }
+}
+
+/** Cache de resultados por termo (mesma instância de servidor) para poupar o upstream. */
+const CACHE_TTL_MS = 10 * 60 * 1000;
+const cache = new Map<string, { at: number; tracks: Track[] }>();
+
+function readCache(key: string): Track[] | null {
+  const hit = cache.get(key);
+  if (!hit) return null;
+  if (Date.now() - hit.at > CACHE_TTL_MS) {
+    cache.delete(key);
+    return null;
+  }
+  return hit.tracks;
 }
 
 async function fromItunes(q: string): Promise<Track[]> {
