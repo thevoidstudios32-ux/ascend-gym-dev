@@ -93,20 +93,30 @@ export const searchMusic = createServerFn({ method: "POST" })
     const q = data.q.trim();
     if (!q) return [];
 
+    const key = q.toLowerCase();
+    const cached = readCache(key);
+    if (cached) return cached;
+
     const errors: string[] = [];
     for (const provider of [fromItunes, fromDeezer]) {
       try {
         const tracks = await provider(q);
-        if (tracks.length > 0) return tracks;
+        if (tracks.length > 0) {
+          cache.set(key, { at: Date.now(), tracks });
+          return tracks;
+        }
         errors.push("sem resultados");
       } catch (e) {
-        const msg = e instanceof Error ? e.message : "erro desconhecido";
-        if (msg.startsWith("Limite")) throw new Error(msg);
-        errors.push(msg);
+        errors.push(e instanceof Error ? e.message : "erro desconhecido");
       }
     }
 
-    if (errors.every((e) => e === "sem resultados")) return [];
+    if (errors.every((e) => e === "sem resultados")) {
+      cache.set(key, { at: Date.now(), tracks: [] });
+      return [];
+    }
+    if (errors.every((e) => e === "rate_limited"))
+      throw new Error("Muitas buscas seguidas. Aguarde alguns segundos e tente de novo.");
     if (errors.some((e) => e.includes("abort")))
       throw new Error("A busca demorou demais. Verifique sua conexão e tente de novo.");
     throw new Error("Serviço de músicas indisponível no momento. Tente novamente em instantes.");
