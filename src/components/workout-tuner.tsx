@@ -5,9 +5,8 @@ import { toast } from "sonner";
 import { Loader2, Sparkles } from "lucide-react";
 import { useCustomAction, useCustomWorkouts } from "@/hooks/use-custom";
 import { applyWorkoutChange, proposeWorkoutChange } from "@/lib/custom.functions";
-import { estimateMinutes } from "@/lib/custom";
+import { estimateMinutes, type Proposal } from "@/lib/custom";
 import { SPLITS } from "@/lib/ascend";
-import type { Proposal } from "@/lib/custom.server";
 
 const QUICK = [
   "Deixe mais focado em calistenia",

@@ -37,6 +37,17 @@ export type WorkoutVersion = {
   created_at: string;
 };
 
+export type Proposal = {
+  name: string;
+  focus: string;
+  emoji: string;
+  difficulty: string;
+  notes: string | null;
+  exercises: CustomExercise[];
+  summary: string;
+  changes: string[];
+};
+
 export const DIFFICULTIES = ["iniciante", "intermediário", "avançado"] as const;
 
 export const FOCUS_OPTIONS = [

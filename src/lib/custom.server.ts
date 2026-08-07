@@ -1,19 +1,8 @@
 /* Coach IA aplicado a treinos: gera propostas de alteração (nunca salva sozinho). */
 
-import type { CustomExercise } from "@/lib/custom";
+import type { CustomExercise, Proposal } from "@/lib/custom";
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
-
-export type Proposal = {
-  name: string;
-  focus: string;
-  emoji: string;
-  difficulty: string;
-  notes: string | null;
-  exercises: CustomExercise[];
-  summary: string;
-  changes: string[];
-};
 
 const schema = {
   name: "propose_workout",
