@@ -595,6 +595,7 @@ export type Database = {
         Row: {
           age: number | null
           avatar_url: string | null
+          banner_id: string
           bio: string | null
           created_at: string
           days_per_week: number
@@ -617,6 +618,7 @@ export type Database = {
         Insert: {
           age?: number | null
           avatar_url?: string | null
+          banner_id?: string
           bio?: string | null
           created_at?: string
           days_per_week?: number
@@ -639,6 +641,7 @@ export type Database = {
         Update: {
           age?: number | null
           avatar_url?: string | null
+          banner_id?: string
           bio?: string | null
           created_at?: string
           days_per_week?: number

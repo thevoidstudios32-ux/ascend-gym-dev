@@ -3,7 +3,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Camera, Sparkles } from "lucide-react";
 import { CountUp, LoadingPage, ProgressBar, StatCard } from "@/components/ui-kit";
+import { ProfileCustomizer } from "@/components/profile-customizer";
+import { bannerById } from "@/lib/banners";
 import { useDashboard, useExtras, useRefreshDashboard } from "@/hooks/use-dashboard";
 import { saveProfile } from "@/lib/ascend.functions";
 import { bmi, computeStreak, EXPERIENCES, GOALS, levelFromXp, titleFromLevel } from "@/lib/ascend";
@@ -33,6 +36,9 @@ function PerfilPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const p = data?.profile;
+  const [customizing, setCustomizing] = useState(false);
+
+
 
   const [form, setForm] = useState<null | {
     name: string;
@@ -99,15 +105,41 @@ function PerfilPage() {
       .map((s) => s[0]!.toUpperCase())
       .join("") || "A";
   const imc = bmi(p.weight_kg ? Number(p.weight_kg) : null, p.height_cm ? Number(p.height_cm) : null);
+  const banner = bannerById(p.banner_id);
 
   return (
     <div className="animate-rise space-y-5">
       <section className="card overflow-hidden">
-        <div className="h-28 bg-ember ember-border border-x-0 border-t-0" />
+        <div className="relative h-32 w-full sm:h-44">
+          <img
+            src={banner.url}
+            alt={`Banner ${banner.name}`}
+            className="size-full object-cover"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-card via-card/40 to-transparent" />
+          <button
+            onClick={() => setCustomizing(true)}
+            className="press absolute right-3 top-3 flex items-center gap-2 rounded-full border border-white/15 bg-black/50 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-widest text-white backdrop-blur-md"
+          >
+            <Sparkles className="size-3.5" /> Personalizar perfil
+          </button>
+        </div>
         <div className="-mt-12 px-5 pb-5">
-          <div className="grid size-24 place-items-center rounded-3xl border-4 border-card bg-primary text-3xl font-extrabold text-primary-foreground shadow-glow">
-            {initials}
-          </div>
+          <button
+            onClick={() => setCustomizing(true)}
+            className="press relative grid size-24 place-items-center overflow-hidden rounded-full border-4 border-card bg-primary text-3xl font-extrabold text-primary-foreground shadow-glow"
+            aria-label="Alterar foto de perfil"
+          >
+            {p.avatar_url ? (
+              <img src={p.avatar_url} alt={p.name} className="size-full object-cover" />
+            ) : (
+              initials
+            )}
+            <span className="absolute bottom-0 inset-x-0 grid place-items-center bg-black/60 py-1">
+              <Camera className="size-3.5 text-white" />
+            </span>
+          </button>
           <h1 className="mt-3 truncate text-display text-4xl">{p.name}</h1>
           <p className="text-sm text-muted-foreground">
             {p.goal} · {p.experience}
@@ -132,6 +164,20 @@ function PerfilPage() {
           </p>
         </div>
       </section>
+
+      <ProfileCustomizer
+        open={customizing}
+        onClose={() => setCustomizing(false)}
+        currentAvatar={p.avatar_url ?? null}
+        currentBanner={p.banner_id ?? null}
+        stats={{
+          level: level.level,
+          workouts: data?.workouts.length ?? 0,
+          medals: medals,
+          xp: p.xp,
+        }}
+        onSaved={refresh}
+      />
 
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard value={<CountUp value={data?.workouts.length ?? 0} />} label="treinos" />

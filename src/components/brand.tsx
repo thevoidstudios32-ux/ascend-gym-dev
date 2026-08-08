@@ -1,6 +1,6 @@
-import fullAsset from "@/assets/branding/ascend-logo-full.png.asset.json";
-import wordmarkAsset from "@/assets/branding/ascend-wordmark.png.asset.json";
-import symbolAsset from "@/assets/branding/ascend-symbol.png.asset.json";
+import fullAsset from "@/assets/branding/ascend-logo-transparent.png.asset.json";
+import wordmarkAsset from "@/assets/branding/ascend-wordmark-transparent.png.asset.json";
+import symbolAsset from "@/assets/branding/ascend-symbol-transparent.png.asset.json";
 
 type Props = { className?: string; alt?: string };
 
