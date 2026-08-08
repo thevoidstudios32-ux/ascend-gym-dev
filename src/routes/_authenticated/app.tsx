@@ -59,29 +59,53 @@ function AppLayout() {
 
   return (
     <div className="min-h-screen bg-ember md:flex">
-      <aside className="sticky top-0 hidden h-screen w-56 shrink-0 flex-col border-r border-border bg-surface/50 p-5 backdrop-blur-xl md:flex">
-        <Link to="/" className="flex items-center gap-2">
-          <AscendSymbol className="size-7" />
-          <AscendWordmark className="h-4 w-auto" />
+      <aside
+        className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-border bg-surface/50 p-4 backdrop-blur-xl transition-[width] duration-300 md:flex ${
+          collapsed ? "w-20 items-center" : "w-56"
+        }`}
+      >
+        <Link to="/" className="flex w-full flex-col items-center pt-2">
+          {collapsed ? (
+            <AscendSymbol className="size-8" />
+          ) : (
+            <span className="text-center text-2xl font-black uppercase tracking-[0.35em] text-white/90 [text-shadow:0_0_18px_rgba(220,38,38,0.25)]">
+              Asc<span className="text-primary">e</span>nd
+            </span>
+          )}
         </Link>
 
-        <nav className="mt-8 flex flex-1 flex-col gap-1">
+        <button
+          onClick={() => setCollapsed((v) => !v)}
+          className="press mt-3 rounded-full bg-elevated p-1.5 text-muted-foreground hover:text-foreground"
+          aria-label={collapsed ? "Expandir menu" : "Recolher menu"}
+        >
+          {collapsed ? <ChevronRight className="size-4" /> : <ChevronLeft className="size-4" />}
+        </button>
+
+        <nav className="mt-5 flex w-full flex-1 flex-col gap-1">
           {NAV.map((item) => {
             const active = item.exact ? pathname === item.to : pathname.startsWith(item.to);
             return (
               <Link
                 key={item.to}
                 to={item.to}
+                title={item.label}
                 className={`press flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors ${
+                  collapsed ? "justify-center" : ""
+                } ${
                   active
                     ? "bg-primary text-primary-foreground shadow-glow"
                     : "text-muted-foreground hover:bg-elevated hover:text-foreground"
                 }`}
               >
-                <item.icon className="size-4" />
-                {item.label}
+                <item.icon className="size-4 shrink-0" />
+                {collapsed ? null : item.label}
                 {item.to === "/app/bros" && broBadge > 0 ? (
-                  <span className="ml-auto grid min-w-5 place-items-center rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-black text-primary-foreground">
+                  <span
+                    className={`grid min-w-5 place-items-center rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-black text-primary-foreground ${
+                      collapsed ? "absolute" : "ml-auto"
+                    }`}
+                  >
                     {broBadge > 99 ? "99+" : broBadge}
                   </span>
                 ) : null}
@@ -91,9 +115,11 @@ function AppLayout() {
         </nav>
         <button
           onClick={signOut}
-          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-muted-foreground hover:text-foreground"
+          className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-muted-foreground hover:text-foreground ${
+            collapsed ? "justify-center" : ""
+          }`}
         >
-          <LogOut className="size-4" /> Sair
+          <LogOut className="size-4" /> {collapsed ? null : "Sair"}
         </button>
       </aside>
 
