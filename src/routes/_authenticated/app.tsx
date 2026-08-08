@@ -1,9 +1,12 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { useState } from "react";
 import {
   Apple,
   Camera,
+  ChevronLeft,
+  ChevronRight,
   Dumbbell,
   Home,
   LineChart,
@@ -16,7 +19,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getSocialBadge } from "@/lib/social.functions";
-import { AscendSymbol, AscendWordmark } from "@/components/brand";
+import { AscendSymbol } from "@/components/brand";
 
 
 export const Route = createFileRoute("/_authenticated/app")({
