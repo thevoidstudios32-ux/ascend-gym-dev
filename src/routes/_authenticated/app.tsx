@@ -58,9 +58,11 @@ function AppLayout() {
   return (
     <div className="min-h-screen bg-ember md:flex">
       <aside className="sticky top-0 hidden h-screen w-56 shrink-0 flex-col border-r border-border bg-surface/50 p-5 backdrop-blur-xl md:flex">
-        <Link to="/" className="text-display text-2xl">
-          <span className="text-primary">AS</span>CEND
+        <Link to="/" className="flex items-center gap-2">
+          <AscendSymbol className="size-7" />
+          <AscendWordmark className="h-4 w-auto" />
         </Link>
+
         <nav className="mt-8 flex flex-1 flex-col gap-1">
           {NAV.map((item) => {
             const active = item.exact ? pathname === item.to : pathname.startsWith(item.to);
