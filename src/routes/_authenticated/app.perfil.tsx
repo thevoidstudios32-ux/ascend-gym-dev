@@ -36,6 +36,9 @@ function PerfilPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const p = data?.profile;
+  const [customizing, setCustomizing] = useState(false);
+
+
 
   const [form, setForm] = useState<null | {
     name: string;
@@ -102,6 +105,7 @@ function PerfilPage() {
       .map((s) => s[0]!.toUpperCase())
       .join("") || "A";
   const imc = bmi(p.weight_kg ? Number(p.weight_kg) : null, p.height_cm ? Number(p.height_cm) : null);
+  const banner = bannerById(p.banner_id);
 
   return (
     <div className="animate-rise space-y-5">
