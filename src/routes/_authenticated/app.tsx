@@ -43,6 +43,7 @@ function AppLayout() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const [collapsed, setCollapsed] = useState<boolean>(false);
   const badgeFn = useServerFn(getSocialBadge);
   const { data: badge } = useQuery({
     queryKey: ["social-badge"],
