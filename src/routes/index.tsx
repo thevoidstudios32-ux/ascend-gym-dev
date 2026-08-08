@@ -60,9 +60,8 @@ function Landing() {
   return (
     <div className="min-h-screen bg-ember">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-6">
-        <span className="text-display text-2xl">
-          <span className="text-primary">AS</span>CEND
-        </span>
+        <AscendWordmark className="h-6 w-auto md:h-7" />
+
         <nav className="flex items-center gap-2">
           <Link
             to="/auth"
