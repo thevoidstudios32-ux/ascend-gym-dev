@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
+import { AscendLogoFull } from "@/components/brand";
+
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>): { mode?: "login" | "signup" } => ({
@@ -82,9 +84,10 @@ function AuthPage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-ember px-5 py-10">
-      <Link to="/" className="text-display text-3xl">
-        <span className="text-primary">AS</span>CEND
+      <Link to="/" className="block py-4">
+        <AscendLogoFull className="h-32 w-auto sm:h-40" />
       </Link>
+
       <p className="mt-2 text-sm text-muted-foreground">
         {isSignup ? "Crie sua conta e comece hoje" : "Bem-vindo de volta"}
       </p>

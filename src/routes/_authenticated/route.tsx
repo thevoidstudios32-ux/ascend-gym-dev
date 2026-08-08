@@ -1,5 +1,7 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
+import { AscendLogoFull } from "@/components/brand";
+
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -29,11 +31,10 @@ export const Route = createFileRoute("/_authenticated")({
     return { user: session.user };
   },
   pendingComponent: () => (
-    <div className="flex min-h-screen items-center justify-center bg-ember">
-      <div className="text-display animate-pulse text-3xl">
-        <span className="text-primary">AS</span>CEND
-      </div>
+    <div className="flex min-h-screen items-center justify-center bg-ember px-8">
+      <AscendLogoFull className="h-32 w-auto animate-pulse sm:h-44" />
     </div>
   ),
+
   component: () => <Outlet />,
 });

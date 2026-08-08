@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Dumbbell, Flame, LineChart, MessageSquareText, Smartphone, Trophy } from "lucide-react";
+import { AscendSymbol, AscendWordmark } from "@/components/brand";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -60,9 +62,8 @@ function Landing() {
   return (
     <div className="min-h-screen bg-ember">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-6">
-        <span className="text-display text-2xl">
-          <span className="text-primary">AS</span>CEND
-        </span>
+        <AscendWordmark className="h-6 w-auto md:h-7" />
+
         <nav className="flex items-center gap-2">
           <Link
             to="/auth"
@@ -178,9 +179,11 @@ function Landing() {
         </section>
       </main>
 
-      <footer className="border-t border-border px-5 py-8 text-center text-xs text-muted-foreground">
+      <footer className="flex flex-col items-center gap-3 border-t border-border px-5 py-10 text-center text-xs text-muted-foreground">
+        <AscendSymbol className="size-8" />
         ASCEND · Gym AI · feito para quem treina de verdade
       </footer>
+
     </div>
   );
 }
