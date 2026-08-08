@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Dumbbell, Flame, LineChart, MessageSquareText, Smartphone, Trophy } from "lucide-react";
+import { AscendSymbol, AscendWordmark } from "@/components/brand";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
