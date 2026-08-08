@@ -179,9 +179,11 @@ function Landing() {
         </section>
       </main>
 
-      <footer className="border-t border-border px-5 py-8 text-center text-xs text-muted-foreground">
+      <footer className="flex flex-col items-center gap-3 border-t border-border px-5 py-10 text-center text-xs text-muted-foreground">
+        <AscendSymbol className="size-8" />
         ASCEND · Gym AI · feito para quem treina de verdade
       </footer>
+
     </div>
   );
 }
