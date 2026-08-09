@@ -32,6 +32,12 @@ export const saveBanner = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) => z.object({ banner_id: z.string().min(1).max(40) }).parse(data))
   .handler(async ({ context, data }) => {
+    const { BANNERS, isVoidOwner } = await import("@/lib/banners");
+    const banner = BANNERS.find((b) => b.id === data.banner_id);
+    if (!banner) throw new Error("Banner inválido");
+    if (banner.category === "VOID" && !isVoidOwner(context.userId)) {
+      throw new Error("Banner indisponível");
+    }
     const { error } = await context.supabase
       .from("profiles")
       .update({ banner_id: data.banner_id })
@@ -39,3 +45,4 @@ export const saveBanner = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
