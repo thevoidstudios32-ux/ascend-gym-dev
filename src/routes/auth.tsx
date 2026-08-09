@@ -97,9 +97,9 @@ function AuthPage() {
         <AscendLogoFull className="h-32 w-auto sm:h-40" />
       </Link>
 
-      <p className="mt-2 text-sm text-muted-foreground">
-        {isSignup ? "Crie sua conta e comece hoje" : "Bem-vindo de volta"}
-      </p>
+      <h1 className="mt-2 text-center text-sm text-muted-foreground">
+        {isSignup ? "Crie sua conta ASCEND e comece hoje" : "Acesse o ASCEND · Bem-vindo de volta"}
+      </h1>
 
       <div className="panel mt-8 w-full max-w-sm p-6 shadow-panel">
         <button
@@ -115,14 +115,28 @@ function AuthPage() {
 
         <form onSubmit={handleSubmit} className="space-y-3">
           {isSignup && (
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Seu nome"
-              className="w-full rounded-xl bg-elevated px-4 py-3 text-sm outline-none ring-ring focus:ring-2"
-            />
+            <>
+              <label htmlFor="auth-name" className="sr-only">
+                Seu nome
+              </label>
+              <input
+                id="auth-name"
+                name="name"
+                autoComplete="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Seu nome"
+                className="w-full rounded-xl bg-elevated px-4 py-3 text-sm outline-none ring-ring focus:ring-2"
+              />
+            </>
           )}
+          <label htmlFor="auth-email" className="sr-only">
+            E-mail
+          </label>
           <input
+            id="auth-email"
+            name="email"
+            autoComplete="email"
             type="email"
             required
             value={email}
@@ -130,7 +144,13 @@ function AuthPage() {
             placeholder="E-mail"
             className="w-full rounded-xl bg-elevated px-4 py-3 text-sm outline-none ring-ring focus:ring-2"
           />
+          <label htmlFor="auth-password" className="sr-only">
+            Senha
+          </label>
           <input
+            id="auth-password"
+            name="password"
+            autoComplete={isSignup ? "new-password" : "current-password"}
             type="password"
             required
             minLength={6}
@@ -139,6 +159,7 @@ function AuthPage() {
             placeholder="Senha (mín. 6 caracteres)"
             className="w-full rounded-xl bg-elevated px-4 py-3 text-sm outline-none ring-ring focus:ring-2"
           />
+
           <button
             type="submit"
             disabled={loading}
