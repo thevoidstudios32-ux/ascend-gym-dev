@@ -5,10 +5,11 @@ import { Camera, Check, ImageIcon, Lock, X } from "lucide-react";
 import { toast } from "sonner";
 import { saveAvatar, saveBanner } from "@/lib/profile-media.functions";
 import {
-  BANNERS,
+  CATEGORY_LABEL,
   RARITY_STYLE,
   bannerById,
   isBannerUnlocked,
+  visibleBanners,
   type BannerStats,
 } from "@/lib/banners";
 
@@ -17,9 +18,11 @@ type Props = {
   onClose: () => void;
   currentAvatar: string | null;
   currentBanner: string | null;
+  userId: string | null;
   stats: BannerStats;
   onSaved: () => void;
 };
+
 
 /** Recorta a imagem em um quadrado com zoom/offset e devolve um data URL webp leve. */
 function renderCrop(img: HTMLImageElement, zoom: number, dx: number, dy: number, size = 320) {
