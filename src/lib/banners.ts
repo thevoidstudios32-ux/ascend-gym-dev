@@ -1,13 +1,14 @@
-import throneAsset from "@/assets/banners/throne.jpg.asset.json";
-import guardianAsset from "@/assets/banners/guardian.jpg.asset.json";
-import apexAsset from "@/assets/banners/apex.jpg.asset.json";
-import forgeAsset from "@/assets/banners/forge.jpg.asset.json";
-import infiniteAsset from "@/assets/banners/infinite.jpg.asset.json";
-import voidAsset from "@/assets/banners/void.jpg.asset.json";
-import ascensionAsset from "@/assets/banners/ascension.jpg.asset.json";
-import eclipseAsset from "@/assets/banners/eclipse.jpg.asset.json";
+import throneHallAsset from "@/assets/banners2/throne-hall.jpg.asset.json";
+import neonGridAsset from "@/assets/banners2/neon-grid.jpg.asset.json";
+import forgeAsset from "@/assets/banners2/forge.jpg.asset.json";
+import titanTempleAsset from "@/assets/banners2/titan-temple.jpg.asset.json";
+import skylineAsset from "@/assets/banners2/skyline.jpg.asset.json";
+import voidStudiosAsset from "@/assets/banners2/void-studios.jpg.asset.json";
 
 export type Rarity = "COMMON" | "RARE" | "EPIC" | "LEGENDARY" | "ASCENDED";
+
+/** CORE = liberado para todos. FORGED = desbloqueável. VOID = exclusivo/secreto. */
+export type BannerCategory = "CORE" | "FORGED" | "VOID";
 
 export type BannerStats = { level: number; workouts: number; medals: number; xp: number };
 
@@ -16,9 +17,9 @@ export type Banner = {
   name: string;
   url: string;
   rarity: Rarity;
+  category: BannerCategory;
   /** null = liberado desde o início */
   requirement: null | { label: string; check: (s: BannerStats) => boolean };
-  premium?: boolean;
 };
 
 export const RARITY_STYLE: Record<Rarity, { color: string; ring: string; label: string }> = {
@@ -29,72 +30,85 @@ export const RARITY_STYLE: Record<Rarity, { color: string; ring: string; label: 
   ASCENDED: { color: "#DC2626", ring: "ring-primary/60", label: "Ascended" },
 };
 
+export const CATEGORY_LABEL: Record<BannerCategory, string> = {
+  CORE: "Core",
+  FORGED: "Forged",
+  VOID: "Void",
+};
+
+/** Contas autorizadas a ver e equipar o banner secreto THE VOID STUDIOS. */
+export const VOID_OWNER_IDS = ["dfa353f8-442b-4c07-a8a1-26b3d0a536ff"];
+
 export const BANNERS: Banner[] = [
   {
-    id: "void",
-    name: "The Void",
-    url: voidAsset.url,
+    id: "throne-hall",
+    name: "Throne Hall",
+    url: throneHallAsset.url,
     rarity: "COMMON",
+    category: "CORE",
+    requirement: null,
+  },
+  {
+    id: "neon-grid",
+    name: "Neon Grid",
+    url: neonGridAsset.url,
+    rarity: "COMMON",
+    category: "CORE",
     requirement: null,
   },
   {
     id: "forge",
     name: "The Forge",
     url: forgeAsset.url,
-    rarity: "COMMON",
-    requirement: null,
-  },
-  {
-    id: "throne",
-    name: "The Throne",
-    url: throneAsset.url,
     rarity: "RARE",
+    category: "FORGED",
     requirement: { label: "Complete 10 treinos", check: (s) => s.workouts >= 10 },
   },
   {
-    id: "guardian",
-    name: "The Guardian",
-    url: guardianAsset.url,
-    rarity: "RARE",
-    requirement: { label: "Alcance o nível 5", check: (s) => s.level >= 5 },
-  },
-  {
-    id: "infinite",
-    name: "Infinite Gym",
-    url: infiniteAsset.url,
+    id: "titan-temple",
+    name: "Titan Temple",
+    url: titanTempleAsset.url,
     rarity: "EPIC",
-    requirement: { label: "Conquiste 5 medalhas", check: (s) => s.medals >= 5 },
+    category: "FORGED",
+    requirement: { label: "Alcance o nível 5 e 3 medalhas", check: (s) => s.level >= 5 && s.medals >= 3 },
   },
   {
-    id: "apex",
-    name: "Apex",
-    url: apexAsset.url,
-    rarity: "EPIC",
-    requirement: { label: "Complete 30 treinos", check: (s) => s.workouts >= 30 },
-  },
-  {
-    id: "ascension",
-    name: "Ascension",
-    url: ascensionAsset.url,
+    id: "skyline",
+    name: "Skyline Ascension",
+    url: skylineAsset.url,
     rarity: "LEGENDARY",
-    requirement: { label: "Alcance o nível 15", check: (s) => s.level >= 15 },
+    category: "FORGED",
+    requirement: { label: "Alcance o nível 15 e 30 treinos", check: (s) => s.level >= 15 && s.workouts >= 30 },
   },
   {
-    id: "eclipse",
-    name: "Red Eclipse",
-    url: eclipseAsset.url,
+    id: "void-studios",
+    name: "The Void Studios",
+    url: voidStudiosAsset.url,
     rarity: "ASCENDED",
-    requirement: { label: "Acumule 10.000 XP", check: (s) => s.xp >= 10000 },
-    premium: true,
+    category: "VOID",
+    requirement: null,
   },
 ];
 
-export const DEFAULT_BANNER_ID = "void";
+export const DEFAULT_BANNER_ID = "throne-hall";
 
-export function bannerById(id: string | null | undefined): Banner {
-  return BANNERS.find((b) => b.id === id) ?? BANNERS[0]!;
+export function isVoidOwner(userId: string | null | undefined) {
+  return !!userId && VOID_OWNER_IDS.includes(userId);
 }
 
-export function isBannerUnlocked(banner: Banner, stats: BannerStats) {
+/** Lista visível: o banner VOID só aparece para contas autorizadas. */
+export function visibleBanners(userId: string | null | undefined) {
+  return BANNERS.filter((b) => b.category !== "VOID" || isVoidOwner(userId));
+}
+
+/** Fallback seguro: ids antigos/desconhecidos caem no CORE padrão. */
+export function bannerById(id: string | null | undefined): Banner {
+  const found = BANNERS.find((b) => b.id === id);
+  if (!found) return BANNERS.find((b) => b.id === DEFAULT_BANNER_ID)!;
+  return found;
+}
+
+export function isBannerUnlocked(banner: Banner, stats: BannerStats, userId?: string | null) {
+  if (banner.category === "VOID") return isVoidOwner(userId);
   return banner.requirement === null || banner.requirement.check(stats);
 }
