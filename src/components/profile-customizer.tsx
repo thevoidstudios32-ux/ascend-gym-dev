@@ -235,62 +235,74 @@ export function ProfileCustomizer({
             )}
           </div>
         ) : (
-          <div className="mt-5 grid gap-3">
-            {BANNERS.map((b) => {
-              const unlocked = isBannerUnlocked(b, stats);
-              const equipped = bannerById(currentBanner).id === b.id;
-              const style = RARITY_STYLE[b.rarity];
+          <div className="mt-5 space-y-5">
+            {(["CORE", "FORGED", "VOID"] as const).map((cat) => {
+              const list = visibleBanners(userId).filter((b) => b.category === cat);
+              if (!list.length) return null;
               return (
-                <div
-                  key={b.id}
-                  className={`overflow-hidden rounded-2xl border border-border bg-elevated ring-1 ${style.ring}`}
-                >
-                  <div className="relative h-24 w-full">
-                    <img
-                      src={b.url}
-                      alt={b.name}
-                      loading="lazy"
-                      className={`size-full object-cover ${unlocked ? "" : "opacity-30 grayscale"}`}
-                    />
-                    {!unlocked ? (
-                      <span className="absolute inset-0 grid place-items-center">
-                        <Lock className="size-6 text-muted-foreground" />
-                      </span>
-                    ) : null}
-                  </div>
-                  <div className="flex items-center justify-between gap-3 p-3">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-bold">{b.name}</p>
-                      <p
-                        className="text-[10px] font-extrabold uppercase tracking-widest"
-                        style={{ color: style.color }}
+                <div key={cat} className="space-y-3">
+                  <p className="text-[11px] font-extrabold uppercase tracking-widest text-muted-foreground">
+                    {CATEGORY_LABEL[cat]}
+                    {cat === "CORE" ? " · grátis" : cat === "FORGED" ? " · desbloqueáveis" : " · exclusivo"}
+                  </p>
+                  {list.map((b) => {
+                    const unlocked = isBannerUnlocked(b, stats, userId);
+                    const equipped = bannerById(currentBanner).id === b.id;
+                    const style = RARITY_STYLE[b.rarity];
+                    return (
+                      <div
+                        key={b.id}
+                        className={`overflow-hidden rounded-2xl border border-border bg-elevated ring-1 ${style.ring}`}
                       >
-                        {style.label}
-                        {b.premium ? " · Premium" : ""}
-                      </p>
-                      {!unlocked && b.requirement ? (
-                        <p className="mt-0.5 text-[11px] text-muted-foreground">{b.requirement.label}</p>
-                      ) : null}
-                    </div>
-                    <button
-                      disabled={!unlocked || equipped || equipM.isPending}
-                      onClick={() => equipM.mutate(b.id)}
-                      className={`shrink-0 rounded-full px-4 py-2 text-xs font-bold ${
-                        equipped
-                          ? "bg-elevated text-muted-foreground"
-                          : unlocked
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-elevated text-muted-foreground"
-                      } disabled:opacity-60`}
-                    >
-                      {equipped ? "Em uso" : unlocked ? "Usar" : "Bloqueado"}
-                    </button>
-                  </div>
+                        <div className="relative h-24 w-full">
+                          <img
+                            src={b.url}
+                            alt={b.name}
+                            loading="lazy"
+                            className={`size-full object-cover ${unlocked ? "" : "opacity-30 grayscale"}`}
+                          />
+                          {!unlocked ? (
+                            <span className="absolute inset-0 grid place-items-center">
+                              <Lock className="size-6 text-muted-foreground" />
+                            </span>
+                          ) : null}
+                        </div>
+                        <div className="flex items-center justify-between gap-3 p-3">
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-bold">{b.name}</p>
+                            <p
+                              className="text-[10px] font-extrabold uppercase tracking-widest"
+                              style={{ color: style.color }}
+                            >
+                              {style.label}
+                            </p>
+                            {!unlocked && b.requirement ? (
+                              <p className="mt-0.5 text-[11px] text-muted-foreground">{b.requirement.label}</p>
+                            ) : null}
+                          </div>
+                          <button
+                            disabled={!unlocked || equipped || equipM.isPending}
+                            onClick={() => equipM.mutate(b.id)}
+                            className={`shrink-0 rounded-full px-4 py-2 text-xs font-bold ${
+                              equipped
+                                ? "bg-elevated text-muted-foreground"
+                                : unlocked
+                                  ? "bg-primary text-primary-foreground"
+                                  : "bg-elevated text-muted-foreground"
+                            } disabled:opacity-60`}
+                          >
+                            {equipped ? "Em uso" : unlocked ? "Usar" : "Bloqueado"}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               );
             })}
           </div>
         )}
+
       </div>
     </div>
   );
