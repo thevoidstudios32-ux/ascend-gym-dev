@@ -231,7 +231,7 @@ function StoryMusicBar({ music, paused }: { music: StoryMusic; paused: boolean }
 
   if (!music.preview) return null;
 
-  const needsUnlock = !playing && !muted;
+  const needsUnlock = !playing && !muted && !paused;
 
   return (
     <div className="pointer-events-auto mt-3 flex items-center gap-2 rounded-full bg-black/50 px-3 py-1.5 backdrop-blur">
