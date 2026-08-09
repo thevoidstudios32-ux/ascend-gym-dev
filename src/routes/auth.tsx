@@ -13,14 +13,23 @@ export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: "Entrar · ASCEND" },
-      { name: "description", content: "Acesse sua conta ASCEND e continue sua evolução." },
+      {
+        name: "description",
+        content:
+          "Entre na sua conta ASCEND ou crie uma gratuita para registrar treinos, acompanhar recordes e falar com o Coach IA em português.",
+      },
       { property: "og:title", content: "Entrar · ASCEND" },
-      { property: "og:description", content: "Acesse sua conta ASCEND." },
+      {
+        property: "og:description",
+        content:
+          "Acesse o ASCEND com e-mail ou Google e continue seus treinos, recordes e conversas com o Coach IA.",
+      },
       { property: "og:url", content: "/auth" },
       { name: "robots", content: "noindex" },
     ],
     links: [{ rel: "canonical", href: "/auth" }],
   }),
+
   component: AuthPage,
 });
 
