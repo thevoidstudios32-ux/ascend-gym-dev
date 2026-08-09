@@ -177,7 +177,9 @@ export function StoriesRow({ preset }: { preset?: StoryDraft | null }) {
 
 function StoryMusicBar({ music, paused }: { music: StoryMusic; paused: boolean }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [blocked, setBlocked] = useState(false);
+  /** Só vira true quando o navegador realmente começa a tocar. */
+  const [playing, setPlaying] = useState(false);
+  const [failed, setFailed] = useState(false);
   const [muted, setMuted] = useState(false);
 
   const from = music.start ?? 0;
@@ -187,14 +189,38 @@ function StoryMusicBar({ music, paused }: { music: StoryMusic; paused: boolean }
     const audio = audioRef.current;
     if (!audio || !music.preview) return;
     try {
+      audio.muted = false;
       audio.volume = music.volume ?? 0.7;
-      if (audio.currentTime < from || audio.currentTime > to) audio.currentTime = from;
+      if (!Number.isFinite(audio.currentTime) || audio.currentTime < from || audio.currentTime > to) {
+        try {
+          audio.currentTime = from;
+        } catch {
+          /* metadata ainda não carregou */
+        }
+      }
       await audio.play();
-      setBlocked(false);
+      setFailed(false);
     } catch {
-      setBlocked(true);
+      setFailed(true);
+      setPlaying(false);
     }
   }, [music.preview, music.volume, from, to]);
+
+  // Limpa o áudio anterior sempre que a faixa/story muda.
+  useEffect(() => {
+    const audio = audioRef.current;
+    setPlaying(false);
+    setFailed(false);
+    setMuted(false);
+    if (audio) {
+      audio.pause();
+      audio.currentTime = 0;
+      audio.load();
+    }
+    return () => {
+      audio?.pause();
+    };
+  }, [music.preview]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -205,6 +231,8 @@ function StoryMusicBar({ music, paused }: { music: StoryMusic; paused: boolean }
 
   if (!music.preview) return null;
 
+  const needsUnlock = !playing && !muted && !paused;
+
   return (
     <div className="pointer-events-auto mt-3 flex items-center gap-2 rounded-full bg-black/50 px-3 py-1.5 backdrop-blur">
       <audio
@@ -212,12 +240,27 @@ function StoryMusicBar({ music, paused }: { music: StoryMusic; paused: boolean }
         src={music.preview}
         preload="auto"
         loop
-        onLoadedMetadata={() => void start()}
+        playsInline
+        crossOrigin="anonymous"
+        onLoadedMetadata={() => {
+          const audio = audioRef.current;
+          if (audio && Number.isFinite(audio.duration) && from < audio.duration) audio.currentTime = from;
+          if (!paused && !muted) void start();
+        }}
+        onPlaying={() => {
+          setPlaying(true);
+          setFailed(false);
+        }}
+        onPause={() => setPlaying(false)}
+        onEnded={() => setPlaying(false)}
         // Toca somente o trecho escolhido, repetindo enquanto o story durar.
         onTimeUpdate={(e) => {
           if (e.currentTarget.currentTime >= to) e.currentTarget.currentTime = from;
         }}
-        onError={() => setBlocked(true)}
+        onError={() => {
+          setFailed(true);
+          setPlaying(false);
+        }}
       />
       {music.artwork ? (
         <img src={music.artwork} alt="" className="size-6 rounded-md" />
@@ -227,19 +270,33 @@ function StoryMusicBar({ music, paused }: { music: StoryMusic; paused: boolean }
       <span className="min-w-0 flex-1 truncate text-[11px] font-bold text-white">
         {music.title} · {music.artist}
       </span>
-      <button
-        onClick={() => {
-          if (blocked) void start();
-          else setMuted((m) => !m);
-        }}
-        aria-label={muted || blocked ? "Ativar som" : "Silenciar"}
-        className="press rounded-full bg-white/10 p-1.5 text-white"
-      >
-        {muted || blocked ? <VolumeX className="size-3.5" /> : <Volume2 className="size-3.5" />}
-      </button>
+      {needsUnlock ? (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            void start();
+          }}
+          className="press flex shrink-0 items-center gap-1 rounded-full bg-primary px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest text-primary-foreground"
+        >
+          <Volume2 className="size-3" />
+          {failed ? "Tentar som" : "Ativar som"}
+        </button>
+      ) : (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setMuted((m) => !m);
+          }}
+          aria-label={muted ? "Ativar som" : "Silenciar"}
+          className="press rounded-full bg-white/10 p-1.5 text-white"
+        >
+          {muted ? <VolumeX className="size-3.5" /> : <Volume2 className="size-3.5" />}
+        </button>
+      )}
     </div>
   );
 }
+
 
 
 

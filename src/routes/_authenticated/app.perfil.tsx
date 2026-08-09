@@ -170,6 +170,8 @@ function PerfilPage() {
         onClose={() => setCustomizing(false)}
         currentAvatar={p.avatar_url ?? null}
         currentBanner={p.banner_id ?? null}
+        userId={p.id ?? null}
+
         stats={{
           level: level.level,
           workouts: data?.workouts.length ?? 0,
