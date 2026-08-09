@@ -45,6 +45,8 @@ export function ProfileCustomizer({
   onClose,
   currentAvatar,
   currentBanner,
+  userId,
+
   stats,
   onSaved,
 }: Props) {
