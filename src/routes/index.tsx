@@ -21,7 +21,36 @@ export const Route = createFileRoute("/")({
       { property: "og:type", content: "website" },
     ],
     links: [{ rel: "canonical", href: "/" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Organization",
+              "@id": "https://ascendgym.dev/#organization",
+              name: "ASCEND",
+              url: "https://ascendgym.dev",
+              description:
+                "Plataforma de treino com Coach IA em português: registro de treinos, recordes, nutrição e evolução.",
+            },
+            {
+              "@type": "WebSite",
+              "@id": "https://ascendgym.dev/#website",
+              name: "ASCEND",
+              url: "https://ascendgym.dev",
+              inLanguage: "pt-BR",
+              publisher: { "@id": "https://ascendgym.dev/#organization" },
+              description:
+                "Registre treinos, acompanhe recordes e peso, e fale com um coach de IA que conhece a sua evolução.",
+            },
+          ],
+        }),
+      },
+    ],
   }),
+
   component: Landing,
 });
 
