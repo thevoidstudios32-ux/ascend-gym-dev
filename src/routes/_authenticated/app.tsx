@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getSocialBadge } from "@/lib/social.functions";
-import { AscendSymbol } from "@/components/brand";
+import { AscendSymbol, AscendWordmark } from "@/components/brand";
 
 
 export const Route = createFileRoute("/_authenticated/app")({
