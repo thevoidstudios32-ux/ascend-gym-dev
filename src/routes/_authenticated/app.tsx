@@ -72,11 +72,10 @@ function AppLayout() {
           {collapsed ? (
             <AscendSymbol className="size-8" />
           ) : (
-            <span className="text-center text-2xl font-black uppercase tracking-[0.35em] text-white/90 [text-shadow:0_0_18px_rgba(220,38,38,0.25)]">
-              Asc<span className="text-primary">e</span>nd
-            </span>
+            <AscendWordmark className="h-7 w-auto max-w-[10rem]" />
           )}
         </Link>
+
 
         <button
           onClick={() => setCollapsed((v) => !v)}
