@@ -68,7 +68,7 @@ function AppLayout() {
           collapsed ? "w-20 items-center" : "w-56"
         }`}
       >
-        <Link to="/" className="flex w-full flex-col items-center pt-2">
+        <Link to="/" className="flex w-full flex-col items-center py-3">
           {collapsed ? (
             <AscendSymbol className="size-8" />
           ) : (
