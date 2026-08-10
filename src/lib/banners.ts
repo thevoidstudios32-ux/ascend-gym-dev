@@ -88,6 +88,25 @@ export const BANNERS: Banner[] = [
     requirement: { label: "Alcance o nível 15 e 30 treinos", check: (s) => s.level >= 15 && s.workouts >= 30 },
   },
   {
+    id: "effort-beats-talent",
+    name: "O Esforço Vence o Talento",
+    url: effortAsset.url,
+    rarity: "EPIC",
+    category: "LEGACY",
+    position: "center 40%",
+    requirement: null,
+  },
+  {
+    id: "ganley-legacy",
+    name: "Ganley · The Legacy",
+    url: ganleyAsset.url,
+    rarity: "LEGENDARY",
+    category: "LEGACY",
+    position: "center 35%",
+    requirement: null,
+  },
+
+  {
     id: "void-studios",
     name: "The Void Studios",
     url: voidStudiosAsset.url,
