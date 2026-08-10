@@ -3,6 +3,9 @@ import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { UserAvatar } from "@/components/user-avatar";
+import { TitleBadge } from "@/components/title-badge";
+import { displayTitle } from "@/lib/titles";
 import { Apple, Bot, Camera, Dumbbell, Flame, Play, Timer, Trophy, Zap } from "lucide-react";
 import { CountUp, LoadingPage, ProgressBar, StatCard } from "@/components/ui-kit";
 import { useDashboard, useExtras, useRefreshDashboard } from "@/hooks/use-dashboard";
@@ -189,7 +192,8 @@ function Dashboard({ data }: { data: DashboardData }) {
   const { data: extras } = useExtras();
   const profile = data.profile!;
   const level = levelFromXp(profile.xp);
-  const title = titleFromLevel(level.level, profile.xp);
+  const shown = displayTitle(level.level, profile.xp, profile.id ?? null);
+  const title = shown.progression;
   const dates = useMemo(() => data.workouts.map((w) => w.date), [data.workouts]);
   const streak = computeStreak(dates);
   const now = new Date();
@@ -240,19 +244,11 @@ function Dashboard({ data }: { data: DashboardData }) {
   const lastWorkout = data.workouts[data.workouts.length - 1] ?? null;
   const monthDone = cells.filter((c) => c && doneSet.has(c)).length;
   const medals = extras?.achievements.length ?? 0;
-  const initials = profile.name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((p) => p[0]!.toUpperCase())
-    .join("");
 
   return (
     <div className="animate-rise space-y-4">
       <header className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
-        <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-primary text-base font-extrabold text-primary-foreground shadow-glow">
-          {initials || "A"}
-        </div>
+        <UserAvatar src={profile.avatar_url ?? null} name={profile.name} className="size-12" />
         <div className="min-w-0">
           <p className="text-xs text-muted-foreground">{greeting()},</p>
           <h1 className="truncate text-display text-3xl">{profile.name}</h1>
@@ -267,12 +263,7 @@ function Dashboard({ data }: { data: DashboardData }) {
       <section className="glass animate-pop p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <span
-              className="inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest"
-              style={{ color: title.color }}
-            >
-              {title.emoji} {title.name}
-            </span>
+            <TitleBadge visual={shown.visual} size="sm" />
             <p className="mt-2 text-display text-4xl">
               Nível <span className="text-primary">{level.level}</span>
             </p>
