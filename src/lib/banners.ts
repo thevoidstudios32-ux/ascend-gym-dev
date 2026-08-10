@@ -4,11 +4,14 @@ import forgeAsset from "@/assets/banners2/forge.jpg.asset.json";
 import titanTempleAsset from "@/assets/banners2/titan-temple.jpg.asset.json";
 import skylineAsset from "@/assets/banners2/skyline.jpg.asset.json";
 import voidStudiosAsset from "@/assets/banners2/void-studios.jpg.asset.json";
+import effortAsset from "@/assets/banners2/effort-beats-talent.png.asset.json";
+import ganleyAsset from "@/assets/banners2/ganley-legacy.png.asset.json";
+
 
 export type Rarity = "COMMON" | "RARE" | "EPIC" | "LEGENDARY" | "ASCENDED";
 
-/** CORE = liberado para todos. FORGED = desbloqueável. VOID = exclusivo/secreto. */
-export type BannerCategory = "CORE" | "FORGED" | "VOID";
+/** CORE = liberado para todos. FORGED = desbloqueável. LEGACY = homenagens. VOID = exclusivo/secreto. */
+export type BannerCategory = "CORE" | "FORGED" | "LEGACY" | "VOID";
 
 export type BannerStats = { level: number; workouts: number; medals: number; xp: number };
 
@@ -18,6 +21,8 @@ export type Banner = {
   url: string;
   rarity: Rarity;
   category: BannerCategory;
+  /** Ponto focal (object-position) para não cortar a arte em telas estreitas. */
+  position?: string;
   /** null = liberado desde o início */
   requirement: null | { label: string; check: (s: BannerStats) => boolean };
 };
@@ -33,8 +38,10 @@ export const RARITY_STYLE: Record<Rarity, { color: string; ring: string; label: 
 export const CATEGORY_LABEL: Record<BannerCategory, string> = {
   CORE: "Core",
   FORGED: "Forged",
+  LEGACY: "Legacy",
   VOID: "Void",
 };
+
 
 /** Contas autorizadas a ver e equipar o banner secreto THE VOID STUDIOS. */
 export const VOID_OWNER_IDS = ["dfa353f8-442b-4c07-a8a1-26b3d0a536ff"];
@@ -80,6 +87,25 @@ export const BANNERS: Banner[] = [
     category: "FORGED",
     requirement: { label: "Alcance o nível 15 e 30 treinos", check: (s) => s.level >= 15 && s.workouts >= 30 },
   },
+  {
+    id: "effort-beats-talent",
+    name: "O Esforço Vence o Talento",
+    url: effortAsset.url,
+    rarity: "EPIC",
+    category: "LEGACY",
+    position: "center 40%",
+    requirement: null,
+  },
+  {
+    id: "ganley-legacy",
+    name: "Ganley · The Legacy",
+    url: ganleyAsset.url,
+    rarity: "LEGENDARY",
+    category: "LEGACY",
+    position: "center 35%",
+    requirement: null,
+  },
+
   {
     id: "void-studios",
     name: "The Void Studios",

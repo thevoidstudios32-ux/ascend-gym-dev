@@ -241,14 +241,20 @@ export function ProfileCustomizer({
           </div>
         ) : (
           <div className="mt-5 space-y-5">
-            {(["CORE", "FORGED", "VOID"] as const).map((cat) => {
+            {(["CORE", "FORGED", "LEGACY", "VOID"] as const).map((cat) => {
               const list = visibleBanners(userId).filter((b) => b.category === cat);
               if (!list.length) return null;
               return (
                 <div key={cat} className="space-y-3">
                   <p className="text-[11px] font-extrabold uppercase tracking-widest text-muted-foreground">
                     {CATEGORY_LABEL[cat]}
-                    {cat === "CORE" ? " · grátis" : cat === "FORGED" ? " · desbloqueáveis" : " · exclusivo"}
+                    {cat === "CORE"
+                      ? " · grátis"
+                      : cat === "FORGED"
+                        ? " · desbloqueáveis"
+                        : cat === "LEGACY"
+                          ? " · homenagens"
+                          : " · exclusivo"}
                   </p>
                   {list.map((b) => {
                     const unlocked = isBannerUnlocked(b, stats, userId);
@@ -264,6 +270,7 @@ export function ProfileCustomizer({
                             src={b.url}
                             alt={b.name}
                             loading="lazy"
+                            style={{ objectPosition: b.position ?? "center" }}
                             className={`size-full object-cover ${unlocked ? "" : "opacity-30 grayscale"}`}
                           />
                           {!unlocked ? (
