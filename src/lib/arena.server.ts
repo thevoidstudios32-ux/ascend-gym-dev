@@ -202,9 +202,7 @@ export async function pickBattle(supabase: DB, userId: string, category: string)
   if (candidates.length === 0) return empty("voted");
 
   candidates.sort((x, y) => x.score - y.score);
-  const best = candidates.filter((c) => c.score < 10_000);
-  const source = best.length > 0 ? best : candidates;
-  const pool = source.slice(0, Math.min(12, source.length));
+  const pool = candidates.slice(0, Math.min(12, candidates.length));
   const chosen = pool[Math.floor(Math.random() * pool.length)]!;
 
   const urls = await signPaths(supabase, [chosen.a.media_path, chosen.b.media_path]);
