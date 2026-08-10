@@ -7,6 +7,8 @@ import { Camera, Sparkles } from "lucide-react";
 import { CountUp, LoadingPage, ProgressBar, StatCard } from "@/components/ui-kit";
 import { ProfileCustomizer } from "@/components/profile-customizer";
 import { bannerById } from "@/lib/banners";
+import { TitleBadge } from "@/components/title-badge";
+import { displayTitle } from "@/lib/titles";
 import { useDashboard, useExtras, useRefreshDashboard } from "@/hooks/use-dashboard";
 import { saveProfile } from "@/lib/ascend.functions";
 import { bmi, computeStreak, EXPERIENCES, GOALS, levelFromXp, titleFromLevel } from "@/lib/ascend";
@@ -94,7 +96,7 @@ function PerfilPage() {
   if (!current || !p) return <LoadingPage />;
 
   const level = levelFromXp(p.xp);
-  const title = titleFromLevel(level.level, p.xp);
+  const shown = displayTitle(level.level, p.xp, p.id ?? null);
   const streak = computeStreak((data?.workouts ?? []).map((w) => w.date));
   const medals = extras?.achievements.length ?? 0;
   const initials =
