@@ -11,7 +11,7 @@ import { TitleBadge } from "@/components/title-badge";
 import { displayTitle } from "@/lib/titles";
 import { useDashboard, useExtras, useRefreshDashboard } from "@/hooks/use-dashboard";
 import { saveProfile } from "@/lib/ascend.functions";
-import { bmi, computeStreak, EXPERIENCES, GOALS, levelFromXp, titleFromLevel } from "@/lib/ascend";
+import { bmi, computeStreak, EXPERIENCES, GOALS, levelFromXp } from "@/lib/ascend";
 
 import { supabase } from "@/integrations/supabase/client";
 
