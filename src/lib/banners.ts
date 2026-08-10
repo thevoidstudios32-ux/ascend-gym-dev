@@ -4,6 +4,9 @@ import forgeAsset from "@/assets/banners2/forge.jpg.asset.json";
 import titanTempleAsset from "@/assets/banners2/titan-temple.jpg.asset.json";
 import skylineAsset from "@/assets/banners2/skyline.jpg.asset.json";
 import voidStudiosAsset from "@/assets/banners2/void-studios.jpg.asset.json";
+import effortAsset from "@/assets/banners2/effort-beats-talent.png.asset.json";
+import ganleyAsset from "@/assets/banners2/ganley-legacy.png.asset.json";
+
 
 export type Rarity = "COMMON" | "RARE" | "EPIC" | "LEGENDARY" | "ASCENDED";
 
