@@ -194,17 +194,15 @@ export async function pickBattle(supabase: DB, userId: string, category: string)
       if (a.entry.user_id === b.entry.user_id) continue;
       if (a.entry.category !== b.entry.category) continue;
       if (seen.has([a.entry.id, b.entry.id].sort().join("|"))) continue;
-      // Confrontos entre outros atletas têm prioridade; os seus entram como reserva.
-      const mine = a.entry.user_id === userId || b.entry.user_id === userId;
-      candidates.push({ a: a.entry, b: b.entry, score: pairScore(a, b) + (mine ? 10_000 : 0) });
+      // Nunca exibimos confrontos com participação própria: votar em si mesmo é proibido.
+      if (a.entry.user_id === userId || b.entry.user_id === userId) continue;
+      candidates.push({ a: a.entry, b: b.entry, score: pairScore(a, b) });
     }
   }
   if (candidates.length === 0) return empty("voted");
 
   candidates.sort((x, y) => x.score - y.score);
-  const best = candidates.filter((c) => c.score < 10_000);
-  const source = best.length > 0 ? best : candidates;
-  const pool = source.slice(0, Math.min(12, source.length));
+  const pool = candidates.slice(0, Math.min(12, candidates.length));
   const chosen = pool[Math.floor(Math.random() * pool.length)]!;
 
   const urls = await signPaths(supabase, [chosen.a.media_path, chosen.b.media_path]);
