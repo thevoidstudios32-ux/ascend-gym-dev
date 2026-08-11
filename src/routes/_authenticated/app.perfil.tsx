@@ -9,6 +9,8 @@ import { ProfileCustomizer } from "@/components/profile-customizer";
 import { bannerById } from "@/lib/banners";
 import { TitleBadge } from "@/components/title-badge";
 import { displayTitle } from "@/lib/titles";
+import { TitleSelector } from "@/components/title-selector";
+import { useTitles } from "@/hooks/use-titles";
 import { useDashboard, useExtras, useRefreshDashboard } from "@/hooks/use-dashboard";
 import { saveProfile } from "@/lib/ascend.functions";
 import { bmi, computeStreak, EXPERIENCES, GOALS, levelFromXp } from "@/lib/ascend";
@@ -39,6 +41,8 @@ function PerfilPage() {
   const queryClient = useQueryClient();
   const p = data?.profile;
   const [customizing, setCustomizing] = useState(false);
+  const [titlesOpen, setTitlesOpen] = useState(false);
+  const { data: titles } = useTitles();
 
 
 
@@ -96,7 +100,7 @@ function PerfilPage() {
   if (!current || !p) return <LoadingPage />;
 
   const level = levelFromXp(p.xp);
-  const shown = displayTitle(level.level, p.xp, p.id ?? null);
+  const shown = displayTitle(level.level, p.xp, p.id ?? null, titles?.equipped ?? null);
   const streak = computeStreak((data?.workouts ?? []).map((w) => w.date));
   const medals = extras?.achievements.length ?? 0;
   const initials =
@@ -155,7 +159,14 @@ function PerfilPage() {
             {p.goal} · {p.experience}
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <TitleBadge visual={shown.visual} size="md" />
+            <TitleBadge visual={shown.visual} size="md" onClick={() => setTitlesOpen(true)} />
+            <TitleSelector
+              open={titlesOpen}
+              onClose={() => setTitlesOpen(false)}
+              userId={p.id ?? null}
+              owned={(titles?.owned ?? []).map((t) => t.id)}
+              equipped={titles?.equipped ?? null}
+            />
             <span className="rounded-full bg-elevated px-3 py-1 text-[11px] font-bold">
               Nível {level.level}
             </span>
