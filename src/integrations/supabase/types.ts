@@ -600,6 +600,7 @@ export type Database = {
           created_at: string
           days_per_week: number
           equipment: string[]
+          equipped_title_id: string | null
           experience: string
           goal: string
           gym: string | null
@@ -623,6 +624,7 @@ export type Database = {
           created_at?: string
           days_per_week?: number
           equipment?: string[]
+          equipped_title_id?: string | null
           experience?: string
           goal?: string
           gym?: string | null
@@ -646,6 +648,7 @@ export type Database = {
           created_at?: string
           days_per_week?: number
           equipment?: string[]
+          equipped_title_id?: string | null
           experience?: string
           goal?: string
           gym?: string | null
@@ -799,6 +802,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_titles: {
+        Row: {
+          created_at: string
+          id: string
+          reward_shown: boolean
+          title_id: string
+          unlocked_at: string
+          updated_at: string
+          user_id: string
+          xp_awarded: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reward_shown?: boolean
+          title_id: string
+          unlocked_at?: string
+          updated_at?: string
+          user_id: string
+          xp_awarded?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reward_shown?: boolean
+          title_id?: string
+          unlocked_at?: string
+          updated_at?: string
+          user_id?: string
+          xp_awarded?: number
+        }
+        Relationships: []
       }
       water_logs: {
         Row: {

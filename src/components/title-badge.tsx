@@ -17,10 +17,15 @@ export function TitleBadge({
   visual,
   size = "md",
   className = "",
+  onClick,
+  ariaLabel,
 }: {
   visual: TitleVisual;
   size?: Size;
   className?: string;
+  /** Quando informado, o emblema vira botão (abre o seletor de títulos). */
+  onClick?: () => void;
+  ariaLabel?: string;
 }) {
   const particles = useMemo(
     () =>
@@ -32,9 +37,14 @@ export function TitleBadge({
     [visual.particles],
   );
 
+  const Tag = (onClick ? "button" : "span") as "button";
+
   return (
-    <span
-      className={`title-badge ${SIZE[size]} ${className}`}
+    <Tag
+      type={onClick ? "button" : undefined}
+      onClick={onClick}
+      aria-label={onClick ? (ariaLabel ?? `Título ${visual.name}. Trocar título`) : undefined}
+      className={`title-badge ${SIZE[size]} ${onClick ? "title-badge-interactive" : ""} ${className}`}
       style={
         {
           "--title-glow": visual.glow,
@@ -56,8 +66,9 @@ export function TitleBadge({
           }}
         />
       ))}
+      <i aria-hidden className="title-sweep" />
       <span className="title-emoji">{visual.emoji}</span>
       <span className="title-text">{visual.name}</span>
-    </span>
+    </Tag>
   );
 }
