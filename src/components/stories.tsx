@@ -106,11 +106,13 @@ export function StoriesRow({ preset }: { preset?: StoryDraft | null }) {
   return (
     <>
       <div className="-mx-4 flex gap-3.5 overflow-x-auto px-4 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <button
-          onClick={() => (mine ? setOpenUser(data!.me) : setComposing(true))}
-          className="press flex w-[68px] shrink-0 flex-col items-center gap-1.5"
-        >
-          <span className="relative">
+        <div className="relative flex w-[68px] shrink-0 flex-col items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => (mine ? setOpenUser(data!.me) : setComposing(true))}
+            aria-label={mine ? "Ver seu story" : "Criar story"}
+            className="press"
+          >
             <span
               className={`grid place-items-center rounded-full p-[2.5px] ${
                 mine?.unseen ? "story-ring" : "bg-border"
@@ -120,12 +122,22 @@ export function StoriesRow({ preset }: { preset?: StoryDraft | null }) {
                 <BroAvatar profile={profileOf(data?.me ?? "")} size="md" />
               </span>
             </span>
-            <span className="absolute -bottom-0.5 -right-0.5 grid size-5 place-items-center rounded-full bg-primary text-primary-foreground ring-2 ring-background">
-              <Plus className="size-3" />
-            </span>
-          </span>
+          </button>
+          {/* Botão "+" separado: SEMPRE abre a criação de um novo story. */}
+          <button
+            type="button"
+            aria-label="Criar novo story"
+            onClick={(e) => {
+              e.stopPropagation();
+              setComposing(true);
+            }}
+            className="press absolute right-1 top-[38px] z-10 grid size-6 place-items-center rounded-full bg-primary text-primary-foreground ring-2 ring-background"
+          >
+            <Plus className="size-3.5" />
+          </button>
           <span className="w-full truncate text-center text-[11px] font-semibold">Seu story</span>
-        </button>
+        </div>
+
 
         {others.map((g) => (
           <button
