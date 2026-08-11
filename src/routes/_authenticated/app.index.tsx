@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { UserAvatar } from "@/components/user-avatar";
 import { TitleBadge } from "@/components/title-badge";
 import { displayTitle } from "@/lib/titles";
+import { TitleSelector } from "@/components/title-selector";
+import { useTitles } from "@/hooks/use-titles";
 import { Apple, Bot, Camera, Dumbbell, Flame, Play, Timer, Trophy, Zap } from "lucide-react";
 import { CountUp, LoadingPage, ProgressBar, StatCard } from "@/components/ui-kit";
 import { useDashboard, useExtras, useRefreshDashboard } from "@/hooks/use-dashboard";
@@ -190,9 +192,11 @@ function greeting() {
 
 function Dashboard({ data }: { data: DashboardData }) {
   const { data: extras } = useExtras();
+  const { data: titles } = useTitles();
+  const [titlesOpen, setTitlesOpen] = useState(false);
   const profile = data.profile!;
   const level = levelFromXp(profile.xp);
-  const shown = displayTitle(level.level, profile.xp, profile.id ?? null);
+  const shown = displayTitle(level.level, profile.xp, profile.id ?? null, titles?.equipped ?? null);
   const title = shown.progression;
   const dates = useMemo(() => data.workouts.map((w) => w.date), [data.workouts]);
   const streak = computeStreak(dates);
@@ -263,7 +267,14 @@ function Dashboard({ data }: { data: DashboardData }) {
       <section className="glass animate-pop p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <TitleBadge visual={shown.visual} size="sm" />
+            <TitleBadge visual={shown.visual} size="sm" onClick={() => setTitlesOpen(true)} />
+            <TitleSelector
+              open={titlesOpen}
+              onClose={() => setTitlesOpen(false)}
+              userId={profile.id ?? null}
+              owned={(titles?.owned ?? []).map((t) => t.id)}
+              equipped={titles?.equipped ?? null}
+            />
             <p className="mt-2 text-display text-4xl">
               Nível <span className="text-primary">{level.level}</span>
             </p>
