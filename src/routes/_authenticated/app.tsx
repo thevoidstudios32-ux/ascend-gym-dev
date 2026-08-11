@@ -1,4 +1,5 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
+import { TitleUnlockOverlay } from "@/components/title-unlock";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
@@ -129,6 +130,8 @@ function AppLayout() {
       <main className="mx-auto w-full max-w-3xl px-4 pb-28 pt-6 md:pb-12">
         <Outlet />
       </main>
+
+      <TitleUnlockOverlay />
 
       <nav className="fixed inset-x-0 bottom-0 z-50 flex overflow-x-auto border-t border-border bg-surface/80 backdrop-blur-2xl md:hidden">
         {NAV.map((item) => {
