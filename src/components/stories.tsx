@@ -449,15 +449,27 @@ function StoryViewer({
       }}
 
     >
-      <div className="relative flex-1 overflow-hidden">
+      <div className="relative flex flex-1 items-center justify-center overflow-hidden">
+        {/* Palco vertical 9:16: mantém proporção premium em qualquer tela. */}
         <div
-          className="animate-zoom-in absolute inset-0"
+          className="animate-zoom-in relative aspect-[9/16] h-full max-h-full w-auto max-w-full overflow-hidden sm:rounded-3xl"
           style={{ background: story.media_path ? "#000" : backgroundCss(story.bg) }}
         >
           {mediaUrl && story.media_type?.startsWith("video") ? (
-            <video src={mediaUrl} autoPlay muted playsInline loop className="size-full object-contain" />
+            <video
+              src={mediaUrl}
+              autoPlay
+              muted
+              playsInline
+              loop
+              className="absolute inset-0 size-full object-cover object-center"
+            />
           ) : mediaUrl ? (
-            <img src={mediaUrl} alt="Story" className="size-full object-contain" />
+            <img
+              src={mediaUrl}
+              alt="Story"
+              className="absolute inset-0 size-full object-cover object-center"
+            />
           ) : null}
 
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-5 px-8 text-center">
@@ -478,6 +490,7 @@ function StoryViewer({
             )}
           </div>
         </div>
+
 
         {/* zonas de toque */}
         <button
