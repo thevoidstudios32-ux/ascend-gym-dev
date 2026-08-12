@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Lock, X } from "lucide-react";
 import { toast } from "sonner";
 import { TitleBadge } from "@/components/title-badge";
@@ -7,6 +9,7 @@ import { TITLE_RARITY_STYLE, visibleTitlesFor, type TitleDef } from "@/lib/title
 /**
  * Seletor compacto de títulos: mostra os títulos possuídos (equipáveis) e os
  * bloqueados com o requisito real. A posse é sempre revalidada no servidor.
+ * Renderizado em portal no body para isolar completamente os cliques.
  */
 export function TitleSelector({
   open,
@@ -22,7 +25,22 @@ export function TitleSelector({
   equipped: string | null;
 }) {
   const equip = useEquipTitle();
-  if (!open) return null;
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [open, onClose]);
+
+  if (!open || typeof document === "undefined") return null;
 
   const list = visibleTitlesFor(userId, owned);
 
@@ -37,18 +55,30 @@ export function TitleSelector({
     });
   }
 
-  return (
+  const stop = (e: React.SyntheticEvent) => e.stopPropagation();
+
+  return createPortal(
     <div
       className="fixed inset-0 z-[95] flex items-end justify-center bg-black/70 p-0 backdrop-blur-sm sm:items-center sm:p-4"
-      onClick={onClose}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClose();
+      }}
+      onPointerDown={stop}
+      onMouseDown={stop}
+      onTouchStart={stop}
       role="dialog"
       aria-modal="true"
       aria-label="Meus títulos"
     >
       <div
-        onClick={(e) => e.stopPropagation()}
+        onClick={stop}
+        onPointerDown={stop}
+        onMouseDown={stop}
+        onTouchStart={stop}
         className="animate-rise max-h-[80vh] w-full max-w-md overflow-y-auto rounded-t-3xl border border-violet-500/20 bg-[#101014]/95 p-5 shadow-[0_0_40px_-12px_rgba(168,85,247,0.45)] sm:rounded-3xl"
       >
+
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xs font-extrabold uppercase tracking-[0.22em] text-muted-foreground">
             Meus títulos
