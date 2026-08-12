@@ -13,6 +13,7 @@ import {
   LineChart,
   LogOut,
   MessageSquareText,
+  Shield,
   Swords,
   Trophy,
   User,
@@ -20,6 +21,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getSocialBadge } from "@/lib/social.functions";
+import { useAdminStatus, useLoginTracking } from "@/hooks/use-admin";
 import { AscendSymbol, AscendWordmark } from "@/components/brand";
 
 
@@ -54,6 +56,9 @@ function AppLayout() {
     retry: false,
   });
   const broBadge = badge?.total ?? 0;
+  const { data: adminStatus } = useAdminStatus();
+  const isAdmin = adminStatus?.isAdmin === true;
+  useLoginTracking();
 
   async function signOut() {
     await queryClient.cancelQueries();
@@ -117,6 +122,17 @@ function AppLayout() {
             );
           })}
         </nav>
+        {isAdmin ? (
+          <Link
+            to="/admin"
+            title="Admin Panel"
+            className={`press mb-1 flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/10 px-3 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/20 ${
+              collapsed ? "justify-center" : ""
+            }`}
+          >
+            <Shield className="size-4 shrink-0" /> {collapsed ? null : "Admin Panel"}
+          </Link>
+        ) : null}
         <button
           onClick={signOut}
           className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-muted-foreground hover:text-foreground ${

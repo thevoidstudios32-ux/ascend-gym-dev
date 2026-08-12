@@ -35,6 +35,33 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_audit_log: {
+        Row: {
+          action: string
+          admin_id: string
+          created_at: string
+          details: Json
+          id: string
+          target_user_id: string | null
+        }
+        Insert: {
+          action: string
+          admin_id: string
+          created_at?: string
+          details?: Json
+          id?: string
+          target_user_id?: string | null
+        }
+        Update: {
+          action?: string
+          admin_id?: string
+          created_at?: string
+          details?: Json
+          id?: string
+          target_user_id?: string | null
+        }
+        Relationships: []
+      }
       battle_entries: {
         Row: {
           battles: number
@@ -461,6 +488,30 @@ export type Database = {
         }
         Relationships: []
       }
+      login_events: {
+        Row: {
+          created_at: string
+          id: string
+          login_at: string
+          login_date: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          login_at?: string
+          login_date?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          login_at?: string
+          login_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       meal_logs: {
         Row: {
           carbs: number
@@ -602,12 +653,16 @@ export type Database = {
           equipment: string[]
           equipped_title_id: string | null
           experience: string
+          first_login_at: string | null
           goal: string
           gym: string | null
           height_cm: number | null
           id: string
           injuries: string | null
           is_public: boolean
+          last_login_at: string | null
+          last_seen_at: string | null
+          login_count: number
           name: string
           onboarded: boolean
           training_since: string | null
@@ -626,12 +681,16 @@ export type Database = {
           equipment?: string[]
           equipped_title_id?: string | null
           experience?: string
+          first_login_at?: string | null
           goal?: string
           gym?: string | null
           height_cm?: number | null
           id: string
           injuries?: string | null
           is_public?: boolean
+          last_login_at?: string | null
+          last_seen_at?: string | null
+          login_count?: number
           name?: string
           onboarded?: boolean
           training_since?: string | null
@@ -650,12 +709,16 @@ export type Database = {
           equipment?: string[]
           equipped_title_id?: string | null
           experience?: string
+          first_login_at?: string | null
           goal?: string
           gym?: string | null
           height_cm?: number | null
           id?: string
           injuries?: string | null
           is_public?: boolean
+          last_login_at?: string | null
+          last_seen_at?: string | null
+          login_count?: number
           name?: string
           onboarded?: boolean
           training_since?: string | null
@@ -803,6 +866,27 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_titles: {
         Row: {
           created_at: string
@@ -928,10 +1012,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1058,6 +1148,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+    },
   },
 } as const
