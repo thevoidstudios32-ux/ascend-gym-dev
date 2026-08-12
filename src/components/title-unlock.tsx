@@ -1,39 +1,76 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { X } from "lucide-react";
 import { TitleBadge } from "@/components/title-badge";
 import { useMarkTitleShown, useTitles } from "@/hooks/use-titles";
 import { TITLE_BY_ID } from "@/lib/titles";
 
 /**
  * Animação "TITLE UNLOCKED" — aparece uma única vez por título desbloqueado.
- * Depois de exibida, marcamos `reward_shown` no banco para nunca repetir.
+ * Marca `reward_shown` assim que exibe (idempotente no servidor) e fecha
+ * sozinho em ~3.5s, por ESC, pelo X ou clicando fora.
  */
 export function TitleUnlockOverlay() {
   const { data } = useTitles();
   const mark = useMarkTitleShown();
   const [current, setCurrent] = useState<string | null>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const markRef = useRef(mark);
+  markRef.current = mark;
 
   const pending = data?.pending?.[0] ?? null;
+
+  const close = useCallback(() => {
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = null;
+    setCurrent(null);
+  }, []);
 
   useEffect(() => {
     if (!pending || current) return;
     setCurrent(pending);
-    const id = pending;
-    const t = setTimeout(() => {
-      mark.mutate(id);
-      setCurrent(null);
-    }, 4200);
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Marca imediatamente: evita reexibir após refresh/re-render e não repete XP.
+    markRef.current.mutate(pending);
+    timer.current = setTimeout(() => setCurrent(null), 3500);
+    return () => {
+      if (timer.current) clearTimeout(timer.current);
+      timer.current = null;
+    };
   }, [pending, current]);
 
+  useEffect(() => {
+    if (!current) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [current, close]);
+
   const def = current ? TITLE_BY_ID[current] : null;
-  if (!def) return null;
+  if (!def || typeof document === "undefined") return null;
 
   const rare = def.rarity === "MYTHIC" || def.rarity === "EXCLUSIVE";
 
-  return (
-    <div className="title-unlock-overlay" role="status" aria-live="polite">
-      <div className={`title-unlock-card ${rare ? "title-unlock-rare" : ""}`}>
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[120] flex items-start justify-center px-4 pt-[12vh]"
+      role="status"
+      aria-live="polite"
+      onClick={close}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className={`title-unlock-card relative ${rare ? "title-unlock-rare" : ""}`}
+      >
+        <button
+          type="button"
+          onClick={close}
+          aria-label="Fechar"
+          className="press absolute right-2 top-2 rounded-full bg-white/10 p-1.5 text-white"
+        >
+          <X className="size-4" />
+        </button>
         <p className="text-[10px] font-extrabold uppercase tracking-[0.35em] text-violet-300">
           Title Unlocked
         </p>
@@ -46,6 +83,7 @@ export function TitleUnlockOverlay() {
           </p>
         )}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
