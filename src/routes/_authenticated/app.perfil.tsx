@@ -1,9 +1,9 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Camera, Sparkles } from "lucide-react";
+import { Camera, Shield, Sparkles } from "lucide-react";
 import { CountUp, LoadingPage, ProgressBar, StatCard } from "@/components/ui-kit";
 import { ProfileCustomizer } from "@/components/profile-customizer";
 import { bannerById } from "@/lib/banners";
@@ -11,6 +11,7 @@ import { TitleBadge } from "@/components/title-badge";
 import { displayTitle } from "@/lib/titles";
 import { TitleSelector } from "@/components/title-selector";
 import { useTitles } from "@/hooks/use-titles";
+import { useAdminStatus } from "@/hooks/use-admin";
 import { useDashboard, useExtras, useRefreshDashboard } from "@/hooks/use-dashboard";
 import { saveProfile } from "@/lib/ascend.functions";
 import { bmi, computeStreak, EXPERIENCES, GOALS, levelFromXp } from "@/lib/ascend";
@@ -34,6 +35,8 @@ const field = "w-full rounded-xl bg-elevated px-4 py-3 text-sm outline-none ring
 
 function PerfilPage() {
   const { data } = useDashboard();
+  const { data: adminStatus } = useAdminStatus();
+  const isAdmin = adminStatus?.isAdmin === true;
   const { data: extras } = useExtras();
   const refresh = useRefreshDashboard();
   const save = useServerFn(saveProfile);
@@ -292,6 +295,15 @@ function PerfilPage() {
           {mutation.isPending ? "Salvando…" : "Salvar alterações"}
         </button>
       </section>
+
+      {isAdmin ? (
+        <Link
+          to="/admin"
+          className="press flex w-full items-center justify-center gap-2 rounded-full border border-primary/40 bg-primary/10 py-3 text-sm font-bold uppercase tracking-wider text-primary"
+        >
+          <Shield className="size-4" /> Admin Panel
+        </Link>
+      ) : null}
 
       <button
         onClick={signOut}
