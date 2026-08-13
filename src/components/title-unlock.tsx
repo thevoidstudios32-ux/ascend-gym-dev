@@ -47,7 +47,7 @@ export function TitleUnlockOverlay() {
     return () => window.removeEventListener("keydown", onKey);
   }, [current, close]);
 
-  const def = current ? TITLE_BY_ID[current] : null;
+  const def = current ? (data?.catalog.find((t) => t.id === current) ?? null) : null;
   if (!def || typeof document === "undefined") return null;
 
   const rare = def.rarity === "MYTHIC" || def.rarity === "EXCLUSIVE";
