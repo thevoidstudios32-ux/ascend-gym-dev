@@ -296,9 +296,10 @@ export function ProfileCustomizer({
                             >
                               {style.label}
                             </p>
-                            {!unlocked && b.requirement ? (
-                              <p className="mt-0.5 text-[11px] text-muted-foreground">{b.requirement.label}</p>
+                            {!unlocked && b.requirementLabel ? (
+                              <p className="mt-0.5 text-[11px] text-muted-foreground">{b.requirementLabel}</p>
                             ) : null}
+
                           </div>
                           <button
                             disabled={!unlocked || equipped || equipM.isPending}
