@@ -134,7 +134,7 @@ export function TitleSelector({
                           : "Tocar para equipar"
                         : t.secret && !has
                           ? "Título especial"
-                          : (t.requirement?.label ?? "Bloqueado")}
+                          : (t.requirementLabel ?? "Bloqueado")}
                     </span>
                   </span>
                   <span
