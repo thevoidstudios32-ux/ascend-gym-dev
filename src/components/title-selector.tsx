@@ -27,6 +27,7 @@ export function TitleSelector({
   equipped: string | null;
 }) {
   const equip = useEquipTitle();
+  const { data: titles } = useTitles();
 
   useEffect(() => {
     if (!open) return;
@@ -44,9 +45,12 @@ export function TitleSelector({
 
   if (!open || typeof document === "undefined") return null;
 
-  const list = visibleTitlesFor(userId, owned);
+  void userId;
+  // Catálogo vindo do servidor (código + itens criados no Admin Panel).
+  const catalog: EffectiveTitle[] = titles?.catalog ?? [];
+  const list = catalog.filter((t) => owned.includes(t.id) || (!t.adminOnly && !t.secret));
 
-  function choose(t: TitleDef) {
+  function choose(t: EffectiveTitle) {
     if (!owned.includes(t.id)) return;
     equip.mutate(t.id, {
       onSuccess: () => {
@@ -56,6 +60,7 @@ export function TitleSelector({
       onError: (e: Error) => toast.error(e.message),
     });
   }
+
 
   const stop = (e: React.SyntheticEvent) => e.stopPropagation();
 
