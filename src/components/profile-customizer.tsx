@@ -4,14 +4,12 @@ import { useServerFn } from "@tanstack/react-start";
 import { Camera, Check, ImageIcon, Lock, X } from "lucide-react";
 import { toast } from "sonner";
 import { saveAvatar, saveBanner } from "@/lib/profile-media.functions";
-import {
-  CATEGORY_LABEL,
-  RARITY_STYLE,
-  bannerById,
-  isBannerUnlocked,
-  visibleBanners,
-  type BannerStats,
-} from "@/lib/banners";
+import { useBanners } from "@/hooks/use-banners";
+import { CATEGORY_LABEL, RARITY_STYLE, type BannerCategory, type BannerStats, type Rarity } from "@/lib/banners";
+
+const RARITY_FALLBACK = { color: "#9CA3AF", ring: "ring-white/15", label: "Common" };
+const rarityStyle = (r: string) => RARITY_STYLE[r as Rarity] ?? RARITY_FALLBACK;
+
 
 type Props = {
   open: boolean;
