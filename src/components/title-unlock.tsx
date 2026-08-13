@@ -3,7 +3,6 @@ import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { TitleBadge } from "@/components/title-badge";
 import { useMarkTitleShown, useTitles } from "@/hooks/use-titles";
-import { TITLE_BY_ID } from "@/lib/titles";
 
 /**
  * Animação "TITLE UNLOCKED" — aparece uma única vez por título desbloqueado.
@@ -47,7 +46,7 @@ export function TitleUnlockOverlay() {
     return () => window.removeEventListener("keydown", onKey);
   }, [current, close]);
 
-  const def = current ? TITLE_BY_ID[current] : null;
+  const def = current ? (data?.catalog.find((t) => t.id === current) ?? null) : null;
   if (!def || typeof document === "undefined") return null;
 
   const rare = def.rarity === "MYTHIC" || def.rarity === "EXCLUSIVE";

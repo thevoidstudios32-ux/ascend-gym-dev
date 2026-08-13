@@ -4,14 +4,12 @@ import { useServerFn } from "@tanstack/react-start";
 import { Camera, Check, ImageIcon, Lock, X } from "lucide-react";
 import { toast } from "sonner";
 import { saveAvatar, saveBanner } from "@/lib/profile-media.functions";
-import {
-  CATEGORY_LABEL,
-  RARITY_STYLE,
-  bannerById,
-  isBannerUnlocked,
-  visibleBanners,
-  type BannerStats,
-} from "@/lib/banners";
+import { useBanners } from "@/hooks/use-banners";
+import { CATEGORY_LABEL, RARITY_STYLE, type BannerCategory, type BannerStats, type Rarity } from "@/lib/banners";
+
+const RARITY_FALLBACK = { color: "#9CA3AF", ring: "ring-white/15", label: "Common" };
+const rarityStyle = (r: string) => RARITY_STYLE[r as Rarity] ?? RARITY_FALLBACK;
+
 
 type Props = {
   open: boolean;
@@ -59,6 +57,13 @@ export function ProfileCustomizer({
 
   const avatarFn = useServerFn(saveAvatar);
   const bannerFn = useServerFn(saveBanner);
+
+  // Desbloqueio e catálogo vêm do servidor (inclui itens criados no Admin Panel).
+  void userId;
+  void stats;
+  const { data: bannersData } = useBanners();
+  const allBanners = bannersData?.banners ?? [];
+
 
   useEffect(() => {
     if (!open) {
@@ -241,8 +246,10 @@ export function ProfileCustomizer({
           </div>
         ) : (
           <div className="mt-5 space-y-5">
-            {(["CORE", "FORGED", "LEGACY", "VOID"] as const).map((cat) => {
-              const list = visibleBanners(userId).filter((b) => b.category === cat);
+            {(["CORE", "FORGED", "LEGACY", "VOID"] as BannerCategory[]).map((cat) => {
+              const list = allBanners.filter(
+                (b) => b.category === cat && (b.category !== "VOID" || b.unlocked),
+              );
               if (!list.length) return null;
               return (
                 <div key={cat} className="space-y-3">
@@ -257,9 +264,10 @@ export function ProfileCustomizer({
                           : " · exclusivo"}
                   </p>
                   {list.map((b) => {
-                    const unlocked = isBannerUnlocked(b, stats, userId);
-                    const equipped = bannerById(currentBanner).id === b.id;
-                    const style = RARITY_STYLE[b.rarity];
+                    const unlocked = b.unlocked;
+                    const equipped = (currentBanner ?? "throne-hall") === b.id;
+                    const style = rarityStyle(b.rarity);
+
                     return (
                       <div
                         key={b.id}
@@ -288,9 +296,10 @@ export function ProfileCustomizer({
                             >
                               {style.label}
                             </p>
-                            {!unlocked && b.requirement ? (
-                              <p className="mt-0.5 text-[11px] text-muted-foreground">{b.requirement.label}</p>
+                            {!unlocked && b.requirementLabel ? (
+                              <p className="mt-0.5 text-[11px] text-muted-foreground">{b.requirementLabel}</p>
                             ) : null}
+
                           </div>
                           <button
                             disabled={!unlocked || equipped || equipM.isPending}

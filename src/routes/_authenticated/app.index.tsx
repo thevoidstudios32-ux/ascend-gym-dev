@@ -267,7 +267,7 @@ function Dashboard({ data }: { data: DashboardData }) {
       <section className="glass animate-pop p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <TitleBadge visual={shown.visual} size="sm" onClick={() => setTitlesOpen(true)} />
+            <TitleBadge visual={titles?.equippedVisual ?? shown.visual} size="sm" onClick={() => setTitlesOpen(true)} />
             <TitleSelector
               open={titlesOpen}
               onClose={() => setTitlesOpen(false)}

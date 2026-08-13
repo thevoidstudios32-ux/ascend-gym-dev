@@ -283,6 +283,87 @@ export type Database = {
         }
         Relationships: []
       }
+      content_items: {
+        Row: {
+          active: boolean
+          admin_only: boolean
+          builtin: boolean
+          category: string | null
+          color: string | null
+          created_at: string
+          deleted_at: string | null
+          description: string | null
+          emoji: string | null
+          glow: string | null
+          gradient: string | null
+          id: string
+          image_position: string | null
+          image_url: string | null
+          kind: string
+          name: string
+          rarity: string
+          slug: string
+          sort_order: number
+          unlock_label: string | null
+          unlock_type: string
+          unlock_value: number | null
+          updated_at: string
+          xp_reward: number
+        }
+        Insert: {
+          active?: boolean
+          admin_only?: boolean
+          builtin?: boolean
+          category?: string | null
+          color?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          emoji?: string | null
+          glow?: string | null
+          gradient?: string | null
+          id?: string
+          image_position?: string | null
+          image_url?: string | null
+          kind: string
+          name: string
+          rarity?: string
+          slug: string
+          sort_order?: number
+          unlock_label?: string | null
+          unlock_type?: string
+          unlock_value?: number | null
+          updated_at?: string
+          xp_reward?: number
+        }
+        Update: {
+          active?: boolean
+          admin_only?: boolean
+          builtin?: boolean
+          category?: string | null
+          color?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          emoji?: string | null
+          glow?: string | null
+          gradient?: string | null
+          id?: string
+          image_position?: string | null
+          image_url?: string | null
+          kind?: string
+          name?: string
+          rarity?: string
+          slug?: string
+          sort_order?: number
+          unlock_label?: string | null
+          unlock_type?: string
+          unlock_value?: number | null
+          updated_at?: string
+          xp_reward?: number
+        }
+        Relationships: []
+      }
       custom_workout_versions: {
         Row: {
           created_at: string
