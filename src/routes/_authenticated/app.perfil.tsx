@@ -11,6 +11,7 @@ import { TitleBadge } from "@/components/title-badge";
 import { displayTitle } from "@/lib/titles";
 import { TitleSelector } from "@/components/title-selector";
 import { useTitles } from "@/hooks/use-titles";
+import { useBanners } from "@/hooks/use-banners";
 import { useAdminStatus } from "@/hooks/use-admin";
 import { useDashboard, useExtras, useRefreshDashboard } from "@/hooks/use-dashboard";
 import { saveProfile } from "@/lib/ascend.functions";
@@ -46,6 +47,7 @@ function PerfilPage() {
   const [customizing, setCustomizing] = useState(false);
   const [titlesOpen, setTitlesOpen] = useState(false);
   const { data: titles } = useTitles();
+  const { data: bannersData } = useBanners();
 
 
 
@@ -114,7 +116,8 @@ function PerfilPage() {
       .map((s) => s[0]!.toUpperCase())
       .join("") || "A";
   const imc = bmi(p.weight_kg ? Number(p.weight_kg) : null, p.height_cm ? Number(p.height_cm) : null);
-  const banner = bannerById(p.banner_id);
+  const banner =
+    bannersData?.banners.find((b) => b.id === p.banner_id) ?? bannerById(p.banner_id);
 
   return (
     <div className="animate-rise space-y-5">
@@ -162,7 +165,7 @@ function PerfilPage() {
             {p.goal} · {p.experience}
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <TitleBadge visual={shown.visual} size="md" onClick={() => setTitlesOpen(true)} />
+            <TitleBadge visual={titles?.equippedVisual ?? shown.visual} size="md" onClick={() => setTitlesOpen(true)} />
             <TitleSelector
               open={titlesOpen}
               onClose={() => setTitlesOpen(false)}
