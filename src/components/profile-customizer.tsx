@@ -58,6 +58,13 @@ export function ProfileCustomizer({
   const avatarFn = useServerFn(saveAvatar);
   const bannerFn = useServerFn(saveBanner);
 
+  // Desbloqueio e catálogo vêm do servidor (inclui itens criados no Admin Panel).
+  void userId;
+  void stats;
+  const { data: bannersData } = useBanners();
+  const allBanners = bannersData?.banners ?? [];
+
+
   useEffect(() => {
     if (!open) {
       setSrc(null);
