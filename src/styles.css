@@ -599,3 +599,14 @@
     animation: none;
   }
 }
+
+/* Campo de formulário usado no Admin Panel. */
+@utility inp {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-elevated);
+  padding: 0.55rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--color-foreground);
+}
