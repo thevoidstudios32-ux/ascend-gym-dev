@@ -3,8 +3,10 @@ import { createPortal } from "react-dom";
 import { Lock, X } from "lucide-react";
 import { toast } from "sonner";
 import { TitleBadge } from "@/components/title-badge";
-import { useEquipTitle } from "@/hooks/use-titles";
-import { TITLE_RARITY_STYLE, visibleTitlesFor, type TitleDef } from "@/lib/titles";
+import { useEquipTitle, useTitles } from "@/hooks/use-titles";
+import { TITLE_RARITY_STYLE } from "@/lib/titles";
+import type { EffectiveTitle } from "@/lib/content";
+
 
 /**
  * Seletor compacto de títulos: mostra os títulos possuídos (equipáveis) e os
