@@ -197,7 +197,10 @@ function ContentForm({ value, onClose }: { value: ContentPayload; onClose: () =>
 
   function pickImage(file?: File) {
     if (!file) return;
-    if (file.size > 2_500_000) return toast.error("Imagem muito grande (máx. 2.5MB)");
+    if (file.size > 2_500_000) {
+      toast.error("Imagem muito grande (máx. 2.5MB)");
+      return;
+    }
     const reader = new FileReader();
     reader.onload = () => {
       const dataUrl = String(reader.result);
