@@ -27,17 +27,44 @@ export const saveAvatar = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-/** Equipa um banner de perfil. */
+/** Equipa um banner de perfil (catálogo em código + itens do Admin Panel). */
 export const saveBanner = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data) => z.object({ banner_id: z.string().min(1).max(40) }).parse(data))
+  .inputValidator((data) => z.object({ banner_id: z.string().min(1).max(60) }).parse(data))
   .handler(async ({ context, data }) => {
-    const { BANNERS, isVoidOwner } = await import("@/lib/banners");
-    const banner = BANNERS.find((b) => b.id === data.banner_id);
-    if (!banner) throw new Error("Banner inválido");
-    if (banner.category === "VOID" && !isVoidOwner(context.userId)) {
+    const { mergeBanners, isBannerUnlockedFor } = await import("@/lib/content");
+    const { resolveImages } = await import("@/lib/content.functions");
+    const { computeStreak, levelFromXp } = await import("@/lib/ascend");
+
+    const [rowsRes, profileRes, workoutsRes, achievementsRes, roleRes] = await Promise.all([
+      context.supabase.from("content_items").select("*").eq("kind", "banner"),
+      context.supabase.from("profiles").select("xp").eq("id", context.userId).maybeSingle(),
+      context.supabase.from("workouts").select("date").eq("user_id", context.userId),
+      context.supabase.from("achievements").select("code").eq("user_id", context.userId),
+      context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" }),
+    ]);
+
+    const rows = await resolveImages(context.supabase, (rowsRes.data ?? []) as never);
+    const merged = mergeBanners(rows);
+    const target = merged.find((m) => m.effective.id === data.banner_id);
+    if (!target) throw new Error("Banner inválido");
+
+    const xp = profileRes.data?.xp ?? 0;
+    const achievements = achievementsRes.data?.length ?? 0;
+    const stats = {
+      xp,
+      level: levelFromXp(xp).level,
+      workouts: workoutsRes.data?.length ?? 0,
+      achievements,
+      medals: achievements,
+      streak: computeStreak((workoutsRes.data ?? []).map((w) => w.date)),
+      onboarded: true,
+    };
+
+    if (!isBannerUnlockedFor(target.effective, target.base, stats, roleRes.data === true, context.userId)) {
       throw new Error("Banner indisponível");
     }
+
     const { error } = await context.supabase
       .from("profiles")
       .update({ banner_id: data.banner_id })
@@ -45,4 +72,5 @@ export const saveBanner = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
 
