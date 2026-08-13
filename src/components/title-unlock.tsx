@@ -3,7 +3,6 @@ import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { TitleBadge } from "@/components/title-badge";
 import { useMarkTitleShown, useTitles } from "@/hooks/use-titles";
-import { TITLE_BY_ID } from "@/lib/titles";
 
 /**
  * Animação "TITLE UNLOCKED" — aparece uma única vez por título desbloqueado.
