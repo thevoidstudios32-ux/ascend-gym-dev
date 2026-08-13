@@ -8,6 +8,7 @@ import {
   adminToggleContent,
   adminUploadBannerImage,
 } from "@/lib/content.functions";
+import type { ContentPayload } from "@/lib/content";
 
 type Kind = "title" | "banner";
 
@@ -34,7 +35,7 @@ export function useSaveContent() {
   const fn = useServerFn(adminSaveContent);
   const invalidate = useInvalidateContent();
   return useMutation({
-    mutationFn: (data: Parameters<typeof adminSaveContent>[0] extends never ? never : any) => fn({ data }),
+    mutationFn: (data: ContentPayload) => fn({ data }),
     onSuccess: invalidate,
   });
 }

@@ -347,3 +347,25 @@ export function isBannerUnlockedFor(
 }
 
 export { DEFAULT_BANNER_ID };
+
+/** Payload aceito pelo formulário do Admin Panel. */
+export type ContentPayload = {
+  id?: string | null;
+  kind: "title" | "banner";
+  slug: string;
+  name: string;
+  description?: string | null;
+  rarity: ContentRarity;
+  unlock_type: UnlockType;
+  unlock_value?: number | null;
+  unlock_label?: string | null;
+  xp_reward: number;
+  image_url?: string | null;
+  image_position?: string | null;
+  category?: "CORE" | "FORGED" | "LEGACY" | "VOID" | null;
+  emoji?: string | null;
+  color?: string | null;
+  active: boolean;
+  admin_only: boolean;
+  sort_order: number;
+};
