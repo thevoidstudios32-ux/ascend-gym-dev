@@ -239,8 +239,10 @@ export function ProfileCustomizer({
           </div>
         ) : (
           <div className="mt-5 space-y-5">
-            {(["CORE", "FORGED", "LEGACY", "VOID"] as const).map((cat) => {
-              const list = visibleBanners(userId).filter((b) => b.category === cat);
+            {(["CORE", "FORGED", "LEGACY", "VOID"] as BannerCategory[]).map((cat) => {
+              const list = allBanners.filter(
+                (b) => b.category === cat && (b.category !== "VOID" || b.unlocked),
+              );
               if (!list.length) return null;
               return (
                 <div key={cat} className="space-y-3">
@@ -255,9 +257,10 @@ export function ProfileCustomizer({
                           : " · exclusivo"}
                   </p>
                   {list.map((b) => {
-                    const unlocked = isBannerUnlocked(b, stats, userId);
-                    const equipped = bannerById(currentBanner).id === b.id;
-                    const style = RARITY_STYLE[b.rarity];
+                    const unlocked = b.unlocked;
+                    const equipped = (currentBanner ?? "throne-hall") === b.id;
+                    const style = rarityStyle(b.rarity);
+
                     return (
                       <div
                         key={b.id}
