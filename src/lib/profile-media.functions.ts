@@ -38,7 +38,7 @@ export const saveBanner = createServerFn({ method: "POST" })
 
     const [rowsRes, profileRes, workoutsRes, achievementsRes, roleRes] = await Promise.all([
       context.supabase.from("content_items").select("*").eq("kind", "banner"),
-      context.supabase.from("profiles").select("xp").eq("id", context.userId).maybeSingle(),
+      context.supabase.from("profiles").select("xp,verified").eq("id", context.userId).maybeSingle(),
       context.supabase.from("workouts").select("date").eq("user_id", context.userId),
       context.supabase.from("achievements").select("code").eq("user_id", context.userId),
       context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" }),
@@ -61,7 +61,16 @@ export const saveBanner = createServerFn({ method: "POST" })
       onboarded: true,
     };
 
-    if (!isBannerUnlockedFor(target.effective, target.base, stats, roleRes.data === true, context.userId)) {
+    if (
+      !isBannerUnlockedFor(
+        target.effective,
+        target.base,
+        stats,
+        roleRes.data === true,
+        context.userId,
+        profileRes.data?.verified === true,
+      )
+    ) {
       throw new Error("Banner indisponível");
     }
 

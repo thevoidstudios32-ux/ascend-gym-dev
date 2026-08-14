@@ -749,6 +749,9 @@ export type Database = {
           training_since: string | null
           updated_at: string
           username: string | null
+          verified: boolean
+          verified_at: string | null
+          verified_by: string | null
           weight_kg: number | null
           xp: number
         }
@@ -777,6 +780,9 @@ export type Database = {
           training_since?: string | null
           updated_at?: string
           username?: string | null
+          verified?: boolean
+          verified_at?: string | null
+          verified_by?: string | null
           weight_kg?: number | null
           xp?: number
         }
@@ -805,6 +811,9 @@ export type Database = {
           training_since?: string | null
           updated_at?: string
           username?: string | null
+          verified?: boolean
+          verified_at?: string | null
+          verified_by?: string | null
           weight_kg?: number | null
           xp?: number
         }
@@ -1100,6 +1109,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_verified: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"

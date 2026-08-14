@@ -8,7 +8,10 @@ type Props = {
   /** Mostra skeleton enquanto o perfil ainda está carregando. */
   loading?: boolean;
   rounded?: string;
+  /** Story ativo: aplica o light sweep POR CIMA da foto (sem anel extra). */
+  story?: boolean;
 };
+
 
 export function initialsOf(name?: string | null) {
   return (
@@ -31,6 +34,7 @@ export function UserAvatar({
   className = "size-12",
   loading = false,
   rounded = "rounded-2xl",
+  story = false,
 }: Props) {
   const [failed, setFailed] = useState(false);
   const showImg = !!src && !failed;
@@ -54,6 +58,8 @@ export function UserAvatar({
       ) : (
         <span>{initialsOf(name)}</span>
       )}
+      {story && <i aria-hidden className="avatar-sweep" />}
     </div>
   );
 }
+

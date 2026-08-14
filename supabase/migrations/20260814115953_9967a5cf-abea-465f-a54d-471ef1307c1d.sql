@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.protect_verified_fields() FROM public, anon, authenticated;

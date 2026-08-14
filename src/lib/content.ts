@@ -252,10 +252,11 @@ export function shouldUnlockTitle(
   stats: TitleStats,
   isAdminUser: boolean,
   userId: string,
+  verified = false,
 ): boolean {
   if (t.adminOnly || t.unlockType === "admin_only") {
-    if (base?.exclusiveTo) return base.exclusiveTo.includes(userId);
-    return isAdminUser;
+    if (base?.exclusiveTo) return base.exclusiveTo.includes(userId) || isAdminUser;
+    return isAdminUser || verified;
   }
   if (t.unlockType === "manual") {
     return base?.requirement ? base.requirement.check(stats) : false;
@@ -326,10 +327,12 @@ export function isBannerUnlockedFor(
   stats: TitleStats & { medals: number },
   isAdminUser: boolean,
   userId: string | null,
+  verified = false,
 ): boolean {
   if (b.adminOnly || b.unlockType === "admin_only") {
+    // Itens VOID continuam exclusivos da The Void Studios — verified NÃO libera.
     if (base?.category === "VOID") return isVoidOwner(userId) || isAdminUser;
-    return isAdminUser;
+    return isAdminUser || verified;
   }
   if (b.unlockType === "manual") {
     if (!base) return true;
@@ -369,3 +372,12 @@ export type ContentPayload = {
   admin_only: boolean;
   sort_order: number;
 };
+
+/** Item classificado como ADMIN (liberado para verified), excluindo os VOID. */
+export function isAdminOnlyBanner(b: EffectiveBanner, base: Banner | null) {
+  return (b.adminOnly || b.unlockType === "admin_only") && base?.category !== "VOID";
+}
+
+export function isAdminOnlyTitle(t: EffectiveTitle, base: TitleDef | null) {
+  return (t.adminOnly || t.unlockType === "admin_only") && !base?.exclusiveTo;
+}

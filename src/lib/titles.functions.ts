@@ -17,7 +17,7 @@ export const getTitles = createServerFn({ method: "GET" })
     const { supabase, userId } = context;
 
     const [profileRes, workoutsRes, achievementsRes, ownedRes, contentRes, roleRes] = await Promise.all([
-      supabase.from("profiles").select("xp,onboarded,equipped_title_id").eq("id", userId).maybeSingle(),
+      supabase.from("profiles").select("xp,onboarded,equipped_title_id,verified").eq("id", userId).maybeSingle(),
       supabase.from("workouts").select("date").eq("user_id", userId),
       supabase.from("achievements").select("code").eq("user_id", userId),
       supabase.from("user_titles").select("title_id,reward_shown,xp_awarded,unlocked_at").eq("user_id", userId),
@@ -30,6 +30,7 @@ export const getTitles = createServerFn({ method: "GET" })
     const owned: OwnedRow[] = (ownedRes.data ?? []) as OwnedRow[];
     const ownedIds = new Set(owned.map((o) => o.title_id));
     const isAdminUser = roleRes.data === true;
+    const isVerified = profileRes.data?.verified === true;
 
     const stats: TitleStats = {
       xp,
@@ -47,7 +48,7 @@ export const getTitles = createServerFn({ method: "GET" })
     const toUnlock = merged.filter(
       (m) =>
         !ownedIds.has(m.effective.id) &&
-        shouldUnlockTitle(m.effective, m.base, stats, isAdminUser, userId),
+        shouldUnlockTitle(m.effective, m.base, stats, isAdminUser, userId, isVerified),
     );
 
     for (const m of toUnlock) {

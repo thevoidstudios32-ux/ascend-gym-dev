@@ -610,3 +610,53 @@
   font-size: 0.875rem;
   color: var(--color-foreground);
 }
+
+/* ===== Light sweep — indicador de Story ativo sobre a própria foto ===== */
+@keyframes avatar-light-sweep {
+  0% {
+    transform: translateX(-170%) rotate(18deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.95;
+  }
+  90% {
+    opacity: 0.35;
+  }
+  100% {
+    transform: translateX(170%) rotate(18deg);
+    opacity: 0;
+  }
+}
+
+/* Faixa luminosa que atravessa a imagem — recortada pelo overflow do avatar. */
+.avatar-sweep {
+  position: absolute;
+  top: -40%;
+  bottom: -40%;
+  left: 0;
+  width: 55%;
+  pointer-events: none;
+  z-index: 2;
+  mix-blend-mode: screen;
+  background: linear-gradient(
+    100deg,
+    transparent 12%,
+    rgb(255 255 255 / 0.1) 34%,
+    rgb(255 255 255 / 0.62) 50%,
+    rgb(255 210 210 / 0.45) 58%,
+    rgb(220 38 38 / 0.22) 66%,
+    transparent 88%
+  );
+  filter: blur(0.4px);
+  animation: avatar-light-sweep 3.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .avatar-sweep {
+    display: none;
+  }
+}

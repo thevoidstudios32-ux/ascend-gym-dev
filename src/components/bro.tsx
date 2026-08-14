@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { broRank, handleOf, initials } from "@/lib/social";
+import { VerifiedBadge } from "@/components/verified-badge";
 
 type MiniProfile = {
   id: string;
@@ -7,6 +8,7 @@ type MiniProfile = {
   username: string | null;
   avatar_url: string | null;
   xp?: number | null;
+  verified?: boolean | null;
 };
 
 const SIZES = { sm: "size-9 text-[11px]", md: "size-12 text-sm", lg: "size-20 text-xl" } as const;
@@ -15,15 +17,18 @@ export function BroAvatar({
   profile,
   size = "md",
   ring = false,
+  story = false,
 }: {
   profile: MiniProfile | undefined;
   size?: keyof typeof SIZES;
   ring?: boolean;
+  /** Story ativo: light sweep sobre a própria imagem (sem moldura extra). */
+  story?: boolean;
 }) {
   const name = profile?.name ?? "Bro";
   return (
     <span
-      className={`grid shrink-0 place-items-center overflow-hidden rounded-full bg-elevated font-extrabold uppercase text-foreground ${
+      className={`relative grid shrink-0 place-items-center overflow-hidden rounded-full bg-elevated font-extrabold uppercase text-foreground ${
         SIZES[size]
       } ${ring ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : "ring-1 ring-border"}`}
     >
@@ -32,6 +37,7 @@ export function BroAvatar({
       ) : (
         initials(name)
       )}
+      {story && <i aria-hidden className="avatar-sweep" />}
     </span>
   );
 }
@@ -56,6 +62,7 @@ export function BroIdentity({
       <span className="min-w-0">
         <span className="flex items-center gap-1.5 truncate font-bold leading-tight">
           {profile?.name ?? "Bro"}
+          {profile?.verified && <VerifiedBadge size="sm" />}
           <span title={rank.name}>{rank.icon}</span>
         </span>
         <span className="block truncate text-xs text-muted-foreground">
@@ -65,6 +72,7 @@ export function BroIdentity({
     </Link>
   );
 }
+
 
 export function RankBadge({ xp }: { xp: number }) {
   const rank = broRank(xp);
