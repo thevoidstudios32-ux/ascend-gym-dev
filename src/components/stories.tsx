@@ -113,15 +113,7 @@ export function StoriesRow({ preset }: { preset?: StoryDraft | null }) {
             aria-label={mine ? "Ver seu story" : "Criar story"}
             className="press"
           >
-            <span
-              className={`grid place-items-center rounded-full p-[2.5px] ${
-                mine?.unseen ? "story-ring" : "bg-border"
-              }`}
-            >
-              <span className="rounded-full bg-background p-[2px]">
-                <BroAvatar profile={profileOf(data?.me ?? "")} size="md" />
-              </span>
-            </span>
+            <BroAvatar profile={profileOf(data?.me ?? "")} size="md" story={!!mine} />
           </button>
           {/* Botão "+" separado: SEMPRE abre a criação de um novo story. */}
           <button
@@ -145,20 +137,13 @@ export function StoriesRow({ preset }: { preset?: StoryDraft | null }) {
             onClick={() => setOpenUser(g.userId)}
             className="press flex w-[68px] shrink-0 flex-col items-center gap-1.5"
           >
-            <span
-              className={`grid place-items-center rounded-full p-[2.5px] ${
-                g.unseen ? "story-ring" : "bg-border"
-              }`}
-            >
-              <span className="rounded-full bg-background p-[2px]">
-                <BroAvatar profile={profileOf(g.userId)} size="md" />
-              </span>
-            </span>
+            <BroAvatar profile={profileOf(g.userId)} size="md" story />
             <span className="w-full truncate text-center text-[11px] font-semibold text-muted-foreground">
               {profileOf(g.userId)?.name?.split(" ")[0] ?? "Bro"}
             </span>
           </button>
         ))}
+
 
         {others.length === 0 && (
           <div className="flex items-center pl-1 text-xs text-muted-foreground">
