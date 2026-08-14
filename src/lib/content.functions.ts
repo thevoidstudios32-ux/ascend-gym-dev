@@ -53,13 +53,14 @@ export async function resolveImages(supabase: any, rows: ContentRow[]) {
 
 async function loadStats(supabase: any, userId: string) {
   const [profileRes, workoutsRes, achievementsRes] = await Promise.all([
-    supabase.from("profiles").select("xp").eq("id", userId).maybeSingle(),
+    supabase.from("profiles").select("xp,verified").eq("id", userId).maybeSingle(),
     supabase.from("workouts").select("date").eq("user_id", userId),
     supabase.from("achievements").select("code").eq("user_id", userId),
   ]);
   const xp = profileRes.data?.xp ?? 0;
   const achievements = achievementsRes.data?.length ?? 0;
   return {
+    verified: profileRes.data?.verified === true,
     xp,
     level: levelFromXp(xp).level,
     workouts: workoutsRes.data?.length ?? 0,
@@ -85,7 +86,7 @@ export const getBanners = createServerFn({ method: "GET" })
     return {
       banners: merged.map((m) => ({
         ...m.effective,
-        unlocked: isBannerUnlockedFor(m.effective, m.base, stats, admin, userId),
+        unlocked: isBannerUnlockedFor(m.effective, m.base, stats, admin, userId, stats.verified),
       })),
     };
   });
