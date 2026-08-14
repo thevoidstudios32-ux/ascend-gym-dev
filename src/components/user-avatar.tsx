@@ -34,6 +34,7 @@ export function UserAvatar({
   className = "size-12",
   loading = false,
   rounded = "rounded-2xl",
+  story = false,
 }: Props) {
   const [failed, setFailed] = useState(false);
   const showImg = !!src && !failed;
@@ -57,6 +58,8 @@ export function UserAvatar({
       ) : (
         <span>{initialsOf(name)}</span>
       )}
+      {story && <i aria-hidden className="avatar-sweep" />}
     </div>
   );
 }
+
