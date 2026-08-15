@@ -44,7 +44,7 @@ export const getExtras = createServerFn({ method: "GET" })
       measurements: measurements.data ?? [],
       photos: photos.data ?? [],
       photoUrls: signed,
-      achievements: badges.rows.map((a) => a.code),
+      achievements: badges.rows.map((a: AchievementRow) => a.code),
       achievementRows: badges.rows,
       achievementContext: badges.context,
       sets: sets.data ?? [],
