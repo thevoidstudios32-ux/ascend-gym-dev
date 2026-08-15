@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useHasStory } from "@/hooks/use-story-ring";
 
 type Props = {
   /** URL da foto (data URL ou http). */
@@ -10,6 +11,8 @@ type Props = {
   rounded?: string;
   /** Story ativo: aplica o light sweep POR CIMA da foto (sem anel extra). */
   story?: boolean;
+  /** Quando informado, o light sweep é detectado automaticamente para esse usuário. */
+  userId?: string | null;
 };
 
 
