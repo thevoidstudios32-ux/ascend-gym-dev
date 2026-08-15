@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useHasStory } from "@/hooks/use-story-ring";
 
 type Props = {
   /** URL da foto (data URL ou http). */
@@ -10,6 +11,8 @@ type Props = {
   rounded?: string;
   /** Story ativo: aplica o light sweep POR CIMA da foto (sem anel extra). */
   story?: boolean;
+  /** Quando informado, o light sweep é detectado automaticamente para esse usuário. */
+  userId?: string | null;
 };
 
 
@@ -34,9 +37,12 @@ export function UserAvatar({
   className = "size-12",
   loading = false,
   rounded = "rounded-2xl",
-  story = false,
+  story,
+  userId,
 }: Props) {
   const [failed, setFailed] = useState(false);
+  const auto = useHasStory(userId);
+  const sweeping = story ?? auto;
   const showImg = !!src && !failed;
 
   if (loading) {
@@ -58,7 +64,7 @@ export function UserAvatar({
       ) : (
         <span>{initialsOf(name)}</span>
       )}
-      {story && <i aria-hidden className="avatar-sweep" />}
+      {sweeping && <i aria-hidden className="avatar-sweep" />}
     </div>
   );
 }

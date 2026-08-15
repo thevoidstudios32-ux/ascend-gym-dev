@@ -252,7 +252,7 @@ function Dashboard({ data }: { data: DashboardData }) {
   return (
     <div className="animate-rise space-y-4">
       <header className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
-        <UserAvatar src={profile.avatar_url ?? null} name={profile.name} className="size-12" />
+        <UserAvatar src={profile.avatar_url ?? null} name={profile.name} userId={profile.id} className="size-12" />
         <div className="min-w-0">
           <p className="text-xs text-muted-foreground">{greeting()},</p>
           <h1 className="truncate text-display text-3xl">{profile.name}</h1>
