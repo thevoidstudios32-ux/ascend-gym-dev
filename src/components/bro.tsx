@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { broRank, handleOf, initials } from "@/lib/social";
 import { VerifiedBadge } from "@/components/verified-badge";
+import { useHasStory } from "@/hooks/use-story-ring";
 
 type MiniProfile = {
   id: string;
@@ -17,15 +18,17 @@ export function BroAvatar({
   profile,
   size = "md",
   ring = false,
-  story = false,
+  story,
 }: {
   profile: MiniProfile | undefined;
   size?: keyof typeof SIZES;
   ring?: boolean;
-  /** Story ativo: light sweep sobre a própria imagem (sem moldura extra). */
+  /** Story ativo: light sweep sobre a própria imagem. Se omitido, é detectado automaticamente. */
   story?: boolean;
 }) {
   const name = profile?.name ?? "Bro";
+  const auto = useHasStory(profile?.id);
+  const sweeping = story ?? auto;
   return (
     <span
       className={`relative grid shrink-0 place-items-center overflow-hidden rounded-full bg-elevated font-extrabold uppercase text-foreground ${
@@ -37,7 +40,7 @@ export function BroAvatar({
       ) : (
         initials(name)
       )}
-      {story && <i aria-hidden className="avatar-sweep" />}
+      {sweeping && <i aria-hidden className="avatar-sweep" />}
     </span>
   );
 }
