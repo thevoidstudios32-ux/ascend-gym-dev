@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { analyzeShape } from "@/lib/coach.server";
 import { ACHIEVEMENTS, computeStreak, levelFromXp, waterTarget } from "@/lib/ascend";
+import { syncAchievements, type AchievementRow } from "@/lib/achievements.server";
 import { z } from "zod";
 
 const setSchema = z.object({
