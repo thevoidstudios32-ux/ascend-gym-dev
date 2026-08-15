@@ -145,6 +145,7 @@ function PerfilPage() {
               ) : (
                 initials
               )}
+              {hasStory && <i aria-hidden className="avatar-sweep" />}
               <span className="absolute bottom-0 inset-x-0 grid place-items-center bg-black/60 py-1">
                 <Camera className="size-3.5 text-white" />
               </span>
