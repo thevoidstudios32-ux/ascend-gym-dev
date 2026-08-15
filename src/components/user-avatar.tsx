@@ -37,9 +37,12 @@ export function UserAvatar({
   className = "size-12",
   loading = false,
   rounded = "rounded-2xl",
-  story = false,
+  story,
+  userId,
 }: Props) {
   const [failed, setFailed] = useState(false);
+  const auto = useHasStory(userId);
+  const sweeping = story ?? auto;
   const showImg = !!src && !failed;
 
   if (loading) {
@@ -61,7 +64,7 @@ export function UserAvatar({
       ) : (
         <span>{initialsOf(name)}</span>
       )}
-      {story && <i aria-hidden className="avatar-sweep" />}
+      {sweeping && <i aria-hidden className="avatar-sweep" />}
     </div>
   );
 }
