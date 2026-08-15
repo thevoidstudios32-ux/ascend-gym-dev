@@ -19,12 +19,14 @@ export const getExtras = createServerFn({ method: "GET" })
     const { supabase, userId } = context;
     const today = new Date().toISOString().slice(0, 10);
 
-    const [water, meals, measurements, photos, achievements, sets] = await Promise.all([
+    // Recalcula/persiste os selos antes de ler (idempotente).
+    const badges = await syncAchievements(supabase as never, userId);
+
+    const [water, meals, measurements, photos, sets] = await Promise.all([
       supabase.from("water_logs").select("*").eq("user_id", userId).order("date", { ascending: false }).limit(30),
       supabase.from("meal_logs").select("*").eq("user_id", userId).eq("date", today).order("created_at"),
       supabase.from("body_measurements").select("*").eq("user_id", userId).order("date", { ascending: false }).limit(30),
       supabase.from("progress_photos").select("*").eq("user_id", userId).order("date", { ascending: false }).limit(20),
-      supabase.from("achievements").select("*").eq("user_id", userId),
       supabase.from("exercise_sets").select("*").eq("user_id", userId).order("created_at", { ascending: false }).limit(200),
     ]);
 
@@ -41,7 +43,9 @@ export const getExtras = createServerFn({ method: "GET" })
       measurements: measurements.data ?? [],
       photos: photos.data ?? [],
       photoUrls: signed,
-      achievements: (achievements.data ?? []).map((a) => a.code),
+      achievements: badges.rows.map((a) => a.code),
+      achievementRows: badges.rows,
+      achievementContext: badges.context,
       sets: sets.data ?? [],
     };
   });
