@@ -15,7 +15,8 @@ const DIMS = {
 } as const;
 
 /** Base compartilhada: altura controla o tamanho, largura sempre automática. */
-const BASE = "block h-auto w-auto max-w-full select-none object-contain";
+const BASE = "block max-w-full select-none object-contain";
+const AUTO_W = { width: "auto" } as const;
 
 /** Logo completa (símbolo + palavra). Usar em login, splash e institucional. */
 export function AscendLogoFull({ className = "h-24 sm:h-32", alt = "ASCEND" }: Props) {
