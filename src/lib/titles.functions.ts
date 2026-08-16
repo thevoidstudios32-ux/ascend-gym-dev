@@ -22,7 +22,7 @@ export const getTitles = createServerFn({ method: "GET" })
       supabase.from("achievements").select("code").eq("user_id", userId),
       supabase.from("user_titles").select("title_id,reward_shown,xp_awarded,unlocked_at").eq("user_id", userId),
       supabase.from("content_items").select("*").eq("kind", "title"),
-      supabase.rpc("has_role", { _user_id: userId, _role: "admin" }),
+      supabase.from("user_roles").select("role").eq("user_id", userId).eq("role", "admin").maybeSingle(),
     ]);
 
     let xp = profileRes.data?.xp ?? 0;

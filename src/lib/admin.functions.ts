@@ -9,19 +9,22 @@ import { addDays, daysBetween, utcDate, type AdminMetrics, type RetentionStat, t
 export const getAdminStatus = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "admin",
-    });
-    return { isAdmin: data === true };
+    return { isAdmin: await checkAdmin(context) };
   });
 
+/** Verifica o papel de admin lendo a tabela de papéis (protegida por RLS). */
+export async function checkAdmin(context: { supabase: any; userId: string }) {
+  const { data } = await context.supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", context.userId)
+    .eq("role", "admin")
+    .maybeSingle();
+  return !!data;
+}
+
 async function assertAdmin(context: { supabase: any; userId: string }) {
-  const { data, error } = await context.supabase.rpc("has_role", {
-    _user_id: context.userId,
-    _role: "admin",
-  });
-  if (error || data !== true) throw new Error("ACCESS DENIED");
+  if (!(await checkAdmin(context))) throw new Error("ACCESS DENIED");
 }
 
 /* ------------------------------ login tracking ----------------------------- */

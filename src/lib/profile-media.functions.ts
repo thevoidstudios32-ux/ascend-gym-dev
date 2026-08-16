@@ -41,7 +41,7 @@ export const saveBanner = createServerFn({ method: "POST" })
       context.supabase.from("profiles").select("xp,verified").eq("id", context.userId).maybeSingle(),
       context.supabase.from("workouts").select("date").eq("user_id", context.userId),
       context.supabase.from("achievements").select("code").eq("user_id", context.userId),
-      context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" }),
+      context.supabase.from("user_roles").select("role").eq("user_id", context.userId).eq("role", "admin").maybeSingle(),
     ]);
 
     const rows = await resolveImages(context.supabase, (rowsRes.data ?? []) as never);
