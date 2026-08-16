@@ -2,6 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
+import { useHasStory } from "@/hooks/use-story-ring";
+
 import { toast } from "sonner";
 import { Camera, Shield, Sparkles } from "lucide-react";
 import { CountUp, LoadingPage, ProgressBar, StatCard } from "@/components/ui-kit";
@@ -48,6 +50,8 @@ function PerfilPage() {
   const [titlesOpen, setTitlesOpen] = useState(false);
   const { data: titles } = useTitles();
   const { data: bannersData } = useBanners();
+  const hasStory = useHasStory(p?.id ?? null);
+
 
 
 
