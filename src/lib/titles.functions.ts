@@ -29,7 +29,7 @@ export const getTitles = createServerFn({ method: "GET" })
     let equipped = profileRes.data?.equipped_title_id ?? null;
     const owned: OwnedRow[] = (ownedRes.data ?? []) as OwnedRow[];
     const ownedIds = new Set(owned.map((o) => o.title_id));
-    const isAdminUser = roleRes.data === true;
+    const isAdminUser = !!roleRes.data;
     const isVerified = profileRes.data?.verified === true;
 
     const stats: TitleStats = {

@@ -66,7 +66,7 @@ export const saveBanner = createServerFn({ method: "POST" })
         target.effective,
         target.base,
         stats,
-        roleRes.data === true,
+        !!roleRes.data,
         context.userId,
         profileRes.data?.verified === true,
       )
