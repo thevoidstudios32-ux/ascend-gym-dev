@@ -32,7 +32,7 @@ export const Route = createFileRoute("/_authenticated")({
   },
   pendingComponent: () => (
     <div className="flex min-h-screen items-center justify-center bg-ember px-8">
-      <AscendLogoFull className="h-32 w-auto animate-pulse sm:h-44" />
+      <AscendLogoFull className="h-24 animate-pulse sm:h-32 md:h-40" />
     </div>
   ),
 

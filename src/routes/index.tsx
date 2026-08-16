@@ -91,7 +91,7 @@ function Landing() {
   return (
     <div className="min-h-screen bg-ember">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-6">
-        <AscendWordmark className="h-6 w-auto md:h-7" />
+        <AscendWordmark className="h-5 sm:h-6 md:h-7" />
 
         <nav className="flex items-center gap-2">
           <Link
@@ -209,7 +209,7 @@ function Landing() {
       </main>
 
       <footer className="flex flex-col items-center gap-3 border-t border-border px-5 py-10 text-center text-xs text-muted-foreground">
-        <AscendSymbol className="size-8" />
+        <AscendSymbol className="h-6 sm:h-7" />
         ASCEND · Gym AI · feito para quem treina de verdade
       </footer>
 

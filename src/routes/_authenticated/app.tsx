@@ -76,9 +76,9 @@ function AppLayout() {
       >
         <Link to="/" className="flex w-full flex-col items-center py-3">
           {collapsed ? (
-            <AscendSymbol className="size-8" />
+            <AscendSymbol className="h-7" />
           ) : (
-            <AscendWordmark className="h-7 w-auto max-w-[10rem]" />
+            <AscendWordmark className="h-6 max-w-[10rem]" />
           )}
         </Link>
 
