@@ -2,13 +2,22 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+/** Aceita apenas imagens enviadas como data URL base64 (bloqueia URLs remotas / SSRF). */
+const imageDataUrl = z
+  .string()
+  .min(50)
+  .max(9_000_000)
+  .refine((v) => /^data:image\/(png|jpe?g|webp);base64,[A-Za-z0-9+/=\s]+$/.test(v), {
+    message: "Envie uma foto válida (imagem enviada do dispositivo).",
+  });
+
 /** Analisa a foto de uma refeição com IA e devolve macros estimados (não salva nada). */
 export const analyzeMealPhoto = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) =>
     z
       .object({
-        image: z.string().min(50).max(9_000_000),
+        image: imageDataUrl,
         notes: z.string().max(300).default(""),
       })
       .parse(data),
@@ -25,7 +34,7 @@ export const scanBarcode = createServerFn({ method: "POST" })
     z
       .object({
         code: z.string().regex(/^\d{6,14}$/).optional(),
-        image: z.string().min(50).max(9_000_000).optional(),
+        image: imageDataUrl.optional(),
       })
       .parse(data),
   )
