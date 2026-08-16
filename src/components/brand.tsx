@@ -26,7 +26,7 @@ export function AscendLogoFull({ className = "h-24 sm:h-32", alt = "ASCEND" }: P
       alt={alt}
       width={DIMS.full.w}
       height={DIMS.full.h}
-      style={{ aspectRatio: `${DIMS.full.w} / ${DIMS.full.h}` }}
+      style={{ ...AUTO_W, aspectRatio: `${DIMS.full.w} / ${DIMS.full.h}` }}
       className={`${BASE} ${className}`}
       draggable={false}
     />
@@ -41,7 +41,7 @@ export function AscendWordmark({ className = "h-5 sm:h-6", alt = "ASCEND" }: Pro
       alt={alt}
       width={DIMS.wordmark.w}
       height={DIMS.wordmark.h}
-      style={{ aspectRatio: `${DIMS.wordmark.w} / ${DIMS.wordmark.h}` }}
+      style={{ ...AUTO_W, aspectRatio: `${DIMS.wordmark.w} / ${DIMS.wordmark.h}` }}
       className={`${BASE} ${className}`}
       draggable={false}
     />
@@ -56,7 +56,7 @@ export function AscendSymbol({ className = "h-8", alt = "ASCEND" }: Props) {
       alt={alt}
       width={DIMS.symbol.w}
       height={DIMS.symbol.h}
-      style={{ aspectRatio: `${DIMS.symbol.w} / ${DIMS.symbol.h}` }}
+      style={{ ...AUTO_W, aspectRatio: `${DIMS.symbol.w} / ${DIMS.symbol.h}` }}
       className={`${BASE} shrink-0 ${className}`}
       draggable={false}
     />
