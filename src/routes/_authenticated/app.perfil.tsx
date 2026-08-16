@@ -50,6 +50,8 @@ function PerfilPage() {
   const [titlesOpen, setTitlesOpen] = useState(false);
   const { data: titles } = useTitles();
   const { data: bannersData } = useBanners();
+  const hasStory = useHasStory(p?.id ?? null);
+
 
 
 
