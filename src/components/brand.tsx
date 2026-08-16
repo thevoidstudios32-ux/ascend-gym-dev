@@ -1,20 +1,17 @@
-import fullAsset from "@/assets/branding/ascend-logo-transparent.png.asset.json";
-import wordmarkAsset from "@/assets/branding/ascend-wordmark-transparent.png.asset.json";
-import symbolAsset from "@/assets/branding/ascend-symbol-transparent.png.asset.json";
+import fullAsset from "@/assets/branding/ascend-logo-v2.png.asset.json";
+import wordmarkAsset from "@/assets/branding/ascend-wordmark-v2.png.asset.json";
+import symbolAsset from "@/assets/branding/ascend-symbol-v2.png.asset.json";
 
 type Props = { className?: string; alt?: string };
 
-/**
- * Dimensões intrínsecas reais dos arquivos (px). Servem para o browser reservar
- * o espaço correto e nunca deformar a arte, mesmo antes do download terminar.
- */
+/** Dimensões intrínsecas reais dos arquivos oficiais (px). */
 const DIMS = {
-  full: { w: 1637, h: 836 },
-  wordmark: { w: 1637, h: 335 },
-  symbol: { w: 597, h: 501 },
+  full: { w: 406, h: 208 },
+  wordmark: { w: 411, h: 33 },
+  symbol: { w: 245, h: 205 },
 } as const;
 
-/** Base compartilhada: altura controla o tamanho, largura sempre automática. */
+/** Base compartilhada: altura controla o tamanho, largura sempre automática. Sem efeitos. */
 const BASE = "block max-w-full select-none object-contain";
 const AUTO_W = { width: "auto" } as const;
 
