@@ -94,7 +94,7 @@ function AuthPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-ember px-5 py-10">
       <Link to="/" className="block py-4">
-        <AscendLogoFull className="h-32 w-auto sm:h-40" />
+        <AscendLogoFull className="h-24 sm:h-32 md:h-40" />
       </Link>
 
       <h1 className="mt-2 text-center text-sm text-muted-foreground">
