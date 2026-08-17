@@ -724,7 +724,7 @@ export function StoryComposer({ preset, onClose }: { preset: StoryDraft | null; 
       </header>
 
       <div
-        className="animate-zoom-in relative mx-4 flex flex-1 items-center justify-center overflow-hidden rounded-3xl"
+        className="animate-zoom-in relative mx-4 flex h-[36vh] max-h-[36vh] items-center justify-center overflow-hidden rounded-3xl sm:h-[44vh] sm:max-h-[44vh]"
         style={{ background: file ? "#111" : backgroundCss(bg) }}
       >
         {previewUrl && file?.type.startsWith("video") ? (
