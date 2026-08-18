@@ -730,7 +730,7 @@ export function StoryComposer({ preset, onClose }: { preset: StoryDraft | null; 
         {previewUrl && file?.type.startsWith("video") ? (
           <video src={previewUrl} className="absolute inset-0 size-full object-cover" autoPlay muted loop playsInline />
         ) : previewUrl ? (
-          <img src={previewUrl" alt="Prévia" className="absolute inset-0 size-full object-cover" />
+          <img src={previewUrl} alt="Prévia" className="absolute inset-0 size-full object-cover" />
         ) : null}
 
         {track ? (
