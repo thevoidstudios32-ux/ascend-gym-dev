@@ -724,13 +724,13 @@ export function StoryComposer({ preset, onClose }: { preset: StoryDraft | null; 
       </header>
 
       <div
-        className="animate-zoom-in relative mx-4 flex h-[30vh] max-h-[30vh] items-center justify-center overflow-hidden rounded-3xl sm:h-[40vh] sm:max-h-[40vh]"
+        className="animate-zoom-in relative mx-4 flex aspect-[9/16] max-h-[380px] items-center justify-center overflow-hidden rounded-3xl sm:max-h-[420px]"
         style={{ background: file ? "#111" : backgroundCss(bg) }}
       >
         {previewUrl && file?.type.startsWith("video") ? (
-          <video src={previewUrl} className="size-full object-contain" autoPlay muted loop playsInline />
+          <video src={previewUrl} className="absolute inset-0 size-full object-cover" autoPlay muted loop playsInline />
         ) : previewUrl ? (
-          <img src={previewUrl} alt="Prévia" className="size-full object-contain" />
+          <img src={previewUrl} alt="Prévia" className="absolute inset-0 size-full object-cover" />
         ) : null}
 
         {track ? (
