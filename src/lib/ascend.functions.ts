@@ -1,7 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { askCoach } from "@/lib/coach.server";
+import { buildContextSummary, collectCoachData } from "@/lib/coach-analysis.server";
 import { computeStreak, levelFromXp, nutritionTargets } from "@/lib/ascend";
+
 import { z } from "zod";
 
 export const getDashboard = createServerFn({ method: "GET" })
