@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import { clearMessages, getMessages, sendMessage } from "@/lib/ascend.functions";
+import { runCoachAnalysis } from "@/lib/coach.functions";
+import { CoachInsights, type AnalysisMode } from "@/components/coach-insights";
 import { useRefreshDashboard } from "@/hooks/use-dashboard";
 import { WorkoutTuner } from "@/components/workout-tuner";
 
@@ -27,6 +29,7 @@ const SUGGESTIONS = [
   "O que comer no pós-treino?",
   "Estou sem motivação, me ajuda",
 ];
+
 
 function CoachPage() {
   const fetchMessages = useServerFn(getMessages);

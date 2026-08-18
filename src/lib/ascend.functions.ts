@@ -1,7 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { askCoach } from "@/lib/coach.server";
-import { computeStreak, levelFromXp, nutritionTargets } from "@/lib/ascend";
+import { buildContextSummary, collectCoachData } from "@/lib/coach-analysis.server";
+
 import { z } from "zod";
 
 export const getDashboard = createServerFn({ method: "GET" })
@@ -201,20 +202,8 @@ export const sendMessage = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
 
-    const [profileRes, workoutsRes, recordsRes, historyRes] = await Promise.all([
-      supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
-      supabase
-        .from("workouts")
-        .select("date,title")
-        .eq("user_id", userId)
-        .order("date", { ascending: false })
-        .limit(30),
-      supabase
-        .from("records")
-        .select("exercise,weight_kg,reps")
-        .eq("user_id", userId)
-        .order("achieved_on", { ascending: false })
-        .limit(10),
+    const [collected, historyRes] = await Promise.all([
+      collectCoachData(supabase as never, userId),
       supabase
         .from("chat_messages")
         .select("role,content")
@@ -223,41 +212,16 @@ export const sendMessage = createServerFn({ method: "POST" })
         .limit(16),
     ]);
 
-    const profile = profileRes.data;
-    const workouts = workoutsRes.data ?? [];
-    const records = recordsRes.data ?? [];
-    const level = levelFromXp(profile?.xp ?? 0);
-    const targets = profile
-      ? nutritionTargets({
-          weight_kg: profile.weight_kg,
-          height_cm: profile.height_cm,
-          age: profile.age,
-          goal: profile.goal,
-        })
-      : null;
+    const summary = buildContextSummary(collected);
 
-    const summary = [
-      `Nome: ${profile?.name ?? "Atleta"}`,
-      `Objetivo: ${profile?.goal ?? "-"} | Experiência: ${profile?.experience ?? "-"}`,
-      `Peso: ${profile?.weight_kg ?? "?"} kg | Altura: ${profile?.height_cm ?? "?"} cm | Idade: ${profile?.age ?? "?"}`,
-      `Dias de treino por semana: ${profile?.days_per_week ?? "?"}`,
-      `Nível ${level.level} (${level.name}), ${profile?.xp ?? 0} XP`,
-      `Sequência atual: ${computeStreak(workouts.map((w) => w.date))} dias`,
-      `Treinos registrados (últimos): ${workouts.map((w) => `${w.date} ${w.title}`).join("; ") || "nenhum"}`,
-      `Recordes: ${records.map((r) => `${r.exercise} ${r.weight_kg}kg x${r.reps}`).join("; ") || "nenhum"}`,
-      targets
-        ? `Meta nutricional estimada: ${targets.kcal} kcal, ${targets.protein}g proteína, ${targets.carbs}g carbo, ${targets.fat}g gordura`
-        : "",
-    ]
-      .filter(Boolean)
-      .join("\n");
-
-    const history = (historyRes.data ?? [])
+    const history = ((historyRes.data ?? []) as { role: string; content: string }[])
       .slice()
       .reverse()
       .map((m) => ({ role: m.role === "assistant" ? ("assistant" as const) : ("user" as const), content: m.content }));
 
+
     const reply = await askCoach([...history, { role: "user", content: data.text }], summary);
+
 
     await supabase.from("chat_messages").insert([
       { user_id: userId, role: "user", content: data.text },
