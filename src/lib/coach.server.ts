@@ -23,7 +23,19 @@ async function callGateway(body: unknown) {
   return json.choices?.[0]?.message?.content?.trim() || "Não consegui responder agora. Tente de novo.";
 }
 
+/** Chamada genérica system+user — usada pelas análises do Coach. */
+export async function askCoachAnalysis(system: string, user: string) {
+  return callGateway({
+    model: "google/gemini-3.6-flash",
+    messages: [
+      { role: "system", content: system },
+      { role: "user", content: user },
+    ],
+  });
+}
+
 export async function askCoach(history: CoachTurn[], contextSummary: string) {
+
   return callGateway({
     model: "google/gemini-3.6-flash",
     messages: [
