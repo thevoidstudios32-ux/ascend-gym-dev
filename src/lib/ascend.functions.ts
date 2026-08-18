@@ -215,10 +215,11 @@ export const sendMessage = createServerFn({ method: "POST" })
 
     const summary = buildContextSummary(collected);
 
-    const history = (historyRes.data ?? [])
+    const history = ((historyRes.data ?? []) as { role: string; content: string }[])
       .slice()
       .reverse()
       .map((m) => ({ role: m.role === "assistant" ? ("assistant" as const) : ("user" as const), content: m.content }));
+
 
     const reply = await askCoach([...history, { role: "user", content: data.text }], summary);
 
