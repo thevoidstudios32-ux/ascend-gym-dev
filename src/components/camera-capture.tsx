@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   Check,
   Images,
@@ -15,6 +16,11 @@ import {
 type Align = { score: number; stable: boolean };
 
 const TIMERS = [0, 3, 5, 10] as const;
+
+/** Renderiza fora da árvore para evitar stacking contexts do composer. */
+function portal(node: React.ReactNode) {
+  return typeof document === "undefined" ? <>{node}</> : createPortal(node, document.body);
+}
 
 function beep(freq = 880, ms = 90) {
   try {
@@ -64,6 +70,7 @@ export function CameraCapture({
   busy = false,
 }: CameraCaptureProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
   const sampleRef = useRef<HTMLCanvasElement | null>(null);
   const prevFrame = useRef<Uint8ClampedArray | null>(null);
   const goodFrames = useRef(0);
@@ -180,7 +187,7 @@ export function CameraCapture({
 
     /* O vídeo é exibido com object-cover: recortamos exatamente a área visível
        para que a foto final seja idêntica à pré-visualização (sem "zoom"). */
-    const rect = video.getBoundingClientRect();
+    const rect = (stageRef.current ?? video).getBoundingClientRect();
     const vw = video.videoWidth;
     const vh = video.videoHeight;
     const target = rect.width > 0 && rect.height > 0 ? rect.width / rect.height : vw / vh;
@@ -269,9 +276,12 @@ export function CameraCapture({
   /* ------------------------------ revisão ----------------------------- */
   if (shots.length) {
     const current = shots[picked]!;
-    return (
-      <div className="animate-zoom-in fixed inset-0 z-[95] flex flex-col bg-black">
-        <header className="flex items-center gap-3 p-4">
+    return portal(
+      <div
+        className="animate-zoom-in fixed inset-0 z-[200] flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden bg-black"
+        style={{ paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
+        <header className="flex shrink-0 items-center gap-3 p-4">
           <h2 className="flex-1 text-base font-extrabold text-white">Pré-visualização</h2>
           <button
             onClick={onClose}
@@ -282,8 +292,14 @@ export function CameraCapture({
           </button>
         </header>
 
-        <div className="relative mx-4 flex-1 overflow-hidden rounded-3xl bg-neutral-900">
-          <img src={current.url} alt="Foto capturada" className="size-full object-contain" />
+        <div className="flex min-h-0 flex-1 items-center justify-center px-4">
+          <div className="relative aspect-[9/16] max-h-full w-auto max-w-full overflow-hidden rounded-3xl bg-neutral-900">
+            <img
+              src={current.url}
+              alt="Foto capturada"
+              className="absolute inset-0 size-full object-cover"
+            />
+          </div>
         </div>
 
         {shots.length > 1 ? (
@@ -300,7 +316,7 @@ export function CameraCapture({
           </div>
         ) : null}
 
-        <div className="flex gap-3 p-4 pb-8">
+        <div className="flex shrink-0 gap-3 p-4">
           <button
             onClick={() => {
               shots.forEach((s) => URL.revokeObjectURL(s.url));
@@ -324,28 +340,35 @@ export function CameraCapture({
   }
 
   /* ------------------------------ câmera ------------------------------ */
-  return (
-    <div className="animate-zoom-in fixed inset-0 z-[95] flex flex-col bg-black">
-      <header className="flex items-center gap-3 p-4">
-        <div className="flex-1">
-          <h2 className="text-base font-extrabold text-white">{title}</h2>
-          {hint ? <p className="text-[11px] text-white/60">{hint}</p> : null}
+  return portal(
+    <div
+      className="animate-zoom-in fixed inset-0 z-[200] flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden bg-black"
+      style={{ paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" }}
+    >
+      <header className="flex shrink-0 items-center gap-3 p-4 pb-2">
+        <div className="min-w-0 flex-1">
+          <h2 className="truncate text-base font-extrabold text-white">{title}</h2>
+          {hint ? <p className="truncate text-[11px] text-white/60">{hint}</p> : null}
         </div>
         <button
           onClick={onClose}
           aria-label="Fechar câmera"
-          className="press rounded-full bg-white/10 p-2 text-white"
+          className="press shrink-0 rounded-full bg-white/10 p-2 text-white"
         >
           <X className="size-4" />
         </button>
       </header>
 
-      <div className="relative mx-4 flex-1 overflow-hidden rounded-3xl bg-neutral-950">
+      <div className="flex min-h-0 flex-1 items-center justify-center px-4 py-2">
+        <div
+          ref={stageRef}
+          className="relative aspect-[9/16] max-h-full w-auto max-w-full overflow-hidden rounded-3xl bg-neutral-950"
+        >
         <video
           ref={videoRef}
           playsInline
           muted
-          className={`size-full object-cover ${facing === "user" ? "-scale-x-100" : ""}`}
+          className={`absolute inset-0 size-full object-cover ${facing === "user" ? "-scale-x-100" : ""}`}
         />
 
         {silhouette ? (
@@ -390,10 +413,11 @@ export function CameraCapture({
             />
           </div>
         </div>
+        </div>
       </div>
 
-      <div className="space-y-3 p-4 pb-8">
-        <div className="flex items-center justify-center gap-2">
+      <div className="shrink-0 space-y-3 p-4">
+        <div className="flex flex-wrap items-center justify-center gap-2">
           {TIMERS.map((t) => (
             <button
               key={t}
