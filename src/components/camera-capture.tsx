@@ -407,10 +407,11 @@ export function CameraCapture({
             />
           </div>
         </div>
+        </div>
       </div>
 
-      <div className="space-y-3 p-4 pb-8">
-        <div className="flex items-center justify-center gap-2">
+      <div className="shrink-0 space-y-3 p-4">
+        <div className="flex flex-wrap items-center justify-center gap-2">
           {TIMERS.map((t) => (
             <button
               key={t}
