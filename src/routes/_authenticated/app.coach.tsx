@@ -113,18 +113,27 @@ function CoachPage() {
         <WorkoutTuner />
       </div>
 
+      <div className="mt-5">
+        <CoachInsights
+          onAnalyze={(mode) => analysisMutation.mutate(mode)}
+          pendingMode={pendingMode}
+          disabled={analysisMutation.isPending || mutation.isPending}
+        />
+      </div>
+
+
       <div className="mt-5 flex-1 space-y-3">
         {messages.length === 0 && (
           <div className="panel p-5">
             <p className="text-sm text-muted-foreground">
               Pergunte qualquer coisa sobre treino, dieta ou recuperação.
             </p>
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="mt-3 -mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] sm:flex-wrap sm:overflow-visible">
               {SUGGESTIONS.map((s) => (
                 <button
                   key={s}
                   onClick={() => submit(s)}
-                  className="rounded-full ember-border bg-elevated px-3 py-1.5 text-xs font-semibold"
+                  className="shrink-0 rounded-full ember-border bg-elevated px-3 py-1.5 text-xs font-semibold"
                 >
                   {s}
                 </button>
