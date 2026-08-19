@@ -64,6 +64,7 @@ export function CameraCapture({
   busy = false,
 }: CameraCaptureProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
   const sampleRef = useRef<HTMLCanvasElement | null>(null);
   const prevFrame = useRef<Uint8ClampedArray | null>(null);
   const goodFrames = useRef(0);
