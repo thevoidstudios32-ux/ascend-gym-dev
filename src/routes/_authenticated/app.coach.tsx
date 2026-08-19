@@ -24,10 +24,14 @@ export const Route = createFileRoute("/_authenticated/app/coach")({
 });
 
 const SUGGESTIONS = [
-  "Monta meu treino de hoje",
+  "Monta meu treino de hoje com base nos meus últimos treinos e cargas",
   "Como aumentar meu supino?",
   "O que comer no pós-treino?",
   "Estou sem motivação, me ajuda",
+  "📊 Como está meu volume de treino?",
+  "📅 Monta minha semana de treinos",
+  "🎯 Quais metas devo bater esse mês?",
+  "🏆 Como quebrar meus PRs atuais?",
 ];
 
 
@@ -58,6 +62,19 @@ function CoachPage() {
   const clearMutation = useMutation({
     mutationFn: () => clear(),
     onSuccess: () => refetch(),
+  });
+
+  const analyze = useServerFn(runCoachAnalysis);
+  const [pendingMode, setPendingMode] = useState<AnalysisMode | null>(null);
+  const analysisMutation = useMutation({
+    mutationFn: (mode: AnalysisMode) => analyze({ data: { mode } }),
+    onMutate: (mode: AnalysisMode) => setPendingMode(mode),
+    onSuccess: async () => {
+      await refetch();
+      refreshDashboard();
+    },
+    onError: (e: Error) => toast.error(e.message || "Não consegui gerar a análise agora."),
+    onSettled: () => setPendingMode(null),
   });
 
   useEffect(() => {
@@ -96,18 +113,27 @@ function CoachPage() {
         <WorkoutTuner />
       </div>
 
+      <div className="mt-5">
+        <CoachInsights
+          onAnalyze={(mode) => analysisMutation.mutate(mode)}
+          pendingMode={pendingMode}
+          disabled={analysisMutation.isPending || mutation.isPending}
+        />
+      </div>
+
+
       <div className="mt-5 flex-1 space-y-3">
         {messages.length === 0 && (
           <div className="panel p-5">
             <p className="text-sm text-muted-foreground">
               Pergunte qualquer coisa sobre treino, dieta ou recuperação.
             </p>
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="mt-3 -mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] sm:flex-wrap sm:overflow-visible">
               {SUGGESTIONS.map((s) => (
                 <button
                   key={s}
                   onClick={() => submit(s)}
-                  className="rounded-full ember-border bg-elevated px-3 py-1.5 text-xs font-semibold"
+                  className="shrink-0 rounded-full ember-border bg-elevated px-3 py-1.5 text-xs font-semibold"
                 >
                   {s}
                 </button>
