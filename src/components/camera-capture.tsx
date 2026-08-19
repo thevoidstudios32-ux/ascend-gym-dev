@@ -310,7 +310,7 @@ export function CameraCapture({
           </div>
         ) : null}
 
-        <div className="flex gap-3 p-4 pb-8">
+        <div className="flex shrink-0 gap-3 p-4">
           <button
             onClick={() => {
               shots.forEach((s) => URL.revokeObjectURL(s.url));
