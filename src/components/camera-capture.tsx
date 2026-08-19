@@ -335,27 +335,34 @@ export function CameraCapture({
 
   /* ------------------------------ câmera ------------------------------ */
   return (
-    <div className="animate-zoom-in fixed inset-0 z-[95] flex flex-col bg-black">
-      <header className="flex items-center gap-3 p-4">
-        <div className="flex-1">
-          <h2 className="text-base font-extrabold text-white">{title}</h2>
-          {hint ? <p className="text-[11px] text-white/60">{hint}</p> : null}
+    <div
+      className="animate-zoom-in fixed inset-0 z-[95] flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden bg-black"
+      style={{ paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" }}
+    >
+      <header className="flex shrink-0 items-center gap-3 p-4 pb-2">
+        <div className="min-w-0 flex-1">
+          <h2 className="truncate text-base font-extrabold text-white">{title}</h2>
+          {hint ? <p className="truncate text-[11px] text-white/60">{hint}</p> : null}
         </div>
         <button
           onClick={onClose}
           aria-label="Fechar câmera"
-          className="press rounded-full bg-white/10 p-2 text-white"
+          className="press shrink-0 rounded-full bg-white/10 p-2 text-white"
         >
           <X className="size-4" />
         </button>
       </header>
 
-      <div className="relative mx-4 flex-1 overflow-hidden rounded-3xl bg-neutral-950">
+      <div className="flex min-h-0 flex-1 items-center justify-center px-4 py-2">
+        <div
+          ref={stageRef}
+          className="relative aspect-[9/16] max-h-full w-auto max-w-full overflow-hidden rounded-3xl bg-neutral-950"
+        >
         <video
           ref={videoRef}
           playsInline
           muted
-          className={`size-full object-cover ${facing === "user" ? "-scale-x-100" : ""}`}
+          className={`absolute inset-0 size-full object-cover ${facing === "user" ? "-scale-x-100" : ""}`}
         />
 
         {silhouette ? (
