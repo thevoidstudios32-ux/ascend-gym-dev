@@ -271,8 +271,11 @@ export function CameraCapture({
   if (shots.length) {
     const current = shots[picked]!;
     return (
-      <div className="animate-zoom-in fixed inset-0 z-[95] flex flex-col bg-black">
-        <header className="flex items-center gap-3 p-4">
+      <div
+        className="animate-zoom-in fixed inset-0 z-[95] flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden bg-black"
+        style={{ paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
+        <header className="flex shrink-0 items-center gap-3 p-4">
           <h2 className="flex-1 text-base font-extrabold text-white">Pré-visualização</h2>
           <button
             onClick={onClose}
@@ -283,8 +286,14 @@ export function CameraCapture({
           </button>
         </header>
 
-        <div className="relative mx-4 flex-1 overflow-hidden rounded-3xl bg-neutral-900">
-          <img src={current.url} alt="Foto capturada" className="size-full object-contain" />
+        <div className="flex min-h-0 flex-1 items-center justify-center px-4">
+          <div className="relative aspect-[9/16] max-h-full w-auto max-w-full overflow-hidden rounded-3xl bg-neutral-900">
+            <img
+              src={current.url}
+              alt="Foto capturada"
+              className="absolute inset-0 size-full object-cover"
+            />
+          </div>
         </div>
 
         {shots.length > 1 ? (
