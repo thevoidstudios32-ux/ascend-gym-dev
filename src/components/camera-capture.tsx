@@ -181,7 +181,7 @@ export function CameraCapture({
 
     /* O vídeo é exibido com object-cover: recortamos exatamente a área visível
        para que a foto final seja idêntica à pré-visualização (sem "zoom"). */
-    const rect = video.getBoundingClientRect();
+    const rect = (stageRef.current ?? video).getBoundingClientRect();
     const vw = video.videoWidth;
     const vh = video.videoHeight;
     const target = rect.width > 0 && rect.height > 0 ? rect.width / rect.height : vw / vh;
