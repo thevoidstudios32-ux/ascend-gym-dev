@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   Check,
   Images,
@@ -15,6 +16,11 @@ import {
 type Align = { score: number; stable: boolean };
 
 const TIMERS = [0, 3, 5, 10] as const;
+
+/** Renderiza fora da árvore para evitar stacking contexts do composer. */
+function portal(node: React.ReactNode) {
+  return typeof document === "undefined" ? <>{node}</> : createPortal(node, document.body);
+}
 
 function beep(freq = 880, ms = 90) {
   try {
@@ -270,9 +276,9 @@ export function CameraCapture({
   /* ------------------------------ revisão ----------------------------- */
   if (shots.length) {
     const current = shots[picked]!;
-    return (
+    return portal(
       <div
-        className="animate-zoom-in fixed inset-0 z-[95] flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden bg-black"
+        className="animate-zoom-in fixed inset-0 z-[200] flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden bg-black"
         style={{ paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         <header className="flex shrink-0 items-center gap-3 p-4">
@@ -334,9 +340,9 @@ export function CameraCapture({
   }
 
   /* ------------------------------ câmera ------------------------------ */
-  return (
+  return portal(
     <div
-      className="animate-zoom-in fixed inset-0 z-[95] flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden bg-black"
+      className="animate-zoom-in fixed inset-0 z-[200] flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden bg-black"
       style={{ paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <header className="flex shrink-0 items-center gap-3 p-4 pb-2">
