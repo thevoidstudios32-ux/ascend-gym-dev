@@ -24,10 +24,14 @@ export const Route = createFileRoute("/_authenticated/app/coach")({
 });
 
 const SUGGESTIONS = [
-  "Monta meu treino de hoje",
+  "Monta meu treino de hoje com base nos meus últimos treinos e cargas",
   "Como aumentar meu supino?",
   "O que comer no pós-treino?",
   "Estou sem motivação, me ajuda",
+  "📊 Como está meu volume de treino?",
+  "📅 Monta minha semana de treinos",
+  "🎯 Quais metas devo bater esse mês?",
+  "🏆 Como quebrar meus PRs atuais?",
 ];
 
 
@@ -58,6 +62,19 @@ function CoachPage() {
   const clearMutation = useMutation({
     mutationFn: () => clear(),
     onSuccess: () => refetch(),
+  });
+
+  const analyze = useServerFn(runCoachAnalysis);
+  const [pendingMode, setPendingMode] = useState<AnalysisMode | null>(null);
+  const analysisMutation = useMutation({
+    mutationFn: (mode: AnalysisMode) => analyze({ data: { mode } }),
+    onMutate: (mode: AnalysisMode) => setPendingMode(mode),
+    onSuccess: async () => {
+      await refetch();
+      refreshDashboard();
+    },
+    onError: (e: Error) => toast.error(e.message || "Não consegui gerar a análise agora."),
+    onSettled: () => setPendingMode(null),
   });
 
   useEffect(() => {
