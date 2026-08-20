@@ -293,7 +293,10 @@ export function CameraCapture({
         </header>
 
         <div className="flex min-h-0 flex-1 items-center justify-center px-4">
-          <div className="relative aspect-[9/16] max-h-full w-auto max-w-full overflow-hidden rounded-3xl bg-neutral-900">
+          <div
+            style={{ aspectRatio: "9 / 16" }}
+            className="relative h-full max-h-full w-auto max-w-full overflow-hidden rounded-3xl bg-neutral-900"
+          >
             <img
               src={current.url}
               alt="Foto capturada"
@@ -362,7 +365,8 @@ export function CameraCapture({
       <div className="flex min-h-0 flex-1 items-center justify-center px-4 py-2">
         <div
           ref={stageRef}
-          className="relative aspect-[9/16] max-h-full w-auto max-w-full overflow-hidden rounded-3xl bg-neutral-950"
+          style={{ aspectRatio: "9 / 16" }}
+          className="relative h-full max-h-full w-auto max-w-full overflow-hidden rounded-3xl bg-neutral-950"
         >
         <video
           ref={videoRef}
