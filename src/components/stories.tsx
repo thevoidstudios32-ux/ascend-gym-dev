@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -24,6 +25,17 @@ import {
   storyDurationMs,
   waveformBars,
 } from "@/lib/stories";
+
+/* Overlays precisam sair de qualquer ancestral com `transform` (ex.: animate-rise),
+   senão `position: fixed` passa a se ancorar nele e a folha some fora da tela. */
+function Overlay({ children }: { children: ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted || typeof document === "undefined") return null;
+  return createPortal(children, document.body);
+}
+
+
 
 
 type StoryRow = {
@@ -1355,7 +1367,8 @@ function StoryViewersSheet({ storyId, onClose }: { storyId: string; onClose: () 
   }, [storyId, qc]);
 
   return (
-    <div className="fixed inset-0 z-[94] flex items-end bg-black/70 backdrop-blur-sm" onClick={onClose}>
+    <Overlay>
+      <div className="fixed inset-0 z-[94] flex items-end bg-black/70 backdrop-blur-sm" onClick={onClose}>
       <div
         onClick={(e) => e.stopPropagation()}
         className="animate-sheet-up max-h-[70vh] w-full overflow-y-auto rounded-t-3xl border-t border-white/10 bg-neutral-950 p-5"
@@ -1392,7 +1405,8 @@ function StoryViewersSheet({ storyId, onClose }: { storyId: string; onClose: () 
           )}
         </div>
       </div>
-    </div>
+      </div>
+    </Overlay>
   );
 }
 
