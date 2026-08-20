@@ -1367,7 +1367,8 @@ function StoryViewersSheet({ storyId, onClose }: { storyId: string; onClose: () 
   }, [storyId, qc]);
 
   return (
-    <div className="fixed inset-0 z-[94] flex items-end bg-black/70 backdrop-blur-sm" onClick={onClose}>
+    <Overlay>
+      <div className="fixed inset-0 z-[94] flex items-end bg-black/70 backdrop-blur-sm" onClick={onClose}>
       <div
         onClick={(e) => e.stopPropagation()}
         className="animate-sheet-up max-h-[70vh] w-full overflow-y-auto rounded-t-3xl border-t border-white/10 bg-neutral-950 p-5"
