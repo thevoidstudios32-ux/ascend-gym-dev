@@ -1404,7 +1404,8 @@ function StoryViewersSheet({ storyId, onClose }: { storyId: string; onClose: () 
           )}
         </div>
       </div>
-    </div>
+      </div>
+    </Overlay>
   );
 }
 
