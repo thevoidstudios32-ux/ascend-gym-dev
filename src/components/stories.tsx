@@ -26,6 +26,17 @@ import {
   waveformBars,
 } from "@/lib/stories";
 
+/* Overlays precisam sair de qualquer ancestral com `transform` (ex.: animate-rise),
+   senão `position: fixed` passa a se ancorar nele e a folha some fora da tela. */
+function Overlay({ children }: { children: ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted || typeof document === "undefined") return null;
+  return createPortal(children, document.body);
+}
+
+
+
 
 type StoryRow = {
   id: string;
