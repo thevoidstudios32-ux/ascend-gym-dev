@@ -419,6 +419,7 @@ function StoryViewer({
 
 
   return (
+    <Overlay>
     <div
       className="fixed inset-0 z-[80] flex flex-col bg-black"
       style={{ transform: `translateY(${dragY}px)`, opacity: 1 - dragY / 500 }}
@@ -629,7 +630,7 @@ function StoryViewer({
         <StoryViewersSheet storyId={story.id} onClose={() => setViewersOpen(false)} />
       ) : null}
     </div>
-
+    </Overlay>
   );
 }
 
@@ -727,6 +728,7 @@ export function StoryComposer({ preset, onClose }: { preset: StoryDraft | null; 
   }
 
   return (
+    <Overlay>
     <div className="fixed inset-0 z-[80] flex flex-col bg-black">
       <header className="flex items-center gap-3 p-4">
         <h2 className="flex-1 text-lg font-extrabold text-white">Criar Story</h2>
@@ -952,6 +954,7 @@ export function StoryComposer({ preset, onClose }: { preset: StoryDraft | null; 
       ) : null}
 
     </div>
+    </Overlay>
   );
 }
 
@@ -985,6 +988,7 @@ function MusicPicker({
   const [q, setQ] = useState("");
   const [results, setResults] = useState<Track[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<Track | null>(null);
   const [playing, setPlaying] = useState(false);
   const [start, setStart] = useState(0);
@@ -1013,6 +1017,7 @@ function MusicPicker({
     if (!term) {
       setResults([]);
       setLoading(false);
+      setError(null);
       return;
     }
     const key = term.toLowerCase();
@@ -1020,12 +1025,14 @@ function MusicPicker({
     if (cached) {
       setResults(cached);
       setLoading(false);
+      setError(null);
       return;
     }
     if (lastQueryRef.current === key) return; // já há uma busca idêntica em voo
     lastQueryRef.current = key;
     const id = ++reqIdRef.current;
     setLoading(true);
+    setError(null);
     try {
       const tracks = await searchRef.current({ data: { q: term } });
       if (id !== reqIdRef.current) return; // resposta obsoleta
@@ -1033,11 +1040,8 @@ function MusicPicker({
       setResults(tracks);
     } catch (e) {
       if (id !== reqIdRef.current) return;
-      const now = Date.now();
-      if (now - lastErrorAtRef.current > 4000) {
-        lastErrorAtRef.current = now;
-        toast.error(e instanceof Error ? e.message : "Busca indisponível.");
-      }
+      const msg = e instanceof Error ? e.message : "Busca indisponível.";
+      setError(msg);
     } finally {
       if (id === reqIdRef.current) {
         setLoading(false);
@@ -1307,35 +1311,64 @@ function MusicPicker({
         ) : null}
 
         <div className="mt-4 space-y-2">
-          {results.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => choose(t)}
-              className={`press flex w-full items-center gap-3 rounded-2xl p-2.5 text-left ${
-                selected?.id === t.id ? "bg-primary/20" : "bg-white/5"
-              }`}
-            >
-              {t.artwork ? (
-                <img src={t.artwork} alt="" className="size-11 rounded-xl" />
-              ) : (
-                <span className="grid size-11 place-items-center rounded-xl bg-white/10 text-white">
-                  <Music className="size-4" />
-                </span>
-              )}
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-bold text-white">{t.title}</span>
-                <span className="block truncate text-[11px] text-white/50">
-                  {t.artist} · {t.preview ? "tocar prévia" : "sem prévia"}
-                </span>
+          {loading ? (
+            <div className="space-y-2">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-3 rounded-2xl bg-white/5 p-2.5">
+                  <div className="size-11 shrink-0 animate-pulse rounded-xl bg-white/10" />
+                  <div className="flex-1 space-y-1.5">
+                    <div className="h-3.5 w-2/3 animate-pulse rounded-full bg-white/10" />
+                    <div className="h-2.5 w-1/2 animate-pulse rounded-full bg-white/10" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center gap-3 py-8 text-center">
+              <span className="grid size-12 place-items-center rounded-full bg-primary/15 text-primary">
+                <Search className="size-5" />
               </span>
-              <Play className="size-4 shrink-0 text-white/60" />
-            </button>
-          ))}
-          {!loading && results.length === 0 ? (
-            <p className="py-6 text-center text-sm text-white/50">
-              Busque uma faixa para embalar seu story.
-            </p>
-          ) : null}
+              <p className="text-sm font-bold text-white">{error}</p>
+              <button
+                onClick={() => void run(q)}
+                className="press rounded-full bg-primary px-5 py-2.5 text-sm font-extrabold text-primary-foreground"
+              >
+                Tentar de novo
+              </button>
+            </div>
+          ) : (
+            <>
+              {results.map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => choose(t)}
+                  className={`press flex w-full items-center gap-3 rounded-2xl p-2.5 text-left ${
+                    selected?.id === t.id ? "bg-primary/20" : "bg-white/5"
+                  }`}
+                >
+                  {t.artwork ? (
+                    <img src={t.artwork} alt="" className="size-11 rounded-xl" />
+                  ) : (
+                    <span className="grid size-11 place-items-center rounded-xl bg-white/10 text-white">
+                      <Music className="size-4" />
+                    </span>
+                  )}
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-bold text-white">{t.title}</span>
+                    <span className="block truncate text-[11px] text-white/50">
+                      {t.artist} · {t.preview ? "tocar prévia" : "sem prévia"}
+                    </span>
+                  </span>
+                  <Play className="size-4 shrink-0 text-white/60" />
+                </button>
+              ))}
+              {results.length === 0 ? (
+                <p className="py-6 text-center text-sm text-white/50">
+                  Busque uma faixa para embalar seu story.
+                </p>
+              ) : null}
+            </>
+          )}
         </div>
       </div>
     </div>
