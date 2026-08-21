@@ -1001,7 +1001,7 @@ function MusicPicker({
   const trackRef = useRef<HTMLDivElement | null>(null);
 
   const clipLen = Math.min(clip, duration || clip);
-  const maxStart = Math.max(0, (duration || clip) - clipLen);
+  const maxStart = Math.max(0, (duration || clip) - 1);
   const end = Math.min(duration || clip, start + clipLen);
 
   const searchRef = useRef(search);
@@ -1097,8 +1097,7 @@ function MusicPicker({
       if (!el) return;
       const rect = el.getBoundingClientRect();
       const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
-      const center = ratio * (duration || clip);
-      const next = Math.min(maxStart, Math.max(0, Math.round(center - clipLen / 2)));
+      const next = Math.min(maxStart, Math.max(0, Math.round(ratio * (duration || clip))));
       setStart(next);
       if (preview) void play(next);
     },
@@ -1260,7 +1259,7 @@ function MusicPicker({
               {/* seleção */}
               <span
                 className="pointer-events-none absolute inset-y-1 rounded-xl border-2 border-primary bg-primary/10 transition-all duration-150"
-                style={{ left: `${(start / total) * 100}%`, width: `${(clipLen / total) * 100}%` }}
+                style={{ left: `${(start / total) * 100}%`, width: `${((end - start) / total) * 100}%` }}
               />
               {/* cursor de reprodução */}
               <span
