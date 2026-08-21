@@ -939,14 +939,16 @@ export function StoryComposer({ preset, onClose }: { preset: StoryDraft | null; 
       ) : null}
 
       {musicOpen ? (
-        <MusicPicker
-          clip={duration}
-          onClose={() => setMusicOpen(false)}
-          onPick={(t) => {
-            setTrack(t);
-            setMusicOpen(false);
-          }}
-        />
+        <Overlay>
+          <MusicPicker
+            clip={duration}
+            onClose={() => setMusicOpen(false)}
+            onPick={(t) => {
+              setTrack(t);
+              setMusicOpen(false);
+            }}
+          />
+        </Overlay>
       ) : null}
 
     </div>
