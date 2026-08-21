@@ -419,6 +419,7 @@ function StoryViewer({
 
 
   return (
+    <Overlay>
     <div
       className="fixed inset-0 z-[80] flex flex-col bg-black"
       style={{ transform: `translateY(${dragY}px)`, opacity: 1 - dragY / 500 }}
@@ -629,7 +630,7 @@ function StoryViewer({
         <StoryViewersSheet storyId={story.id} onClose={() => setViewersOpen(false)} />
       ) : null}
     </div>
-
+    </Overlay>
   );
 }
 
@@ -727,6 +728,7 @@ export function StoryComposer({ preset, onClose }: { preset: StoryDraft | null; 
   }
 
   return (
+    <Overlay>
     <div className="fixed inset-0 z-[80] flex flex-col bg-black">
       <header className="flex items-center gap-3 p-4">
         <h2 className="flex-1 text-lg font-extrabold text-white">Criar Story</h2>
@@ -952,6 +954,7 @@ export function StoryComposer({ preset, onClose }: { preset: StoryDraft | null; 
       ) : null}
 
     </div>
+    </Overlay>
   );
 }
 
