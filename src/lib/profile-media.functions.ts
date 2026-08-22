@@ -74,7 +74,10 @@ export const saveBanner = createServerFn({ method: "POST" })
       throw new Error("Banner indisponível");
     }
 
-    const { error } = await context.supabase
+    // banner_id é campo protegido no banco: gravação só pelo client de serviço,
+    // depois da checagem de desbloqueio acima.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
       .from("profiles")
       .update({ banner_id: data.banner_id })
       .eq("id", context.userId);

@@ -86,10 +86,12 @@ export const toggleWorkout = createServerFn({ method: "POST" })
 
     const profile = await supabase.from("profiles").select("xp").eq("id", userId).maybeSingle();
     const currentXp = profile.data?.xp ?? 0;
+    // XP é campo protegido no banco: só o client de serviço pode gravar.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     if (existing.data) {
       await supabase.from("workouts").delete().eq("id", existing.data.id);
-      await supabase
+      await supabaseAdmin
         .from("profiles")
         .update({ xp: Math.max(0, currentXp - (existing.data.xp ?? 0)) })
         .eq("id", userId);
@@ -105,7 +107,8 @@ export const toggleWorkout = createServerFn({ method: "POST" })
       xp,
     });
     if (error) throw new Error(error.message);
-    await supabase.from("profiles").update({ xp: currentXp + xp }).eq("id", userId);
+    await supabaseAdmin.from("profiles").update({ xp: currentXp + xp }).eq("id", userId);
+
     await supabase.from("posts").insert({
       user_id: userId,
       kind: "workout",
