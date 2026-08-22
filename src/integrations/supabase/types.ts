@@ -62,6 +62,90 @@ export type Database = {
         }
         Relationships: []
       }
+      badge_audit_logs: {
+        Row: {
+          action: string
+          admin_id: string
+          badge_id: string | null
+          created_at: string
+          id: string
+          reason: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          admin_id: string
+          badge_id?: string | null
+          created_at?: string
+          id?: string
+          reason?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          admin_id?: string
+          badge_id?: string | null
+          created_at?: string
+          id?: string
+          reason?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      badges: {
+        Row: {
+          admin_only: boolean
+          category: string
+          color: string | null
+          created_at: string
+          description: string | null
+          emoji: string | null
+          featurable: boolean
+          icon_url: string | null
+          id: string
+          is_active: boolean
+          name: string
+          rarity: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          admin_only?: boolean
+          category?: string
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          emoji?: string | null
+          featurable?: boolean
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          rarity?: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          admin_only?: boolean
+          category?: string
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          emoji?: string | null
+          featurable?: boolean
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          rarity?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       battle_entries: {
         Row: {
           battles: number
@@ -956,6 +1040,56 @@ export type Database = {
           },
         ]
       }
+      user_badges: {
+        Row: {
+          badge_id: string
+          created_at: string
+          granted_at: string
+          granted_by: string | null
+          id: string
+          is_featured: boolean
+          revoked_at: string | null
+          revoked_by: string | null
+          seen_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          created_at?: string
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          is_featured?: boolean
+          revoked_at?: string | null
+          revoked_by?: string | null
+          seen_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          created_at?: string
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          is_featured?: boolean
+          revoked_at?: string | null
+          revoked_by?: string | null
+          seen_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1105,7 +1239,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user"
+      app_role: "admin" | "moderator" | "user" | "super_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1233,7 +1367,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator", "user"],
+      app_role: ["admin", "moderator", "user", "super_admin"],
     },
   },
 } as const
