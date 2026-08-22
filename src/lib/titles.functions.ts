@@ -114,7 +114,8 @@ export const equipTitle = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!row) throw new Error("Você ainda não desbloqueou esse título");
 
-    const { error } = await supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
       .from("profiles")
       .update({ equipped_title_id: data.titleId })
       .eq("id", userId);
