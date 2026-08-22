@@ -51,9 +51,13 @@ export const getTitles = createServerFn({ method: "GET" })
         shouldUnlockTitle(m.effective, m.base, stats, isAdminUser, userId, isVerified),
     );
 
+    // user_titles/xp/equipped_title_id são protegidos no banco: só o client de
+    // serviço grava, e apenas depois da validação de elegibilidade acima.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
     for (const m of toUnlock) {
       const t = m.effective;
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from("user_titles")
         .insert({ user_id: userId, title_id: t.id, xp_awarded: t.xpReward });
       if (error) continue;
@@ -68,15 +72,16 @@ export const getTitles = createServerFn({ method: "GET" })
     }
 
     if (xp !== (profileRes.data?.xp ?? 0)) {
-      await supabase.from("profiles").update({ xp }).eq("id", userId);
+      await supabaseAdmin.from("profiles").update({ xp }).eq("id", userId);
     }
 
     // Equipa automaticamente o primeiro título quando ainda não há nenhum.
     if (!equipped && owned.length > 0) {
       const first = owned[0]!.title_id;
-      await supabase.from("profiles").update({ equipped_title_id: first }).eq("id", userId);
+      await supabaseAdmin.from("profiles").update({ equipped_title_id: first }).eq("id", userId);
       equipped = first;
     }
+
 
     return {
       owned: owned.map((o) => ({
@@ -109,7 +114,8 @@ export const equipTitle = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!row) throw new Error("Você ainda não desbloqueou esse título");
 
-    const { error } = await supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
       .from("profiles")
       .update({ equipped_title_id: data.titleId })
       .eq("id", userId);

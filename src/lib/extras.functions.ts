@@ -145,7 +145,10 @@ export const finishWorkout = createServerFn({ method: "POST" })
 
     const { data: profile } = await supabase.from("profiles").select("xp").eq("id", userId).maybeSingle();
     const totalXp = (profile?.xp ?? 0) + xp;
-    await supabase.from("profiles").update({ xp: totalXp }).eq("id", userId);
+    // XP é campo protegido no banco: só o client de serviço pode gravar.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("profiles").update({ xp: totalXp }).eq("id", userId);
+
 
     // Publica no feed dos Gym Bros (histórico social do treino concluído).
     await supabase.from("posts").insert({
