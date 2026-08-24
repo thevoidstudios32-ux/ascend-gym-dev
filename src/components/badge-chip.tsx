@@ -60,7 +60,7 @@ export function BadgeCard({
   badge: BadgeDef;
   featured?: boolean;
   locked?: boolean;
-  onClick?: () => void;
+  onClick?: (() => void) | undefined;
   disabled?: boolean;
 }) {
   const style = rarityStyle(badge.rarity);
