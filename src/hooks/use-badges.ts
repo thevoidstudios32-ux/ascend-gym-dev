@@ -14,6 +14,7 @@ import {
   markBadgesSeen,
   setFeaturedBadge,
 } from "@/lib/badges.functions";
+import type { BadgeCategory, BadgeRarity } from "@/lib/badges";
 
 /** Chaves de cache centralizadas — mutations invalidam sempre pelo mesmo prefixo. */
 export const badgeKeys = {
