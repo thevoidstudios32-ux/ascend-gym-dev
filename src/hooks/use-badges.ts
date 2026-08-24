@@ -71,14 +71,31 @@ export function useAdminBadges() {
   return useQuery({ queryKey: badgeKeys.catalog, queryFn: () => fn(), retry: false });
 }
 
+export type BadgeFormPayload = {
+  id?: string | null;
+  slug: string;
+  name: string;
+  description?: string | null;
+  icon_url?: string | null;
+  emoji?: string | null;
+  category: BadgeCategory;
+  rarity: BadgeRarity;
+  color?: string | null;
+  is_active: boolean;
+  admin_only: boolean;
+  featurable: boolean;
+  sort_order: number;
+};
+
 export function useSaveBadge() {
   const qc = useQueryClient();
   const fn = useServerFn(adminSaveBadge);
   return useMutation({
-    mutationFn: (payload: Parameters<typeof fn>[0]["data"]) => fn({ data: payload }),
+    mutationFn: (payload: BadgeFormPayload) => fn({ data: payload }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["badges"] }),
   });
 }
+
 
 export function useToggleBadge() {
   const qc = useQueryClient();
