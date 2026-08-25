@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.15"
+    PostgrestVersion: "14.17"
   }
   public: {
     Tables: {
@@ -59,6 +59,134 @@ export type Database = {
           details?: Json
           id?: string
           target_user_id?: string | null
+        }
+        Relationships: []
+      }
+      ai_program_versions: {
+        Row: {
+          created_at: string
+          id: string
+          program_id: string
+          reason: string | null
+          snapshot: Json
+          user_id: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          program_id: string
+          reason?: string | null
+          snapshot: Json
+          user_id: string
+          version: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          program_id?: string
+          reason?: string | null
+          snapshot?: Json
+          user_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_program_versions_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "ai_programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_programs: {
+        Row: {
+          active: boolean
+          created_at: string
+          days: Json
+          days_per_week: number
+          goal: string
+          id: string
+          name: string
+          notes: string | null
+          priorities: string[]
+          split_label: string
+          updated_at: string
+          user_id: string
+          version: number
+          week_focus: string | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          days?: Json
+          days_per_week?: number
+          goal?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          priorities?: string[]
+          split_label?: string
+          updated_at?: string
+          user_id: string
+          version?: number
+          week_focus?: string | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          days?: Json
+          days_per_week?: number
+          goal?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          priorities?: string[]
+          split_label?: string
+          updated_at?: string
+          user_id?: string
+          version?: number
+          week_focus?: string | null
+        }
+        Relationships: []
+      }
+      ai_recommendations: {
+        Row: {
+          action_label: string | null
+          created_at: string
+          id: string
+          kind: string
+          message: string
+          payload: Json
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          action_label?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          message: string
+          payload?: Json
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          action_label?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          message?: string
+          payload?: Json
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -1039,6 +1167,98 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      training_feedback: {
+        Row: {
+          comment: string | null
+          created_at: string
+          day_key: string | null
+          duration_min: number | null
+          id: string
+          program_id: string | null
+          rating: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          day_key?: string | null
+          duration_min?: number | null
+          id?: string
+          program_id?: string | null
+          rating?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          day_key?: string | null
+          duration_min?: number | null
+          id?: string
+          program_id?: string | null
+          rating?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_feedback_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "ai_programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_preferences: {
+        Row: {
+          created_at: string
+          days_per_week: number
+          disliked_exercises: string[]
+          equipment: string[]
+          experience: string
+          goal: string
+          liked_exercises: string[]
+          minutes_per_session: number
+          notes: string | null
+          priority_muscles: string[]
+          restrictions: string | null
+          split_preference: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          days_per_week?: number
+          disliked_exercises?: string[]
+          equipment?: string[]
+          experience?: string
+          goal?: string
+          liked_exercises?: string[]
+          minutes_per_session?: number
+          notes?: string | null
+          priority_muscles?: string[]
+          restrictions?: string | null
+          split_preference?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          days_per_week?: number
+          disliked_exercises?: string[]
+          equipment?: string[]
+          experience?: string
+          goal?: string
+          liked_exercises?: string[]
+          minutes_per_session?: number
+          notes?: string | null
+          priority_muscles?: string[]
+          restrictions?: string | null
+          split_preference?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_badges: {
         Row: {
