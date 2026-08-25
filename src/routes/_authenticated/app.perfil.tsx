@@ -10,6 +10,7 @@ import { CountUp, LoadingPage, ProgressBar, StatCard } from "@/components/ui-kit
 import { ProfileCustomizer } from "@/components/profile-customizer";
 import { bannerById } from "@/lib/banners";
 import { TitleBadge } from "@/components/title-badge";
+import { ProfileBadges } from "@/components/profile-badges";
 import { displayTitle } from "@/lib/titles";
 import { TitleSelector } from "@/components/title-selector";
 import { useTitles } from "@/hooks/use-titles";
@@ -192,6 +193,8 @@ function PerfilPage() {
         </div>
       </section>
 
+
+      <ProfileBadges userId={p.id ?? null} own />
 
       <ProfileCustomizer
         open={customizing}

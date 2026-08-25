@@ -18,9 +18,9 @@ export async function checkAdmin(context: { supabase: any; userId: string }) {
     .from("user_roles")
     .select("role")
     .eq("user_id", context.userId)
-    .eq("role", "admin")
-    .maybeSingle();
-  return !!data;
+    .in("role", ["admin", "super_admin"])
+    .limit(1);
+  return !!(data && data.length > 0);
 }
 
 async function assertAdmin(context: { supabase: any; userId: string }) {
