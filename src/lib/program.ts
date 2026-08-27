@@ -92,13 +92,18 @@ export type TrainingPreferences = {
   notes: string | null;
 };
 
+/** JSON recursivo serializável (compatível com a validação RPC do TanStack). */
+export type JsonValue = string | number | boolean | null | JsonValue[] | {
+  [key: string]: JsonValue;
+};
+
 export type Recommendation = {
   id: string;
   kind: string;
   title: string;
   message: string;
   action_label: string | null;
-  payload: Record<string, unknown>;
+  payload: { [key: string]: JsonValue };
   status: "pending" | "accepted" | "dismissed";
   created_at: string;
 };
