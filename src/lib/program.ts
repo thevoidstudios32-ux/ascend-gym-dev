@@ -51,13 +51,31 @@ export type ProgramProposal = {
   changes: string[];
 };
 
+/** Snapshot serializável de um programa (linha de ai_programs no momento da versão). */
+export type ProgramSnapshot = {
+  id: string;
+  user_id: string;
+  name: string;
+  goal: string;
+  split_label: string;
+  days_per_week: number;
+  priorities: string[];
+  week_focus: string | null;
+  notes: string | null;
+  days: ProgramDay[];
+  version: number;
+  active: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
 export type ProgramVersion = {
   id: string;
   program_id: string;
   version: number;
   reason: string | null;
   created_at: string;
-  snapshot: unknown;
+  snapshot: ProgramSnapshot | null;
 };
 
 export type TrainingPreferences = {
