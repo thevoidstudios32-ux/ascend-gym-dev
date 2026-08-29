@@ -4,6 +4,7 @@ import { useDashboard } from "@/hooks/use-dashboard";
 import { useCustomWorkouts } from "@/hooks/use-custom";
 import { estimateMinutes } from "@/lib/custom";
 import { SPLITS, splitOfDay } from "@/lib/ascend";
+import { AiProgramSection } from "@/components/program-ai";
 
 export const Route = createFileRoute("/_authenticated/app/treinos")({
   head: () => ({
@@ -33,6 +34,8 @@ function TreinosPage() {
           Escolha a divisão. Séries, descanso e cargas são registrados automaticamente.
         </p>
       </header>
+
+      <AiProgramSection />
 
       <section className="space-y-3">
         {SPLITS.map((s) => (
