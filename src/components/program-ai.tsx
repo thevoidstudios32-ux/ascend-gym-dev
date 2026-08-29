@@ -596,6 +596,7 @@ export function CoachProgramSheet({
 }) {
   const [request, setRequest] = useState(initialRequest ?? "");
   const [result, setResult] = useState<{ proposal: ProgramProposal; hadProgram: boolean } | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const propose = useProposeProgram();
   const apply = useApplyProgram();
 
