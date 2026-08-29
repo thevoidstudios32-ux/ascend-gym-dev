@@ -686,6 +686,12 @@ export function CoachProgramSheet({
           <p className="text-center text-xs text-muted-foreground">O Coach está montando seu programa…</p>
         )}
 
+        {error && !propose.isPending && (
+          <div className="rounded-2xl border border-destructive/40 bg-destructive/10 p-3 text-xs font-semibold text-destructive">
+            {error}
+          </div>
+        )}
+
         {result && (
           <ProposalView
             proposal={result.proposal}
