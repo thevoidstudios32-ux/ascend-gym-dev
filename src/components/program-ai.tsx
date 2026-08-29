@@ -281,6 +281,7 @@ export function ProgramEditor({
       const target = index + dir;
       if (target < 0 || target >= days.length) return d;
       const [item] = days.splice(index, 1);
+      if (!item) return d;
       days.splice(target, 0, item);
       return { ...d, days };
     });
@@ -291,7 +292,7 @@ export function ProgramEditor({
       const key = `dia-${Date.now()}`;
       const day: ProgramDay = {
         key,
-        weekday: WEEKDAYS[d.days.length % 7],
+        weekday: WEEKDAYS[d.days.length % 7] ?? "SEG",
         title: "Novo dia",
         focus: "Full Body",
         muscles: [],
@@ -870,7 +871,9 @@ export function AiProgramSection() {
 
       <CoachInsightsArea insights={data?.insights ?? []} recommendations={data?.recommendations ?? []} />
 
-      {sheet === "coach" && <CoachProgramSheet initialRequest={seed} onClose={() => setSheet(null)} />}
+      {sheet === "coach" && (
+        <CoachProgramSheet {...(seed ? { initialRequest: seed } : {})} onClose={() => setSheet(null)} />
+      )}
 
       {sheet === "prefs" && (
         <Sheet title="Preferências de treino" onClose={() => setSheet(null)}>
