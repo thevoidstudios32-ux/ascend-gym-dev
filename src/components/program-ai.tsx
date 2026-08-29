@@ -281,6 +281,7 @@ export function ProgramEditor({
       const target = index + dir;
       if (target < 0 || target >= days.length) return d;
       const [item] = days.splice(index, 1);
+      if (!item) return d;
       days.splice(target, 0, item);
       return { ...d, days };
     });
