@@ -71,7 +71,12 @@ async function callGateway(body: unknown) {
   });
 
   if (res.status === 429) throw new Error("Muitas solicitações seguidas. Tente de novo em instantes.");
-  if (res.status === 402) throw new Error("Créditos de IA esgotados no workspace.");
+  if (res.status === 402)
+    throw new Error(
+      "Créditos de IA esgotados. Adicione créditos em Settings → Plans & credits para usar o Coach IA.",
+    );
+  if (res.status === 403)
+    throw new Error("Coach IA bloqueado pelas configurações do workspace (limite ou acesso à IA desativado).");
   if (!res.ok) throw new Error("Coach IA falhou (" + res.status + ").");
   return res.json() as Promise<any>;
 }

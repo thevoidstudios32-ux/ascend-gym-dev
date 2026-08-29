@@ -596,6 +596,7 @@ export function CoachProgramSheet({
 }) {
   const [request, setRequest] = useState(initialRequest ?? "");
   const [result, setResult] = useState<{ proposal: ProgramProposal; hadProgram: boolean } | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const propose = useProposeProgram();
   const apply = useApplyProgram();
 
@@ -606,11 +607,14 @@ export function CoachProgramSheet({
       return;
     }
     setResult(null);
+    setError(null);
     try {
       const res = await propose.mutateAsync(q);
       setResult(res as { proposal: ProgramProposal; hadProgram: boolean });
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "O Coach não conseguiu responder agora.");
+      const msg = e instanceof Error ? e.message : "O Coach não conseguiu responder agora.";
+      setError(msg);
+      toast.error(msg);
     }
   };
 
@@ -680,6 +684,12 @@ export function CoachProgramSheet({
 
         {propose.isPending && (
           <p className="text-center text-xs text-muted-foreground">O Coach está montando seu programa…</p>
+        )}
+
+        {error && !propose.isPending && (
+          <div className="rounded-2xl border border-destructive/40 bg-destructive/10 p-3 text-xs font-semibold text-destructive">
+            {error}
+          </div>
         )}
 
         {result && (
