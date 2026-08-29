@@ -607,11 +607,14 @@ export function CoachProgramSheet({
       return;
     }
     setResult(null);
+    setError(null);
     try {
       const res = await propose.mutateAsync(q);
       setResult(res as { proposal: ProgramProposal; hadProgram: boolean });
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "O Coach não conseguiu responder agora.");
+      const msg = e instanceof Error ? e.message : "O Coach não conseguiu responder agora.";
+      setError(msg);
+      toast.error(msg);
     }
   };
 
