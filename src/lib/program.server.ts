@@ -6,8 +6,7 @@
 import type { ProgramDay, ProgramExercise, ProgramProposal, TrainingPreferences } from "@/lib/program";
 import { WEEKDAYS } from "@/lib/program";
 import { computeStreak, todayISO } from "@/lib/ascend";
-
-const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
+import { aiChat, type AiMessage } from "@/lib/ai-provider.server";
 
 const exerciseSchema = {
   type: "object",
@@ -60,25 +59,12 @@ const schema = {
   },
 } as const;
 
-async function callGateway(body: unknown) {
-  const key = process.env["LOVABLE_API_KEY"];
-  if (!key) throw new Error("Coach IA indisponível: chave ausente.");
-
-  const res = await fetch(GATEWAY, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "Lovable-API-Key": key },
-    body: JSON.stringify(body),
-  });
-
-  if (res.status === 429) throw new Error("Muitas solicitações seguidas. Tente de novo em instantes.");
-  if (res.status === 402)
-    throw new Error(
-      "Créditos de IA esgotados. Adicione créditos em Settings → Plans & credits para usar o Coach IA.",
-    );
-  if (res.status === 403)
-    throw new Error("Coach IA bloqueado pelas configurações do workspace (limite ou acesso à IA desativado).");
-  if (!res.ok) throw new Error("Coach IA falhou (" + res.status + ").");
-  return res.json() as Promise<any>;
+async function callGateway(body: {
+  messages: AiMessage[];
+  tools?: unknown[];
+  tool_choice?: unknown;
+}) {
+  return aiChat(body) as Promise<any>;
 }
 
 function str(v: unknown, max: number, fallback = "") {
@@ -128,7 +114,6 @@ export type ProposeInput = {
 
 export async function proposeProgram(input: ProposeInput): Promise<ProgramProposal> {
   const json = await callGateway({
-    model: "google/gemini-3.6-flash",
     messages: [
       {
         role: "system",

@@ -2,7 +2,7 @@
 
 import type { CustomExercise, Proposal } from "@/lib/custom";
 
-const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
+import { aiChat } from "@/lib/ai-provider.server";
 
 const schema = {
   name: "propose_workout",
@@ -48,42 +48,25 @@ export async function proposeWorkout(input: {
   workout: { name: string; focus: string; emoji: string; difficulty: string; notes: string | null; exercises: CustomExercise[] };
   athlete: string;
 }): Promise<Proposal> {
-  const key = process.env["LOVABLE_API_KEY"];
-  if (!key) throw new Error("Coach IA indisponível: chave ausente.");
-
-  const res = await fetch(GATEWAY, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "Lovable-API-Key": key },
-    body: JSON.stringify({
-      model: "google/gemini-3.6-flash",
-      messages: [
-        {
-          role: "system",
-          content:
-            "Você é o Coach IA do ASCEND. Receberá o treino atual do atleta e um pedido de ajuste. " +
-            "Devolva SEMPRE a versão completa do treino proposto pela função propose_workout, em português do Brasil. " +
-            "Respeite o pedido, mantenha coerência de volume, descanso e progressão, e use 'hold' (segundos) " +
-            "apenas em exercícios isométricos. Nunca invente equipamentos que o atleta disse não ter.\n\nATLETA:\n" +
-            input.athlete,
-        },
-        {
-          role: "user",
-          content:
-            `PEDIDO: ${input.request}\n\nTREINO ATUAL (JSON):\n` + JSON.stringify(input.workout),
-        },
-      ],
-      tools: [{ type: "function", function: schema }],
-      tool_choice: { type: "function", function: { name: "propose_workout" } },
-    }),
-  });
-
-  if (res.status === 429) throw new Error("Muitas solicitações seguidas. Tente de novo em instantes.");
-  if (res.status === 402) throw new Error("Créditos de IA esgotados no workspace.");
-  if (!res.ok) throw new Error("Coach IA falhou (" + res.status + ").");
-
-  const json = (await res.json()) as {
-    choices?: { message?: { tool_calls?: { function?: { arguments?: string } }[] } }[];
-  };
+  const json = (await aiChat({
+    messages: [
+      {
+        role: "system",
+        content:
+          "Você é o Coach IA do ASCEND. Receberá o treino atual do atleta e um pedido de ajuste. " +
+          "Devolva SEMPRE a versão completa do treino proposto pela função propose_workout, em português do Brasil. " +
+          "Respeite o pedido, mantenha coerência de volume, descanso e progressão, e use 'hold' (segundos) " +
+          "apenas em exercícios isométricos. Nunca invente equipamentos que o atleta disse não ter.\n\nATLETA:\n" +
+          input.athlete,
+      },
+      {
+        role: "user",
+        content: `PEDIDO: ${input.request}\n\nTREINO ATUAL (JSON):\n` + JSON.stringify(input.workout),
+      },
+    ],
+    tools: [{ type: "function", function: schema }],
+    tool_choice: { type: "function", function: { name: "propose_workout" } },
+  })) as { choices?: { message?: { tool_calls?: { function?: { arguments?: string } }[] } }[] };
   const raw = json.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
   if (!raw) throw new Error("O coach não conseguiu montar a proposta. Tente reformular o pedido.");
 

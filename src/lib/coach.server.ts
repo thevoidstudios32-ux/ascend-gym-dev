@@ -1,32 +1,15 @@
-const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
+import { aiChat, type AiChatInput } from "@/lib/ai-provider.server";
 
 export type CoachTurn = { role: "user" | "assistant"; content: string };
 
-function apiKey() {
-  const key = process.env["LOVABLE_API_KEY"];
-  if (!key) throw new Error("Coach IA indisponível: chave ausente.");
-  return key;
-}
-
-async function callGateway(body: unknown) {
-  const res = await fetch(GATEWAY, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "Lovable-API-Key": apiKey() },
-    body: JSON.stringify(body),
-  });
-
-  if (res.status === 429) throw new Error("Muitas mensagens seguidas. Tente de novo em instantes.");
-  if (res.status === 402) throw new Error("Créditos de IA esgotados no workspace.");
-  if (!res.ok) throw new Error("Coach IA falhou (" + res.status + ").");
-
-  const json = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+async function callGateway(body: AiChatInput) {
+  const json = (await aiChat(body)) as { choices?: { message?: { content?: string } }[] };
   return json.choices?.[0]?.message?.content?.trim() || "Não consegui responder agora. Tente de novo.";
 }
 
 /** Chamada genérica system+user — usada pelas análises do Coach. */
 export async function askCoachAnalysis(system: string, user: string) {
   return callGateway({
-    model: "google/gemini-3.6-flash",
     messages: [
       { role: "system", content: system },
       { role: "user", content: user },
@@ -37,7 +20,6 @@ export async function askCoachAnalysis(system: string, user: string) {
 export async function askCoach(history: CoachTurn[], contextSummary: string) {
 
   return callGateway({
-    model: "google/gemini-3.6-flash",
     messages: [
       {
         role: "system",
@@ -62,7 +44,6 @@ export async function pickSubstitution(
   contextSummary: string,
 ) {
   const reply = await callGateway({
-    model: "google/gemini-3.6-flash",
     messages: [
       {
         role: "system",
@@ -98,7 +79,7 @@ export async function analyzeShape(
   weeks: number,
 ) {
   return callGateway({
-    model: "google/gemini-3.6-flash",
+    vision: true,
     messages: [
       {
         role: "system",

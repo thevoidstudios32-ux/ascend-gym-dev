@@ -1,6 +1,6 @@
 /* Dieta Inteligente — análise de refeições por IA (server-only). */
 
-const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
+import { aiChat } from "@/lib/ai-provider.server";
 
 export type MealItem = { name: string; qty: string; kcal: number; protein: number; carbs: number; fat: number };
 export type MealAnalysis = {
@@ -15,44 +15,28 @@ export type MealAnalysis = {
   notes: string;
 };
 
-function apiKey() {
-  const key = process.env["LOVABLE_API_KEY"];
-  if (!key) throw new Error("IA indisponível: chave ausente.");
-  return key;
-}
-
 async function vision(prompt: string, imageDataUrl: string) {
-  const res = await fetch(GATEWAY, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "Lovable-API-Key": apiKey() },
-    body: JSON.stringify({
-      model: "google/gemini-3.6-flash",
-      messages: [
-        {
-          role: "system",
-          content:
-            "Você é um nutricionista do app ASCEND. Analise a foto da refeição e estime os alimentos e as " +
-            "porções. Responda SOMENTE com JSON válido, sem markdown, no formato: " +
-            '{"title":string,"items":[{"name":string,"qty":string,"kcal":number,"protein":number,"carbs":number,"fat":number}],' +
-            '"fiber":number,"confidence":number,"notes":string}. ' +
-            "Valores em gramas e kcal, números inteiros. confidence de 0 a 100. notes = 1 frase curta em português.",
-        },
-        {
-          role: "user",
-          content: [
-            { type: "text", text: prompt },
-            { type: "image_url", image_url: { url: imageDataUrl } },
-          ],
-        },
-      ],
-    }),
-  });
-
-  if (res.status === 429) throw new Error("Muitas análises seguidas. Tente de novo em instantes.");
-  if (res.status === 402) throw new Error("Créditos de IA esgotados no workspace.");
-  if (!res.ok) throw new Error(`Análise falhou (${res.status}).`);
-
-  const json = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+  const json = (await aiChat({
+    vision: true,
+    messages: [
+      {
+        role: "system",
+        content:
+          "Você é um nutricionista do app ASCEND. Analise a foto da refeição e estime os alimentos e as " +
+          "porções. Responda SOMENTE com JSON válido, sem markdown, no formato: " +
+          '{"title":string,"items":[{"name":string,"qty":string,"kcal":number,"protein":number,"carbs":number,"fat":number}],' +
+          '"fiber":number,"confidence":number,"notes":string}. ' +
+          "Valores em gramas e kcal, números inteiros. confidence de 0 a 100. notes = 1 frase curta em português.",
+      },
+      {
+        role: "user",
+        content: [
+          { type: "text", text: prompt },
+          { type: "image_url", image_url: { url: imageDataUrl } },
+        ],
+      },
+    ],
+  })) as { choices?: { message?: { content?: string } }[] };
   return json.choices?.[0]?.message?.content ?? "";
 }
 
