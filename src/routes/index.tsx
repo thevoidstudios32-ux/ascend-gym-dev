@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Dumbbell, Flame, LineChart, MessageSquareText, Smartphone, Trophy } from "lucide-react";
+import { useEffect, useRef } from "react";
 import { AscendSymbol, AscendWordmark } from "@/components/brand";
 
 
@@ -87,10 +88,87 @@ const FEATURES = [
   },
 ];
 
+const ENERGY_PARTICLES = [
+  "energy-particle-1",
+  "energy-particle-2",
+  "energy-particle-3",
+  "energy-particle-4",
+  "energy-particle-5",
+  "energy-particle-6",
+  "energy-particle-7",
+  "energy-particle-8",
+  "energy-particle-9",
+  "energy-particle-10",
+  "energy-particle-11",
+  "energy-particle-12",
+];
+
+function EnergyField() {
+  const fieldRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const field = fieldRef.current;
+    if (!field || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    let frame = 0;
+    let targetX = 0;
+    let targetY = 0;
+    let currentX = 0;
+    let currentY = 0;
+    let scrollY = window.scrollY;
+
+    const render = () => {
+      currentX += (targetX - currentX) * 0.035;
+      currentY += (targetY - currentY) * 0.035;
+      field.style.setProperty("--energy-pointer-x", `${currentX.toFixed(2)}px`);
+      field.style.setProperty("--energy-pointer-y", `${currentY.toFixed(2)}px`);
+      field.style.setProperty("--energy-scroll", `${Math.min(scrollY * 0.018, 24).toFixed(2)}px`);
+      frame = window.requestAnimationFrame(render);
+    };
+
+    const onPointerMove = (event: PointerEvent) => {
+      targetX = (event.clientX / window.innerWidth - 0.5) * 10;
+      targetY = (event.clientY / window.innerHeight - 0.5) * 8;
+    };
+    const onScroll = () => {
+      scrollY = window.scrollY;
+    };
+
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
+    frame = window.requestAnimationFrame(render);
+
+    return () => {
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("scroll", onScroll);
+      window.cancelAnimationFrame(frame);
+    };
+  }, []);
+
+  return (
+    <div ref={fieldRef} className="energy-field" aria-hidden="true">
+      <div className="energy-depth energy-depth-far">
+        <div className="energy-glow energy-glow-wide" />
+      </div>
+      <div className="energy-depth energy-depth-near">
+        <div className="energy-glow energy-glow-core" />
+      </div>
+      <div className="energy-particles">
+        {ENERGY_PARTICLES.map((particle) => (
+          <span key={particle} className={`energy-particle ${particle}`} />
+        ))}
+      </div>
+      <div className="energy-grain" />
+      <div className="energy-vignette" />
+    </div>
+  );
+}
+
 function Landing() {
   return (
-    <div className="min-h-screen bg-ember">
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-6">
+    <div className="relative isolate min-h-screen overflow-hidden bg-ember">
+      <EnergyField />
+      <header className="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-5 py-6">
         <AscendWordmark className="h-5 sm:h-6 md:h-7" />
 
         <nav className="flex items-center gap-2">
@@ -110,7 +188,7 @@ function Landing() {
         </nav>
       </header>
 
-      <main>
+      <main className="relative z-10">
         <section className="mx-auto max-w-6xl px-5 pb-20 pt-10 md:pt-20">
           <div className="grid items-center gap-12 md:grid-cols-[1.1fr_0.9fr]">
             <div>
@@ -208,7 +286,7 @@ function Landing() {
         </section>
       </main>
 
-      <footer className="flex flex-col items-center gap-3 border-t border-border px-5 py-10 text-center text-xs text-muted-foreground">
+      <footer className="relative z-10 flex flex-col items-center gap-3 border-t border-border px-5 py-10 text-center text-xs text-muted-foreground">
         <AscendSymbol className="h-6 sm:h-7" />
         ASCEND · Gym AI · feito para quem treina de verdade
       </footer>
