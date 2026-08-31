@@ -129,6 +129,161 @@
     linear-gradient(180deg, var(--background), var(--background));
 }
 
+/* Landing-only atmospheric energy field. All movement stays on composited layers. */
+.energy-field {
+  --energy-pointer-x: 0px;
+  --energy-pointer-y: 0px;
+  --energy-scroll: 0px;
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--background);
+  contain: strict;
+}
+
+.energy-depth,
+.energy-particles,
+.energy-grain,
+.energy-vignette {
+  position: absolute;
+  inset: -12%;
+  will-change: transform;
+}
+
+.energy-depth-far {
+  transform: translate3d(
+    calc(var(--energy-pointer-x) * 0.45),
+    calc(var(--energy-pointer-y) * 0.45 - var(--energy-scroll) * 0.35),
+    0
+  );
+}
+
+.energy-depth-near {
+  transform: translate3d(
+    var(--energy-pointer-x),
+    calc(var(--energy-pointer-y) - var(--energy-scroll) * 0.7),
+    0
+  );
+}
+
+.energy-glow {
+  position: absolute;
+  border-radius: 46% 54% 58% 42% / 55% 43% 57% 45%;
+  background: radial-gradient(
+    ellipse at 42% 44%,
+    color-mix(in oklab, var(--primary) 24%, transparent),
+    color-mix(in oklab, var(--accent) 10%, transparent) 40%,
+    transparent 72%
+  );
+  filter: blur(72px);
+  mix-blend-mode: screen;
+  transform: translateZ(0);
+  will-change: transform, opacity;
+}
+
+.energy-glow-wide {
+  top: -30%;
+  left: -18%;
+  width: 92vw;
+  height: 88vh;
+  opacity: 0.24;
+  animation: energy-drift-wide 47s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
+}
+
+.energy-glow-core {
+  right: -24%;
+  bottom: -26%;
+  width: 78vw;
+  height: 82vh;
+  opacity: 0.17;
+  animation: energy-drift-core 61s cubic-bezier(0.42, 0, 0.58, 1) -19s infinite alternate;
+}
+
+.energy-particles {
+  transform: translate3d(
+    calc(var(--energy-pointer-x) * -0.25),
+    calc(var(--energy-pointer-y) * -0.25 - var(--energy-scroll) * 0.2),
+    0
+  );
+}
+
+.energy-particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--primary) 48%, var(--foreground));
+  box-shadow: 0 0 12px color-mix(in oklab, var(--primary) 32%, transparent);
+  opacity: 0.12;
+  filter: blur(0.35px);
+  animation: energy-particle-breathe 13s ease-in-out infinite alternate;
+}
+
+.energy-particle-1 { left: 8%; top: 18%; animation-delay: -2s; }
+.energy-particle-2 { left: 17%; top: 63%; animation-delay: -8s; }
+.energy-particle-3 { left: 28%; top: 34%; animation-delay: -5s; }
+.energy-particle-4 { left: 39%; top: 78%; animation-delay: -11s; }
+.energy-particle-5 { left: 48%; top: 14%; animation-delay: -4s; }
+.energy-particle-6 { left: 57%; top: 54%; animation-delay: -9s; }
+.energy-particle-7 { left: 66%; top: 26%; animation-delay: -1s; }
+.energy-particle-8 { left: 73%; top: 72%; animation-delay: -7s; }
+.energy-particle-9 { left: 82%; top: 42%; animation-delay: -12s; }
+.energy-particle-10 { left: 91%; top: 17%; animation-delay: -6s; }
+.energy-particle-11 { left: 12%; top: 88%; animation-delay: -10s; }
+.energy-particle-12 { left: 87%; top: 91%; animation-delay: -3s; }
+
+.energy-grain {
+  inset: 0;
+  opacity: 0.035;
+  background-image:
+    repeating-radial-gradient(circle at 18% 26%, var(--foreground) 0 0.45px, transparent 0.6px 4px),
+    repeating-radial-gradient(circle at 74% 68%, var(--foreground) 0 0.35px, transparent 0.55px 5px);
+  background-size: 7px 9px, 11px 13px;
+}
+
+.energy-vignette {
+  inset: 0;
+  background:
+    radial-gradient(ellipse at center, transparent 24%, color-mix(in oklab, var(--background) 58%, transparent) 88%),
+    linear-gradient(180deg, transparent, color-mix(in oklab, var(--background) 18%, transparent));
+}
+
+@keyframes energy-drift-wide {
+  0% { transform: translate3d(-4%, -3%, 0) rotate(-3deg) scale(0.98); opacity: 0.18; }
+  38% { transform: translate3d(12%, 8%, 0) rotate(4deg) scale(1.04); opacity: 0.25; }
+  72% { transform: translate3d(4%, 17%, 0) rotate(-1deg) scale(1.01); opacity: 0.21; }
+  100% { transform: translate3d(18%, 4%, 0) rotate(3deg) scale(1.06); opacity: 0.27; }
+}
+
+@keyframes energy-drift-core {
+  0% { transform: translate3d(5%, 9%, 0) rotate(2deg) scale(1.03); opacity: 0.12; }
+  44% { transform: translate3d(-13%, -4%, 0) rotate(-4deg) scale(0.97); opacity: 0.2; }
+  76% { transform: translate3d(-5%, -14%, 0) rotate(1deg) scale(1.05); opacity: 0.16; }
+  100% { transform: translate3d(-18%, 3%, 0) rotate(-2deg) scale(1); opacity: 0.22; }
+}
+
+@keyframes energy-particle-breathe {
+  0%, 18% { transform: translate3d(0, 0, 0) scale(0.7); opacity: 0.04; }
+  68% { transform: translate3d(2px, -5px, 0) scale(1.15); opacity: 0.15; }
+  100% { transform: translate3d(-1px, -9px, 0) scale(0.8); opacity: 0.07; }
+}
+
+@media (max-width: 767px) {
+  .energy-glow { filter: blur(54px); }
+  .energy-glow-wide { width: 130vw; height: 72vh; left: -45%; opacity: 0.2; }
+  .energy-glow-core { width: 120vw; height: 68vh; right: -48%; opacity: 0.14; }
+  .energy-grain { opacity: 0.025; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .energy-depth,
+  .energy-particles { transform: none; }
+  .energy-glow,
+  .energy-particle { animation: none; }
+}
+
 @utility panel {
   background-color: var(--surface);
   border: 1px solid var(--border);
