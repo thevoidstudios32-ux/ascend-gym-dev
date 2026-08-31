@@ -44,19 +44,21 @@ function config() {
   };
 }
 
-/** Chamada bruta ao provedor. Devolve o JSON no formato OpenAI. */
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/** Modelos alternativos usados quando o principal está sobrecarregado (503/429). */
+function fallbackModels(primary: string) {
+  const extra = (process.env["AI_MODEL_FALLBACKS"] ?? "gemini-2.5-flash,gemini-2.0-flash")
+    .split(",")
+    .map((m) => m.trim())
+    .filter(Boolean);
+  return [primary, ...extra.filter((m) => m !== primary)];
+}
+
+/** Uma tentativa contra um modelo específico. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function aiChat(input: AiChatInput): Promise<any> {
-  if (!Array.isArray(input.messages) || input.messages.length === 0) {
-    throw new AiError("Requisição inválida: sem mensagens.", 400);
-  }
-
-  const { key, base, textModel, visionModel } = config();
-
-  const body: Record<string, unknown> = {
-    model: input.vision ? visionModel : textModel,
-    messages: input.messages,
-  };
+async function attempt(model: string, input: AiChatInput, key: string, base: string): Promise<any> {
+  const body: Record<string, unknown> = { model, messages: input.messages };
   if (input.tools) body["tools"] = input.tools;
   if (input.tool_choice) body["tool_choice"] = input.tool_choice;
   if (typeof input.temperature === "number") body["temperature"] = input.temperature;
@@ -86,8 +88,17 @@ export async function aiChat(input: AiChatInput): Promise<any> {
     console.error("[ai] credencial do provedor rejeitada", res.status);
     throw new AiError("IA indisponível: credencial do provedor inválida.", 502);
   }
-  if (res.status === 429) throw new AiError("Muitas solicitações seguidas. Tente de novo em instantes.", 429);
   if (res.status === 402) throw new AiError("Limite de uso da IA atingido no provedor.", 402);
+  if (res.status === 429 || res.status === 503 || res.status >= 500) {
+    const detail = await res.text().catch(() => "");
+    console.error("[ai] provedor ocupado", model, res.status, detail.slice(0, 300));
+    throw new AiError(
+      res.status === 429
+        ? "Muitas solicitações seguidas. Tente de novo em instantes."
+        : "A IA está sobrecarregada agora. Tente de novo em instantes.",
+      res.status === 429 ? 429 : 503,
+    );
+  }
   if (!res.ok) {
     const detail = await res.text().catch(() => "");
     console.error("[ai] erro do provedor", res.status, detail.slice(0, 500));
@@ -95,6 +106,34 @@ export async function aiChat(input: AiChatInput): Promise<any> {
   }
 
   return res.json();
+}
+
+/** Chamada bruta ao provedor, com retentativa e fallback de modelo. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function aiChat(input: AiChatInput): Promise<any> {
+  if (!Array.isArray(input.messages) || input.messages.length === 0) {
+    throw new AiError("Requisição inválida: sem mensagens.", 400);
+  }
+
+  const { key, base, textModel, visionModel } = config();
+  const models = fallbackModels(input.vision ? visionModel : textModel);
+
+  let last: unknown;
+  for (let i = 0; i < models.length; i++) {
+    for (let tryN = 0; tryN < 2; tryN++) {
+      try {
+        return await attempt(models[i]!, input, key, base);
+      } catch (err) {
+        last = err;
+        const retryable = err instanceof AiError && (err.status === 503 || err.status === 429);
+        if (!retryable) throw err;
+        await sleep(600 * (tryN + 1));
+      }
+    }
+  }
+  throw last instanceof AiError
+    ? last
+    : new AiError("A IA está sobrecarregada agora. Tente de novo em instantes.", 503);
 }
 
 /** Atalho para respostas de texto simples. */
