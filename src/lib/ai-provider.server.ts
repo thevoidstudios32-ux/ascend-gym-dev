@@ -11,7 +11,8 @@
  *   AI_MODEL_VISION  modelo com visão (fotos: Shape Tracker / nutrição)
  */
 
-const TIMEOUT_MS = 60_000;
+/** Geração de programa completo pode levar minutos — nunca abortar cedo. */
+const TIMEOUT_MS = 300_000;
 
 export type AiMessage = { role: "system" | "user" | "assistant"; content: unknown };
 
