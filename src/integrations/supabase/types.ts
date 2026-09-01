@@ -190,6 +190,48 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_usage_logs: {
+        Row: {
+          completion_tokens: number
+          created_at: string
+          duration_ms: number
+          error: string | null
+          feature: string
+          id: string
+          model: string
+          ok: boolean
+          prompt_tokens: number
+          total_tokens: number
+          user_id: string | null
+        }
+        Insert: {
+          completion_tokens?: number
+          created_at?: string
+          duration_ms?: number
+          error?: string | null
+          feature?: string
+          id?: string
+          model?: string
+          ok?: boolean
+          prompt_tokens?: number
+          total_tokens?: number
+          user_id?: string | null
+        }
+        Update: {
+          completion_tokens?: number
+          created_at?: string
+          duration_ms?: number
+          error?: string | null
+          feature?: string
+          id?: string
+          model?: string
+          ok?: boolean
+          prompt_tokens?: number
+          total_tokens?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       badge_audit_logs: {
         Row: {
           action: string

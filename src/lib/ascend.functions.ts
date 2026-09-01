@@ -229,7 +229,10 @@ export const sendMessage = createServerFn({ method: "POST" })
       .from("chat_messages")
       .insert({ user_id: userId, role: "user", content: data.text });
 
-    const reply = await askCoach([...history, { role: "user", content: data.text }], summary);
+    const reply = await askCoach([...history, { role: "user", content: data.text }], summary, {
+      userId,
+      feature: "coach-chat",
+    });
 
     await supabase
       .from("chat_messages")

@@ -16,12 +16,16 @@ const TIMEOUT_MS = 300_000;
 
 export type AiMessage = { role: "system" | "user" | "assistant"; content: unknown };
 
+/** Identifica a chamada no painel de consumo (quem pediu e para quê). */
+export type AiMeta = { userId?: string | null; feature?: string };
+
 export type AiChatInput = {
   messages: AiMessage[];
   tools?: unknown[];
   tool_choice?: unknown;
   vision?: boolean;
   temperature?: number;
+  meta?: AiMeta;
 };
 
 /** Erro de IA com status HTTP, para o endpoint devolver o código certo. */
@@ -109,6 +113,37 @@ async function attempt(model: string, input: AiChatInput, key: string, base: str
   return res.json();
 }
 
+/** Grava a métrica da chamada (tokens + tempo) para o painel de consumo. */
+async function logUsage(row: {
+  userId?: string | null;
+  feature: string;
+  model: string;
+  durationMs: number;
+  ok: boolean;
+  error?: string;
+  usage?: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
+}) {
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("ai_usage_logs").insert({
+      user_id: row.userId ?? null,
+      feature: row.feature,
+      model: row.model,
+      prompt_tokens: Math.round(row.usage?.prompt_tokens ?? 0),
+      completion_tokens: Math.round(row.usage?.completion_tokens ?? 0),
+      total_tokens: Math.round(
+        row.usage?.total_tokens ??
+          (row.usage?.prompt_tokens ?? 0) + (row.usage?.completion_tokens ?? 0),
+      ),
+      duration_ms: Math.round(row.durationMs),
+      ok: row.ok,
+      error: row.error ?? null,
+    });
+  } catch (err) {
+    console.error("[ai] falha ao registrar consumo", err);
+  }
+}
+
 /** Chamada bruta ao provedor, com retentativa e fallback de modelo. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function aiChat(input: AiChatInput): Promise<any> {
@@ -118,23 +153,54 @@ export async function aiChat(input: AiChatInput): Promise<any> {
 
   const { key, base, textModel, visionModel } = config();
   const models = fallbackModels(input.vision ? visionModel : textModel);
+  const feature = input.meta?.feature ?? "outros";
+  const userId = input.meta?.userId ?? null;
+  const started = Date.now();
 
   let last: unknown;
   for (let i = 0; i < models.length; i++) {
     for (let tryN = 0; tryN < 2; tryN++) {
       try {
-        return await attempt(models[i]!, input, key, base);
+        const json = await attempt(models[i]!, input, key, base);
+        await logUsage({
+          userId,
+          feature,
+          model: models[i]!,
+          durationMs: Date.now() - started,
+          ok: true,
+          usage: json?.usage,
+        });
+        return json;
       } catch (err) {
         last = err;
         const retryable = err instanceof AiError && (err.status === 503 || err.status === 429);
-        if (!retryable) throw err;
+        if (!retryable) {
+          await logUsage({
+            userId,
+            feature,
+            model: models[i]!,
+            durationMs: Date.now() - started,
+            ok: false,
+            error: err instanceof Error ? err.message : String(err),
+          });
+          throw err;
+        }
         await sleep(600 * (tryN + 1));
       }
     }
   }
-  throw last instanceof AiError
+  const fail = last instanceof AiError
     ? last
     : new AiError("A IA está sobrecarregada agora. Tente de novo em instantes.", 503);
+  await logUsage({
+    userId,
+    feature,
+    model: models[0]!,
+    durationMs: Date.now() - started,
+    ok: false,
+    error: fail.message,
+  });
+  throw fail;
 }
 
 /** Atalho para respostas de texto simples. */
