@@ -16,12 +16,16 @@ const TIMEOUT_MS = 300_000;
 
 export type AiMessage = { role: "system" | "user" | "assistant"; content: unknown };
 
+/** Identifica a chamada no painel de consumo (quem pediu e para quê). */
+export type AiMeta = { userId?: string | null; feature?: string };
+
 export type AiChatInput = {
   messages: AiMessage[];
   tools?: unknown[];
   tool_choice?: unknown;
   vision?: boolean;
   temperature?: number;
+  meta?: AiMeta;
 };
 
 /** Erro de IA com status HTTP, para o endpoint devolver o código certo. */
