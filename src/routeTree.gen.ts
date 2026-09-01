@@ -17,6 +17,7 @@ import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/ap
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as AuthenticatedAppArenaRouteImport } from './routes/_authenticated/app.arena'
 import { Route as AuthenticatedAppCoachRouteImport } from './routes/_authenticated/app.coach'
+import { Route as AuthenticatedAppCoachPainelRouteImport } from './routes/_authenticated/app.coach-painel'
 import { Route as AuthenticatedAppConquistasRouteImport } from './routes/_authenticated/app.conquistas'
 import { Route as AuthenticatedAppNutricaoRouteImport } from './routes/_authenticated/app.nutricao'
 import { Route as AuthenticatedAppPerfilRouteImport } from './routes/_authenticated/app.perfil'
@@ -69,6 +70,12 @@ const AuthenticatedAppCoachRoute = AuthenticatedAppCoachRouteImport.update({
   path: '/coach',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppCoachPainelRoute =
+  AuthenticatedAppCoachPainelRouteImport.update({
+    id: '/coach-painel',
+    path: '/coach-painel',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppConquistasRoute =
   AuthenticatedAppConquistasRouteImport.update({
     id: '/conquistas',
@@ -144,6 +151,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AuthenticatedAppRouteWithChildren
   '/app/arena': typeof AuthenticatedAppArenaRoute
   '/app/coach': typeof AuthenticatedAppCoachRoute
+  '/app/coach-painel': typeof AuthenticatedAppCoachPainelRoute
   '/app/conquistas': typeof AuthenticatedAppConquistasRoute
   '/app/nutricao': typeof AuthenticatedAppNutricaoRoute
   '/app/perfil': typeof AuthenticatedAppPerfilRoute
@@ -164,6 +172,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/app/arena': typeof AuthenticatedAppArenaRoute
   '/app/coach': typeof AuthenticatedAppCoachRoute
+  '/app/coach-painel': typeof AuthenticatedAppCoachPainelRoute
   '/app/conquistas': typeof AuthenticatedAppConquistasRoute
   '/app/nutricao': typeof AuthenticatedAppNutricaoRoute
   '/app/perfil': typeof AuthenticatedAppPerfilRoute
@@ -187,6 +196,7 @@ export interface FileRoutesById {
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
   '/_authenticated/app/arena': typeof AuthenticatedAppArenaRoute
   '/_authenticated/app/coach': typeof AuthenticatedAppCoachRoute
+  '/_authenticated/app/coach-painel': typeof AuthenticatedAppCoachPainelRoute
   '/_authenticated/app/conquistas': typeof AuthenticatedAppConquistasRoute
   '/_authenticated/app/nutricao': typeof AuthenticatedAppNutricaoRoute
   '/_authenticated/app/perfil': typeof AuthenticatedAppPerfilRoute
@@ -210,6 +220,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/app/arena'
     | '/app/coach'
+    | '/app/coach-painel'
     | '/app/conquistas'
     | '/app/nutricao'
     | '/app/perfil'
@@ -230,6 +241,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app/arena'
     | '/app/coach'
+    | '/app/coach-painel'
     | '/app/conquistas'
     | '/app/nutricao'
     | '/app/perfil'
@@ -252,6 +264,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app'
     | '/_authenticated/app/arena'
     | '/_authenticated/app/coach'
+    | '/_authenticated/app/coach-painel'
     | '/_authenticated/app/conquistas'
     | '/_authenticated/app/nutricao'
     | '/_authenticated/app/perfil'
@@ -330,6 +343,13 @@ declare module '@tanstack/react-router' {
       path: '/coach'
       fullPath: '/app/coach'
       preLoaderRoute: typeof AuthenticatedAppCoachRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/coach-painel': {
+      id: '/_authenticated/app/coach-painel'
+      path: '/coach-painel'
+      fullPath: '/app/coach-painel'
+      preLoaderRoute: typeof AuthenticatedAppCoachPainelRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
     '/_authenticated/app/conquistas': {
@@ -422,6 +442,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedAppRouteChildren {
   AuthenticatedAppArenaRoute: typeof AuthenticatedAppArenaRoute
   AuthenticatedAppCoachRoute: typeof AuthenticatedAppCoachRoute
+  AuthenticatedAppCoachPainelRoute: typeof AuthenticatedAppCoachPainelRoute
   AuthenticatedAppConquistasRoute: typeof AuthenticatedAppConquistasRoute
   AuthenticatedAppNutricaoRoute: typeof AuthenticatedAppNutricaoRoute
   AuthenticatedAppPerfilRoute: typeof AuthenticatedAppPerfilRoute
@@ -439,6 +460,7 @@ interface AuthenticatedAppRouteChildren {
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppArenaRoute: AuthenticatedAppArenaRoute,
   AuthenticatedAppCoachRoute: AuthenticatedAppCoachRoute,
+  AuthenticatedAppCoachPainelRoute: AuthenticatedAppCoachPainelRoute,
   AuthenticatedAppConquistasRoute: AuthenticatedAppConquistasRoute,
   AuthenticatedAppNutricaoRoute: AuthenticatedAppNutricaoRoute,
   AuthenticatedAppPerfilRoute: AuthenticatedAppPerfilRoute,
