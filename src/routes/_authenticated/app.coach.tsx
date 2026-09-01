@@ -161,6 +161,12 @@ function CoachPage() {
           </div>
         ))}
 
+        {mutation.isPending && mutation.variables && (
+          <div className="ml-auto max-w-[85%] rounded-2xl bg-primary px-4 py-3 text-sm text-primary-foreground opacity-70">
+            {mutation.variables}
+          </div>
+        )}
+
         {mutation.isPending && (
           <div className="ember-border w-24 rounded-2xl bg-surface px-4 py-3">
             <span className="flex gap-1">
