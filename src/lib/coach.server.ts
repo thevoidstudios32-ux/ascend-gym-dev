@@ -1,4 +1,4 @@
-import { aiChat, type AiChatInput } from "@/lib/ai-provider.server";
+import { aiChat, type AiChatInput, type AiMeta } from "@/lib/ai-provider.server";
 
 export type CoachTurn = { role: "user" | "assistant"; content: string };
 
@@ -8,18 +8,20 @@ async function callGateway(body: AiChatInput) {
 }
 
 /** Chamada genérica system+user — usada pelas análises do Coach. */
-export async function askCoachAnalysis(system: string, user: string) {
+export async function askCoachAnalysis(system: string, user: string, meta?: AiMeta) {
   return callGateway({
     messages: [
       { role: "system", content: system },
       { role: "user", content: user },
     ],
+    meta: { feature: "coach-analise", ...meta },
   });
 }
 
-export async function askCoach(history: CoachTurn[], contextSummary: string) {
+export async function askCoach(history: CoachTurn[], contextSummary: string, meta?: AiMeta) {
 
   return callGateway({
+    meta: { feature: "coach-chat", ...meta },
     messages: [
       {
         role: "system",
@@ -42,8 +44,10 @@ export async function pickSubstitution(
   muscle: string,
   candidates: string[],
   contextSummary: string,
+  meta?: AiMeta,
 ) {
   const reply = await callGateway({
+    meta: { feature: "troca-exercicio", ...meta },
     messages: [
       {
         role: "system",
@@ -77,9 +81,11 @@ export async function analyzeShape(
   afterUrl: string,
   contextSummary: string,
   weeks: number,
+  meta?: AiMeta,
 ) {
   return callGateway({
     vision: true,
+    meta: { feature: "shape-tracker", ...meta },
     messages: [
       {
         role: "system",
