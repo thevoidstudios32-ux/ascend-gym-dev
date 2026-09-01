@@ -223,13 +223,17 @@ export const sendMessage = createServerFn({ method: "POST" })
       .map((m) => ({ role: m.role === "assistant" ? ("assistant" as const) : ("user" as const), content: m.content }));
 
 
+    // A mensagem do atleta é gravada ANTES da IA: se o provedor falhar,
+    // o histórico não se perde e ele pode só pedir de novo.
+    await supabase
+      .from("chat_messages")
+      .insert({ user_id: userId, role: "user", content: data.text });
+
     const reply = await askCoach([...history, { role: "user", content: data.text }], summary);
 
-
-    await supabase.from("chat_messages").insert([
-      { user_id: userId, role: "user", content: data.text },
-      { user_id: userId, role: "assistant", content: reply },
-    ]);
+    await supabase
+      .from("chat_messages")
+      .insert({ user_id: userId, role: "assistant", content: reply });
 
     return { reply };
   });
