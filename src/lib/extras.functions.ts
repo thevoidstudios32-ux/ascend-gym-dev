@@ -343,7 +343,10 @@ export const analyzeProgress = createServerFn({ method: "POST" })
     );
     const summary = `Objetivo: ${profile?.goal ?? "-"} | Experiência: ${profile?.experience ?? "-"} | Peso atual: ${profile?.weight_kg ?? "-"} kg`;
 
-    const analysis = await analyzeShape(a.data.signedUrl, b.data.signedUrl, summary, weeks);
+    const analysis = await analyzeShape(a.data.signedUrl, b.data.signedUrl, summary, weeks, {
+      userId: context.userId,
+      feature: "shape-tracker",
+    });
     await supabase.from("progress_photos").update({ analysis }).eq("id", last.id).eq("user_id", userId);
     return { analysis };
   });

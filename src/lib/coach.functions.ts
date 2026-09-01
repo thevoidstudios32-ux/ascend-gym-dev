@@ -27,6 +27,7 @@ export const runCoachAnalysis = createServerFn({ method: "POST" })
     const reply = await askCoachAnalysis(
       `${prompt.system}\n\nDADOS REAIS DO ATLETA:\n${summary}`,
       prompt.user,
+      { userId, feature: `coach-${data.mode}` },
     );
 
     await supabase.from("chat_messages").insert([

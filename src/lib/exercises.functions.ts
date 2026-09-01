@@ -105,5 +105,8 @@ export const suggestSubstitution = createServerFn({ method: "POST" })
       `Histórico recente: ${history || "sem registros"}`,
     ].join("\n");
 
-    return pickSubstitution(data.exercise, data.muscle, data.candidates, summary);
+    return pickSubstitution(data.exercise, data.muscle, data.candidates, summary, {
+      userId: context.userId,
+      feature: "troca-exercicio",
+    });
   });
