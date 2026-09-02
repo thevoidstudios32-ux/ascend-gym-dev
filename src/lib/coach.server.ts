@@ -75,6 +75,24 @@ export async function pickSubstitution(
   return { choice: match, reason };
 }
 
+/**
+ * Baixa a imagem e converte para data URL base64.
+ * O endpoint compatível com OpenAI do Google NÃO busca imagens por URL remota
+ * (responde 400), então a foto precisa ir embutida na requisição.
+ */
+async function toDataUrl(url: string): Promise<string> {
+  if (url.startsWith("data:")) return url;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Não consegui abrir as fotos para análise.");
+  const type = res.headers.get("content-type")?.split(";")[0] || "image/jpeg";
+  const buf = new Uint8Array(await res.arrayBuffer());
+  let bin = "";
+  for (let i = 0; i < buf.length; i += 0x8000) {
+    bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
+  }
+  return `data:${type};base64,${btoa(bin)}`;
+}
+
 /** Compara duas fotos de evolução e devolve uma análise curta em markdown. */
 export async function analyzeShape(
   beforeUrl: string,
@@ -83,6 +101,8 @@ export async function analyzeShape(
   weeks: number,
   meta?: AiMeta,
 ) {
+  const [before, after] = await Promise.all([toDataUrl(beforeUrl), toDataUrl(afterUrl)]);
+
   return callGateway({
     vision: true,
     meta: { feature: "shape-tracker", ...meta },
