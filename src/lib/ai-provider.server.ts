@@ -104,6 +104,11 @@ async function attempt(model: string, input: AiChatInput, key: string, base: str
       res.status === 429 ? 429 : 503,
     );
   }
+  if (res.status === 404) {
+    const detail = await res.text().catch(() => "");
+    console.error("[ai] modelo indisponível", model, detail.slice(0, 300));
+    throw new AiError(`Modelo de IA indisponível (${model}).`, 404);
+  }
   if (!res.ok) {
     const detail = await res.text().catch(() => "");
     console.error("[ai] erro do provedor", res.status, detail.slice(0, 500));
