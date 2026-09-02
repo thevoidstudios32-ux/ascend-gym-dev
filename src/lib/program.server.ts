@@ -63,8 +63,14 @@ async function callGateway(body: {
   messages: AiMessage[];
   tools?: unknown[];
   tool_choice?: unknown;
+  userId?: string | null;
 }) {
-  return aiChat(body) as Promise<any>;
+  return aiChat({
+    messages: body.messages,
+    tools: body.tools,
+    tool_choice: body.tool_choice,
+    meta: { userId: body.userId ?? null, feature: "programa-ia" },
+  }) as Promise<any>;
 }
 
 function str(v: unknown, max: number, fallback = "") {
@@ -110,10 +116,12 @@ export type ProposeInput = {
   preferences: TrainingPreferences;
   current: { name: string; split_label: string; days: ProgramDay[] } | null;
   athlete: string;
+  userId?: string | null;
 };
 
 export async function proposeProgram(input: ProposeInput): Promise<ProgramProposal> {
   const json = await callGateway({
+    userId: input.userId,
     messages: [
       {
         role: "system",
