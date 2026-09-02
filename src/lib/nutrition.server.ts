@@ -15,9 +15,10 @@ export type MealAnalysis = {
   notes: string;
 };
 
-async function vision(prompt: string, imageDataUrl: string) {
+async function vision(prompt: string, imageDataUrl: string, userId?: string | null) {
   const json = (await aiChat({
     vision: true,
+    meta: { userId: userId ?? null, feature: "nutricao-foto" },
     messages: [
       {
         role: "system",
@@ -51,11 +52,11 @@ function parseJson(raw: string): Record<string, unknown> {
 const num = (v: unknown) => Math.max(0, Math.round(Number(v) || 0));
 
 /** Analisa a foto de uma refeição e devolve macros somados + itens detectados. */
-export async function analyzeMealImage(imageDataUrl: string, notes: string): Promise<MealAnalysis> {
+export async function analyzeMealImage(imageDataUrl: string, notes: string, userId?: string | null): Promise<MealAnalysis> {
   const prompt = notes.trim()
     ? `Analise esta refeição. Observações do usuário (use para melhorar a precisão): ${notes.trim()}`
     : "Analise esta refeição e estime as porções.";
-  const parsed = parseJson(await vision(prompt, imageDataUrl));
+  const parsed = parseJson(await vision(prompt, imageDataUrl, userId));
 
   const rawItems = Array.isArray(parsed["items"]) ? (parsed["items"] as Record<string, unknown>[]) : [];
   const items: MealItem[] = rawItems.slice(0, 12).map((i) => ({

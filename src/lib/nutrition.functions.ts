@@ -22,9 +22,9 @@ export const analyzeMealPhoto = createServerFn({ method: "POST" })
       })
       .parse(data),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const { analyzeMealImage } = await import("@/lib/nutrition.server");
-    return analyzeMealImage(data.image, data.notes);
+    return analyzeMealImage(data.image, data.notes, context.userId);
   });
 
 /** Busca um produto pelo código de barras na base pública Open Food Facts. */

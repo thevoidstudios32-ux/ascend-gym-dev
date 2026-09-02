@@ -26,6 +26,9 @@ const FEATURE_LABELS: Record<string, string> = {
   "coach-analise": "Análises",
   "troca-exercicio": "Troca de exercício",
   "shape-tracker": "Shape Tracker",
+  "programa-ia": "Programa IA",
+  "treino-personalizado": "Treino personalizado",
+  "nutricao-foto": "Foto de refeição",
   outros: "Outros",
 };
 const label = (f: string) => FEATURE_LABELS[f] ?? f;

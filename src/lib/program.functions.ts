@@ -145,6 +145,7 @@ export const proposeProgramChange = createServerFn({ method: "POST" })
       preferences,
       current: (programRes.data as never) ?? null,
       athlete: ctx.summary,
+      userId,
     });
 
     return { proposal, hadProgram: !!programRes.data };

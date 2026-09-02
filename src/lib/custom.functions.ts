@@ -162,7 +162,7 @@ export const proposeWorkoutChange = createServerFn({ method: "POST" })
       `Dias por semana: ${profile?.days_per_week ?? "?"}`,
     ].join("\n");
 
-    const proposal = await proposeWorkout({ request: data.request, workout: base, athlete });
+    const proposal = await proposeWorkout({ request: data.request, workout: base, athlete, userId });
     return { proposal, base, fromSplit: !data.workoutId };
   });
 

@@ -47,8 +47,10 @@ export async function proposeWorkout(input: {
   request: string;
   workout: { name: string; focus: string; emoji: string; difficulty: string; notes: string | null; exercises: CustomExercise[] };
   athlete: string;
+  userId?: string | null;
 }): Promise<Proposal> {
   const json = (await aiChat({
+    meta: { userId: input.userId ?? null, feature: "treino-personalizado" },
     messages: [
       {
         role: "system",
