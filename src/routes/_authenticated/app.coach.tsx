@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
@@ -99,14 +99,22 @@ function CoachPage() {
           <h1 className="text-display text-4xl">COACH IA</h1>
           <p className="text-sm text-muted-foreground">Ele conhece seus treinos, cargas e metas.</p>
         </div>
-        {messages.length > 0 && (
-          <button
-            onClick={() => clearMutation.mutate()}
-            className="text-xs font-bold text-muted-foreground hover:text-destructive"
+        <div className="flex items-center gap-3">
+          <Link
+            to="/app/coach-painel"
+            className="rounded-full ember-border bg-elevated px-3 py-1.5 text-xs font-bold"
           >
-            Limpar
-          </button>
-        )}
+            📊 Painel
+          </Link>
+          {messages.length > 0 && (
+            <button
+              onClick={() => clearMutation.mutate()}
+              className="text-xs font-bold text-muted-foreground hover:text-destructive"
+            >
+              Limpar
+            </button>
+          )}
+        </div>
       </header>
 
       <div className="mt-5">
