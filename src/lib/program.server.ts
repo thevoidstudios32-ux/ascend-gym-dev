@@ -63,14 +63,15 @@ async function callGateway(body: {
   messages: AiMessage[];
   tools?: unknown[];
   tool_choice?: unknown;
-  userId?: string | null;
+  userId?: string | null | undefined;
 }) {
-  return aiChat({
+  const input: Parameters<typeof aiChat>[0] = {
     messages: body.messages,
-    tools: body.tools,
-    tool_choice: body.tool_choice,
     meta: { userId: body.userId ?? null, feature: "programa-ia" },
-  }) as Promise<any>;
+  };
+  if (body.tools) input.tools = body.tools;
+  if (body.tool_choice) input.tool_choice = body.tool_choice;
+  return aiChat(input) as Promise<any>;
 }
 
 function str(v: unknown, max: number, fallback = "") {
