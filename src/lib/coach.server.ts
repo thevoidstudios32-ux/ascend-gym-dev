@@ -121,8 +121,9 @@ export async function analyzeShape(
         role: "user",
         content: [
           { type: "text", text: "Analise minha evolução entre estas duas fotos." },
-          { type: "image_url", image_url: { url: beforeUrl } },
-          { type: "image_url", image_url: { url: afterUrl } },
+          { type: "image_url", image_url: { url: before } },
+          { type: "image_url", image_url: { url: after } },
+
         ],
       },
     ],
