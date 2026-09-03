@@ -178,6 +178,8 @@ export async function aiChat(input: AiChatInput): Promise<any> {
         return json;
       } catch (err) {
         last = err;
+        // Modelo inexistente/descontinuado: pula direto para o próximo da lista.
+        if (err instanceof AiError && err.status === 404) break;
         const retryable = err instanceof AiError && (err.status === 503 || err.status === 429);
         if (!retryable) {
           await logUsage({
