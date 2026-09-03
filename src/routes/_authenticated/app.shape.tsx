@@ -4,6 +4,15 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
+import {
+  PolarAngleAxis,
+  PolarGrid,
+  PolarRadiusAxis,
+  Radar,
+  RadarChart,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
 import { Sparkle, Trash2, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useExtras, useRefreshDashboard } from "@/hooks/use-dashboard";
