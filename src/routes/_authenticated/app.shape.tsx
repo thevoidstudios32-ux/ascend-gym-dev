@@ -4,6 +4,15 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
+import {
+  PolarAngleAxis,
+  PolarGrid,
+  PolarRadiusAxis,
+  Radar,
+  RadarChart,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
 import { Sparkle, Trash2, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useExtras, useRefreshDashboard } from "@/hooks/use-dashboard";
@@ -125,18 +134,37 @@ function ShapePage() {
       {scores.length > 0 && (
         <section className="panel p-5">
           <h2 className="font-bold">Regiões que mais evoluíram</h2>
-          <div className="mt-3 space-y-2.5">
-            {scores.map((s) => (
-              <div key={s.label}>
-                <div className="flex justify-between text-xs">
-                  <span className="font-semibold">{s.label}</span>
-                  <span className="text-muted-foreground">{s.value}</span>
-                </div>
-                <div className="mt-1 h-2 overflow-hidden rounded-full bg-muted">
-                  <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${s.value}%` }} />
-                </div>
-              </div>
-            ))}
+          <div className="mt-3 aspect-square w-full max-w-sm mx-auto">
+            <ResponsiveContainer width="100%" height="100%">
+              <RadarChart cx="50%" cy="50%" outerRadius="65%" data={scores}>
+                <PolarGrid stroke="rgba(255,255,255,0.12)" />
+                <PolarAngleAxis
+                  dataKey="label"
+                  tick={{ fill: "currentColor", fontSize: 11, fontWeight: 700 }}
+                />
+                <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
+                <Radar
+                  name="Evolução"
+                  dataKey="value"
+                  stroke="#dc2626"
+                  strokeWidth={2.5}
+                  fill="#dc2626"
+                  fillOpacity={0.32}
+                />
+                <Tooltip
+                  content={({ active, payload }) => {
+                    if (!active || !payload?.length) return null;
+                    const p = payload[0]?.payload as { label: string; value: number };
+                    return (
+                      <div className="rounded-lg border border-border/50 bg-background/95 px-3 py-2 text-xs shadow-lg">
+                        <p className="font-bold">{p.label}</p>
+                        <p className="text-muted-foreground">{p.value}/100</p>
+                      </div>
+                    );
+                  }}
+                />
+              </RadarChart>
+            </ResponsiveContainer>
           </div>
         </section>
       )}
