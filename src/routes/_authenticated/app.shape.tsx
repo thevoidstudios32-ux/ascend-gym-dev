@@ -133,7 +133,7 @@ function ShapePage() {
 
       {scores.length > 0 && (
         <section className="panel p-5">
-          <h2 className="font-bold">Mapa de evolução muscular</h2>
+          <h2 className="font-bold">Regiões que mais evoluíram</h2>
           <div className="mt-3 aspect-square w-full max-w-sm mx-auto">
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart cx="50%" cy="50%" outerRadius="65%" data={scores}>
