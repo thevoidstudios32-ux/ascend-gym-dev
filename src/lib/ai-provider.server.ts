@@ -44,8 +44,8 @@ function config() {
   return {
     key,
     base: (process.env["AI_BASE_URL"] ?? "https://api.openai.com/v1").replace(/\/+$/, ""),
-    textModel: process.env["AI_MODEL_TEXT"] ?? "gpt-4o-mini",
-    visionModel: process.env["AI_MODEL_VISION"] ?? process.env["AI_MODEL_TEXT"] ?? "gpt-4o-mini",
+    textModel: process.env["AI_MODEL_TEXT"] ?? "gemini-3.6-flash",
+    visionModel: process.env["AI_MODEL_VISION"] ?? process.env["AI_MODEL_TEXT"] ?? "gemini-3.6-flash",
   };
 }
 
@@ -53,7 +53,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** Modelos alternativos usados quando o principal está sobrecarregado (503/429). */
 function fallbackModels(primary: string) {
-  const extra = (process.env["AI_MODEL_FALLBACKS"] ?? "gemini-2.5-flash,gemini-2.0-flash")
+  const extra = (process.env["AI_MODEL_FALLBACKS"] ?? "gemini-flash-latest,gemini-2.0-flash")
     .split(",")
     .map((m) => m.trim())
     .filter(Boolean);
