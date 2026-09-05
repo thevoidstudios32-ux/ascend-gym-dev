@@ -336,25 +336,47 @@ function Dashboard({ data }: { data: DashboardData }) {
 
       <section className="card overflow-hidden">
         <div className="flex items-center gap-4 p-5">
-          <span className="animate-exercise text-3xl">{split.emoji}</span>
+          <span className="animate-exercise text-3xl">
+            {todayProgramDay ? todayProgramDay.exercises[0]?.emoji || "✨" : split.emoji}
+          </span>
           <div className="min-w-0 flex-1">
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
               {doneToday ? "Treino de hoje concluído" : "Treino de hoje"}
+              {todayProgramDay ? " · programa IA" : ""}
             </p>
-            <p className="truncate text-lg font-bold">{split.name}</p>
+            <p className="truncate text-lg font-bold">
+              {todayProgramDay ? todayProgramDay.title : split.name}
+            </p>
             <p className="truncate text-xs text-muted-foreground">
-              {split.focus} · {split.minutes} min · {split.exercises.length} exercícios
+              {todayProgramDay
+                ? `${todayProgramDay.focus} · ${todayProgramDay.minutes} min · ${todayProgramDay.exercises.length} exercícios`
+                : `${split.focus} · ${split.minutes} min · ${split.exercises.length} exercícios`}
             </p>
           </div>
         </div>
-        <Link
-          to="/app/treino/$split"
-          params={{ split: split.id }}
-          className="press flex items-center justify-center gap-2 bg-primary py-4 text-base font-extrabold uppercase tracking-wide text-primary-foreground"
-        >
-          <Play className="size-5 fill-current" />
-          {doneToday ? "Treinar de novo" : "Iniciar treino"}
-        </Link>
+        {todayProgramDay ? (
+          <button
+            onClick={() => startProgramWorkout(todayProgramDay.key)}
+            disabled={startDay.isPending}
+            className="press flex w-full items-center justify-center gap-2 bg-primary py-4 text-base font-extrabold uppercase tracking-wide text-primary-foreground disabled:opacity-60"
+          >
+            <Play className="size-5 fill-current" />
+            {startDay.isPending
+              ? "Preparando…"
+              : doneToday
+                ? "Treinar de novo"
+                : "Iniciar treino"}
+          </button>
+        ) : (
+          <Link
+            to="/app/treino/$split"
+            params={{ split: split.id }}
+            className="press flex items-center justify-center gap-2 bg-primary py-4 text-base font-extrabold uppercase tracking-wide text-primary-foreground"
+          >
+            <Play className="size-5 fill-current" />
+            {doneToday ? "Treinar de novo" : "Iniciar treino"}
+          </Link>
+        )}
       </section>
 
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
