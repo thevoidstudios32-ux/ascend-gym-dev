@@ -134,7 +134,23 @@ function ShapePage() {
       {scores.length > 0 && (
         <section className="panel p-5">
           <h2 className="font-bold">Regiões que mais evoluíram</h2>
+          {scores.length < 3 ? (
+            <div className="mt-3 space-y-3">
+              {scores.map((s) => (
+                <div key={s.label}>
+                  <div className="flex items-center justify-between text-xs font-semibold">
+                    <span>{s.label}</span>
+                    <span className="text-muted-foreground">{s.value}/100</span>
+                  </div>
+                  <div className="mt-1 h-2 overflow-hidden rounded-full bg-elevated">
+                    <div className="h-full rounded-full bg-primary" style={{ width: `${s.value}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
           <div className="mt-3 aspect-square w-full max-w-sm mx-auto">
+
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart cx="50%" cy="50%" outerRadius="65%" data={scores}>
                 <PolarGrid stroke="rgba(255,255,255,0.12)" />
@@ -166,7 +182,9 @@ function ShapePage() {
               </RadarChart>
             </ResponsiveContainer>
           </div>
+          )}
         </section>
+
       )}
 
       {latestAnalysis && (
@@ -212,9 +230,20 @@ function ShapePage() {
 function parseScores(text: string | null) {
   if (!text) return [];
   const out: { label: string; value: number }[] = [];
+  const seen = new Set<string>();
+  // Captura "Peitoral: 70", "- **Dorsais/Costas**: 85/100", "Braços — 72"
+  const re = /\*{0,2}([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ\s/]{2,28}?)\*{0,2}\s*[:—–-]\s*(\d{1,3})\s*(?:\/\s*100)?\b/g;
   for (const line of text.split("\n")) {
-    const m = line.match(/^[-*\s]*\*{0,2}([A-Za-zÀ-ÿ\s/]{3,30}?)\*{0,2}\s*:\s*(\d{1,3})\b/);
-    if (m) out.push({ label: m[1]!.trim(), value: Math.min(100, Number(m[2])) });
+    const clean = line.replace(/^[-*\s]+/, "");
+    for (const m of clean.matchAll(re)) {
+      const label = m[1]!.trim().replace(/\s+/g, " ");
+      const value = Math.max(0, Math.min(100, Number(m[2])));
+      const key = label.toLowerCase();
+      if (label.length < 3 || seen.has(key) || Number.isNaN(value)) continue;
+      seen.add(key);
+      out.push({ label, value });
+    }
   }
   return out.slice(0, 8);
 }
+
