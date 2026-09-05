@@ -182,7 +182,9 @@ function ShapePage() {
               </RadarChart>
             </ResponsiveContainer>
           </div>
+          )}
         </section>
+
       )}
 
       {latestAnalysis && (
