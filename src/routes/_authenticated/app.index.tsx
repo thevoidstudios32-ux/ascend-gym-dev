@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
@@ -11,6 +11,8 @@ import { useTitles } from "@/hooks/use-titles";
 import { Apple, Bot, Camera, Dumbbell, Flame, Play, Timer, Trophy, Zap } from "lucide-react";
 import { CountUp, LoadingPage, ProgressBar, StatCard } from "@/components/ui-kit";
 import { useDashboard, useExtras, useRefreshDashboard } from "@/hooks/use-dashboard";
+import { useProgram, useStartProgramDay } from "@/hooks/use-program";
+import { WEEKDAYS } from "@/lib/program";
 import { saveProfile } from "@/lib/ascend.functions";
 import {
   computeStreak,
