@@ -208,6 +208,25 @@ function Dashboard({ data }: { data: DashboardData }) {
   const doneSet = new Set(dates);
   const split = splitOfDay();
   const doneToday = doneSet.has(today);
+  const { data: programData } = useProgram();
+  const startDay = useStartProgramDay();
+  const navigate = useNavigate();
+  const todayProgramDay = useMemo(() => {
+    const program = programData?.program;
+    if (!program?.active) return null;
+    const weekday = WEEKDAYS[(now.getDay() + 6) % 7]!;
+    return program.days.find((d) => d.weekday === weekday) ?? null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [programData?.program]);
+
+  const startProgramWorkout = async (dayKey: string) => {
+    try {
+      const res = await startDay.mutateAsync(dayKey);
+      await navigate({ to: "/app/treino/$split", params: { split: res.workoutId } });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Não foi possível iniciar o treino.");
+    }
+  };
 
   const last7 = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => {
