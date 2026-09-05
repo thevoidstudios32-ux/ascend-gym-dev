@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
@@ -11,6 +11,8 @@ import { useTitles } from "@/hooks/use-titles";
 import { Apple, Bot, Camera, Dumbbell, Flame, Play, Timer, Trophy, Zap } from "lucide-react";
 import { CountUp, LoadingPage, ProgressBar, StatCard } from "@/components/ui-kit";
 import { useDashboard, useExtras, useRefreshDashboard } from "@/hooks/use-dashboard";
+import { useProgram, useStartProgramDay } from "@/hooks/use-program";
+import { WEEKDAYS } from "@/lib/program";
 import { saveProfile } from "@/lib/ascend.functions";
 import {
   computeStreak,
@@ -206,6 +208,25 @@ function Dashboard({ data }: { data: DashboardData }) {
   const doneSet = new Set(dates);
   const split = splitOfDay();
   const doneToday = doneSet.has(today);
+  const { data: programData } = useProgram();
+  const startDay = useStartProgramDay();
+  const navigate = useNavigate();
+  const todayProgramDay = useMemo(() => {
+    const program = programData?.program;
+    if (!program?.active) return null;
+    const weekday = WEEKDAYS[(now.getDay() + 6) % 7]!;
+    return program.days.find((d) => d.weekday === weekday) ?? null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [programData?.program]);
+
+  const startProgramWorkout = async (dayKey: string) => {
+    try {
+      const res = await startDay.mutateAsync(dayKey);
+      await navigate({ to: "/app/treino/$split", params: { split: res.workoutId } });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Não foi possível iniciar o treino.");
+    }
+  };
 
   const last7 = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => {
@@ -315,25 +336,47 @@ function Dashboard({ data }: { data: DashboardData }) {
 
       <section className="card overflow-hidden">
         <div className="flex items-center gap-4 p-5">
-          <span className="animate-exercise text-3xl">{split.emoji}</span>
+          <span className="animate-exercise text-3xl">
+            {todayProgramDay ? todayProgramDay.exercises[0]?.emoji || "✨" : split.emoji}
+          </span>
           <div className="min-w-0 flex-1">
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
               {doneToday ? "Treino de hoje concluído" : "Treino de hoje"}
+              {todayProgramDay ? " · programa IA" : ""}
             </p>
-            <p className="truncate text-lg font-bold">{split.name}</p>
+            <p className="truncate text-lg font-bold">
+              {todayProgramDay ? todayProgramDay.title : split.name}
+            </p>
             <p className="truncate text-xs text-muted-foreground">
-              {split.focus} · {split.minutes} min · {split.exercises.length} exercícios
+              {todayProgramDay
+                ? `${todayProgramDay.focus} · ${todayProgramDay.minutes} min · ${todayProgramDay.exercises.length} exercícios`
+                : `${split.focus} · ${split.minutes} min · ${split.exercises.length} exercícios`}
             </p>
           </div>
         </div>
-        <Link
-          to="/app/treino/$split"
-          params={{ split: split.id }}
-          className="press flex items-center justify-center gap-2 bg-primary py-4 text-base font-extrabold uppercase tracking-wide text-primary-foreground"
-        >
-          <Play className="size-5 fill-current" />
-          {doneToday ? "Treinar de novo" : "Iniciar treino"}
-        </Link>
+        {todayProgramDay ? (
+          <button
+            onClick={() => startProgramWorkout(todayProgramDay.key)}
+            disabled={startDay.isPending}
+            className="press flex w-full items-center justify-center gap-2 bg-primary py-4 text-base font-extrabold uppercase tracking-wide text-primary-foreground disabled:opacity-60"
+          >
+            <Play className="size-5 fill-current" />
+            {startDay.isPending
+              ? "Preparando…"
+              : doneToday
+                ? "Treinar de novo"
+                : "Iniciar treino"}
+          </button>
+        ) : (
+          <Link
+            to="/app/treino/$split"
+            params={{ split: split.id }}
+            className="press flex items-center justify-center gap-2 bg-primary py-4 text-base font-extrabold uppercase tracking-wide text-primary-foreground"
+          >
+            <Play className="size-5 fill-current" />
+            {doneToday ? "Treinar de novo" : "Iniciar treino"}
+          </Link>
+        )}
       </section>
 
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
