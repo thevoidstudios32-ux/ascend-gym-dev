@@ -212,9 +212,20 @@ function ShapePage() {
 function parseScores(text: string | null) {
   if (!text) return [];
   const out: { label: string; value: number }[] = [];
+  const seen = new Set<string>();
+  // Captura "Peitoral: 70", "- **Dorsais/Costas**: 85/100", "Braços — 72"
+  const re = /\*{0,2}([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ\s/]{2,28}?)\*{0,2}\s*[:—–-]\s*(\d{1,3})\s*(?:\/\s*100)?\b/g;
   for (const line of text.split("\n")) {
-    const m = line.match(/^[-*\s]*\*{0,2}([A-Za-zÀ-ÿ\s/]{3,30}?)\*{0,2}\s*:\s*(\d{1,3})\b/);
-    if (m) out.push({ label: m[1]!.trim(), value: Math.min(100, Number(m[2])) });
+    const clean = line.replace(/^[-*\s]+/, "");
+    for (const m of clean.matchAll(re)) {
+      const label = m[1]!.trim().replace(/\s+/g, " ");
+      const value = Math.max(0, Math.min(100, Number(m[2])));
+      const key = label.toLowerCase();
+      if (label.length < 3 || seen.has(key) || Number.isNaN(value)) continue;
+      seen.add(key);
+      out.push({ label, value });
+    }
   }
   return out.slice(0, 8);
 }
+
