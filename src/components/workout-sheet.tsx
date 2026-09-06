@@ -111,6 +111,19 @@ export function WorkoutSheetButton() {
 
   function build(): Block[] {
     const blocks: Block[] = [];
+    const customBlocks: Block[] = (custom.data?.workouts ?? []).map((w) => ({
+      title: w.name,
+      subtitle: `${w.focus} · ${w.difficulty}`,
+      minutes: estimateMinutes(w.exercises),
+      rows: w.exercises.map((e) => ({
+        name: e.name,
+        muscle: e.muscle,
+        sets: e.sets,
+        reps: e.reps,
+        rest: e.rest,
+        tip: e.tip,
+      })),
+    }));
     const days = [...(program?.program?.days ?? [])].sort((a, b) => {
       const ia = WEEKDAYS.findIndex((w) => w === (a.weekday ?? "").toUpperCase());
       const ib = WEEKDAYS.findIndex((w) => w === (b.weekday ?? "").toUpperCase());
