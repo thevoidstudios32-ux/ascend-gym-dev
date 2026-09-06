@@ -8,10 +8,9 @@ import { useCustomWorkouts } from "@/hooks/use-custom";
 import { useDashboard } from "@/hooks/use-dashboard";
 import { SPLITS } from "@/lib/ascend";
 import { estimateMinutes } from "@/lib/custom";
-import { dayMinutes } from "@/lib/program";
+import { dayMinutes, WEEKDAYS } from "@/lib/program";
 
 type Row = {
-  emoji: string;
   name: string;
   muscle: string;
   sets: number;
@@ -31,7 +30,7 @@ function blockHtml(b: Block) {
     .map(
       (r) => `
       <tr>
-        <td class="ex"><strong>${esc(r.emoji)} ${esc(r.name)}</strong>${
+        <td class="ex"><strong>${esc(r.name)}</strong>${
           r.tip ? `<span class="tip">${esc(r.tip)}</span>` : ""
         }</td>
         <td>${esc(r.muscle)}</td>
@@ -112,14 +111,17 @@ export function WorkoutSheetButton() {
 
   function build(): Block[] {
     const blocks: Block[] = [];
-    const days = program?.program?.days ?? [];
+    const days = [...(program?.program?.days ?? [])].sort((a, b) => {
+      const ia = WEEKDAYS.findIndex((w) => w === (a.weekday ?? "").toUpperCase());
+      const ib = WEEKDAYS.findIndex((w) => w === (b.weekday ?? "").toUpperCase());
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+    });
     for (const d of days) {
       blocks.push({
         title: `${d.weekday} · ${d.title}`,
         subtitle: d.focus,
         minutes: dayMinutes(d),
         rows: d.exercises.map((e) => ({
-          emoji: e.emoji,
           name: e.name,
           muscle: e.muscle,
           sets: e.sets,
@@ -132,11 +134,10 @@ export function WorkoutSheetButton() {
     if (blocks.length === 0) {
       for (const s of SPLITS) {
         blocks.push({
-          title: `${s.emoji} ${s.name}`,
+          title: s.name,
           subtitle: s.focus,
           minutes: s.minutes,
           rows: s.exercises.map((e) => ({
-            emoji: e.emoji,
             name: e.name,
             muscle: e.muscle,
             sets: e.sets,
@@ -149,11 +150,10 @@ export function WorkoutSheetButton() {
     }
     for (const w of custom.data?.workouts ?? []) {
       blocks.push({
-        title: `${w.emoji} ${w.name}`,
+        title: w.name,
         subtitle: `${w.focus} · ${w.difficulty}`,
         minutes: estimateMinutes(w.exercises),
         rows: w.exercises.map((e) => ({
-          emoji: e.emoji,
           name: e.name,
           muscle: e.muscle,
           sets: e.sets,
