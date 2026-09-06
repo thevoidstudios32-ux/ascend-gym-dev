@@ -1,6 +1,6 @@
 /* Ficha de treino imprimível (PDF via impressão do navegador). */
 import { useState } from "react";
-import { Printer } from "lucide-react";
+import { Printer, Download } from "lucide-react";
 import { toast } from "sonner";
 import { ascendBrandUrls } from "@/components/brand";
 import { useProgram } from "@/hooks/use-program";
