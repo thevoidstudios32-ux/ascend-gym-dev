@@ -38,6 +38,8 @@ function TreinosPage() {
 
       <AiProgramSection />
 
+      <WorkoutSheetButton />
+
       <section className="space-y-3">
         {SPLITS.map((s) => (
           <Link
