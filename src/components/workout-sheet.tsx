@@ -111,6 +111,19 @@ export function WorkoutSheetButton() {
 
   function build(): Block[] {
     const blocks: Block[] = [];
+    const customBlocks: Block[] = (custom.data?.workouts ?? []).map((w) => ({
+      title: w.name,
+      subtitle: `${w.focus} · ${w.difficulty}`,
+      minutes: estimateMinutes(w.exercises),
+      rows: w.exercises.map((e) => ({
+        name: e.name,
+        muscle: e.muscle,
+        sets: e.sets,
+        reps: e.reps,
+        rest: e.rest,
+        tip: e.tip,
+      })),
+    }));
     const days = [...(program?.program?.days ?? [])].sort((a, b) => {
       const ia = WEEKDAYS.findIndex((w) => w === (a.weekday ?? "").toUpperCase());
       const ib = WEEKDAYS.findIndex((w) => w === (b.weekday ?? "").toUpperCase());
@@ -131,6 +144,9 @@ export function WorkoutSheetButton() {
         })),
       });
     }
+    // Sem programa da IA: usa os treinos personalizados do usuário…
+    if (blocks.length === 0) blocks.push(...customBlocks);
+    // …e se não houver nenhum, cai nas divisões padrão.
     if (blocks.length === 0) {
       for (const s of SPLITS) {
         blocks.push({
@@ -147,21 +163,6 @@ export function WorkoutSheetButton() {
           })),
         });
       }
-    }
-    for (const w of custom.data?.workouts ?? []) {
-      blocks.push({
-        title: w.name,
-        subtitle: `${w.focus} · ${w.difficulty}`,
-        minutes: estimateMinutes(w.exercises),
-        rows: w.exercises.map((e) => ({
-          name: e.name,
-          muscle: e.muscle,
-          sets: e.sets,
-          reps: e.reps,
-          rest: e.rest,
-          tip: e.tip,
-        })),
-      });
     }
     return blocks;
   }
