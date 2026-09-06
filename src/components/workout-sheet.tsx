@@ -357,12 +357,21 @@ export function WorkoutSheetButton() {
   }
 
   return (
-    <button
-      onClick={open}
-      disabled={busy}
-      className="press flex w-full items-center justify-center gap-2 rounded-full bg-elevated py-3 text-sm font-extrabold disabled:opacity-50"
-    >
-      <Printer className="size-4" /> Exportar ficha de treino (PDF)
-    </button>
+    <div className="flex gap-2">
+      <button
+        onClick={downloadPdf}
+        disabled={busy}
+        className="press flex flex-1 items-center justify-center gap-2 rounded-full bg-primary py-3 text-sm font-extrabold text-primary-foreground shadow-glow disabled:opacity-50"
+      >
+        <Download className="size-4" /> Baixar ficha (PDF)
+      </button>
+      <button
+        onClick={open}
+        disabled={busy}
+        className="press flex flex-1 items-center justify-center gap-2 rounded-full bg-elevated py-3 text-sm font-extrabold disabled:opacity-50"
+      >
+        <Printer className="size-4" /> Imprimir
+      </button>
+    </div>
   );
 }
