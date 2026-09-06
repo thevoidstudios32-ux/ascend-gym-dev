@@ -1,6 +1,6 @@
 /* Ficha de treino imprimível (PDF via impressão do navegador). */
 import { useState } from "react";
-import { Printer } from "lucide-react";
+import { Printer, Download } from "lucide-react";
 import { toast } from "sonner";
 import { ascendBrandUrls } from "@/components/brand";
 import { useProgram } from "@/hooks/use-program";
@@ -167,6 +167,171 @@ export function WorkoutSheetButton() {
     return blocks;
   }
 
+  function headerInfo() {
+    return {
+      name: data?.profile?.name || "Atleta ASCEND",
+      goal: program?.program
+        ? `${program.program.name} · ${program.program.split_label}`
+        : data?.profile?.goal
+          ? `Objetivo: ${data.profile.goal}`
+          : "Divisões padrão Push / Pull / Legs / Full Body",
+    };
+  }
+
+  async function downloadPdf() {
+    const blocks = build();
+    if (blocks.length === 0) {
+      toast.error("Nenhum treino disponível para exportar ainda.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const { jsPDF } = await import("jspdf");
+      const autoTable = (await import("jspdf-autotable")).default;
+      const doc = new jsPDF({ unit: "mm", format: "a4" });
+      const W = doc.internal.pageSize.getWidth();
+      const H = doc.internal.pageSize.getHeight();
+      const { name, goal } = headerInfo();
+      const date = new Date().toLocaleDateString("pt-BR");
+
+      // Marca d'água (logo carregada como data URL).
+      let wm: { data: string; w: number; h: number } | null = null;
+      try {
+        const res = await fetch(ascendBrandUrls.full);
+        const blob = await res.blob();
+        const data = await new Promise<string>((ok, err) => {
+          const fr = new FileReader();
+          fr.onload = () => ok(fr.result as string);
+          fr.onerror = err;
+          fr.readAsDataURL(blob);
+        });
+        const img = new Image();
+        await new Promise<void>((ok, err) => {
+          img.onload = () => ok();
+          img.onerror = err;
+          img.src = data;
+        });
+        wm = { data, w: img.naturalWidth, h: img.naturalHeight };
+      } catch {
+        wm = null; // sem logo: segue só com o texto
+      }
+
+      const drawWatermark = () => {
+        doc.saveGraphicsState();
+        // @ts-expect-error GState existe no jsPDF 2.x
+        doc.setGState(new doc.GState({ opacity: 0.1 }));
+        if (wm) {
+          const targetW = 46;
+          const targetH = (targetW * wm.h) / wm.w;
+          doc.addImage(wm.data, "PNG", (W - targetW) / 2, H - 22 - targetH, targetW, targetH);
+        }
+        doc.setFontSize(9);
+        doc.setTextColor(120);
+        doc.setCharSpace(3);
+        doc.text("ASCEND", W / 2, H - 12, { align: "center" });
+        doc.setCharSpace(0);
+        doc.restoreGraphicsState();
+      };
+
+      let y = 16;
+      // Cabeçalho
+      doc.setFillColor(220, 38, 38);
+      doc.rect(14, y, 1.6, 12, "F");
+      doc.setFontSize(17);
+      doc.setTextColor(15);
+      doc.setFont("helvetica", "bold");
+      doc.text("ASCEND · FICHA DE TREINO", 19, y + 5);
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(90);
+      doc.text([name, goal, `Emitida em ${date}`], W - 14, y + 2, { align: "right" });
+      y += 14;
+      doc.setDrawColor(220, 38, 38);
+      doc.setLineWidth(1);
+      doc.line(14, y, W - 14, y);
+      y += 7;
+
+      for (const b of blocks) {
+        const headH = 10;
+        if (y + headH + 30 > H - 20) {
+          drawWatermark();
+          doc.addPage();
+          y = 16;
+        }
+        doc.setFillColor(220, 38, 38);
+        doc.rect(14, y - 1.5, 1.4, 5.4, "F");
+        doc.setFontSize(11.5);
+        doc.setTextColor(15);
+        doc.setFont("helvetica", "bold");
+        doc.text(b.title, 17.5, y + 2.5);
+        doc.setFontSize(8.5);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(110);
+        doc.text(`${b.subtitle} · ~${b.minutes} min · ${b.rows.length} exercícios`, W - 14, y + 2.5, {
+          align: "right",
+        });
+        y += 6;
+
+        autoTable(doc, {
+          startY: y,
+          margin: { left: 14, right: 14 },
+          head: [["Exercício", "Músculo", "Séries", "Reps", "Desc.", "S1", "S2", "S3", "S4"]],
+          body: b.rows.map((r) => [
+            r.tip ? `${r.name}\n${r.tip}` : r.name,
+            r.muscle,
+            String(r.sets),
+            r.reps,
+            `${r.rest}s`,
+            "",
+            "",
+            "",
+            "",
+          ]),
+          styles: { fontSize: 8, cellPadding: 1.8, textColor: 30, lineColor: [226, 226, 226], lineWidth: 0.1 },
+          headStyles: { fillColor: [21, 21, 21], textColor: 255, fontSize: 7, fontStyle: "bold" },
+          alternateRowStyles: { fillColor: [250, 250, 250] },
+          columnStyles: {
+            0: { cellWidth: 62 },
+            1: { cellWidth: 30 },
+            2: { halign: "center", cellWidth: 12 },
+            3: { halign: "center", cellWidth: 14 },
+            4: { halign: "center", cellWidth: 12 },
+            5: { halign: "center", cellWidth: 13, fillColor: [255, 255, 255] },
+            6: { halign: "center", cellWidth: 13, fillColor: [255, 255, 255] },
+            7: { halign: "center", cellWidth: 13, fillColor: [255, 255, 255] },
+            8: { halign: "center", cellWidth: 13, fillColor: [255, 255, 255] },
+          },
+          didParseCell: (d) => {
+            if (d.section === "body" && d.column.index === 0) {
+              d.cell.styles.fontStyle = "bold";
+            }
+          },
+        });
+        // @ts-expect-error lastAutoTable é preenchido pelo autotable
+        y = doc.lastAutoTable.finalY + 8;
+      }
+
+      doc.setFontSize(8);
+      doc.setTextColor(120);
+      const note =
+        "S1–S4: anote a carga (kg) e as repetições realizadas em cada série. Progrida quando concluir todas as repetições com boa execução.";
+      if (y + 6 > H - 20) {
+        drawWatermark();
+        doc.addPage();
+        y = 16;
+      }
+      doc.text(note, 14, y);
+      drawWatermark();
+
+      doc.save(`ficha-treino-ascend-${new Date().toISOString().slice(0, 10)}.pdf`);
+      toast.success("Ficha baixada em PDF!");
+    } catch {
+      toast.error("Não foi possível gerar o PDF. Tente pela opção de impressão.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   function open() {
     const blocks = build();
     if (blocks.length === 0) {
@@ -175,12 +340,7 @@ export function WorkoutSheetButton() {
     }
     setBusy(true);
     const html = sheetHtml({
-      name: data?.profile?.name || "Atleta ASCEND",
-      goal: program?.program
-        ? `${program.program.name} · ${program.program.split_label}`
-        : data?.profile?.goal
-          ? `Objetivo: ${data.profile.goal}`
-          : "Divisões padrão Push / Pull / Legs / Full Body",
+      ...headerInfo(),
       blocks,
       watermark: new URL(ascendBrandUrls.full, window.location.origin).href,
     });
@@ -197,12 +357,21 @@ export function WorkoutSheetButton() {
   }
 
   return (
-    <button
-      onClick={open}
-      disabled={busy}
-      className="press flex w-full items-center justify-center gap-2 rounded-full bg-elevated py-3 text-sm font-extrabold disabled:opacity-50"
-    >
-      <Printer className="size-4" /> Exportar ficha de treino (PDF)
-    </button>
+    <div className="flex gap-2">
+      <button
+        onClick={downloadPdf}
+        disabled={busy}
+        className="press flex flex-1 items-center justify-center gap-2 rounded-full bg-primary py-3 text-sm font-extrabold text-primary-foreground shadow-glow disabled:opacity-50"
+      >
+        <Download className="size-4" /> Baixar ficha (PDF)
+      </button>
+      <button
+        onClick={open}
+        disabled={busy}
+        className="press flex flex-1 items-center justify-center gap-2 rounded-full bg-elevated py-3 text-sm font-extrabold disabled:opacity-50"
+      >
+        <Printer className="size-4" /> Imprimir
+      </button>
+    </div>
   );
 }
