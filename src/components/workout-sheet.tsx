@@ -217,7 +217,6 @@ export function WorkoutSheetButton() {
       }
 
       const drawWatermark = () => {
-        // @ts-expect-error GState existe no jsPDF 2.x
         doc.saveGraphicsState();
         // @ts-expect-error GState existe no jsPDF 2.x
         doc.setGState(new doc.GState({ opacity: 0.1 }));
@@ -231,7 +230,6 @@ export function WorkoutSheetButton() {
         doc.setCharSpace(3);
         doc.text("ASCEND", W / 2, H - 12, { align: "center" });
         doc.setCharSpace(0);
-        // @ts-expect-error GState existe no jsPDF 2.x
         doc.restoreGraphicsState();
       };
 
