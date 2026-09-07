@@ -258,7 +258,7 @@ export function AscendIcon({
   name: AscendIconName;
   size?: number;
   className?: string;
-  title?: string;
+  title?: string | undefined;
 }) {
   return (
     <svg
