@@ -1,15 +1,14 @@
 /**
- * ASCEND ICONOGRAPHY SYSTEM — "Titanium Tactical"
+ * ASCEND ICONOGRAPHY SYSTEM — "Ascend Vector"
  *
  * Sistema único de ícones SVG do ASCEND. Substitui a camada visual de emojis
  * da interface. Os dados antigos (campos `emoji`/`icon`) continuam intactos no
  * banco/catálogos — apenas a REPRESENTAÇÃO passa por aqui, via `Glyph`.
  *
  * Regras visuais:
- *  - grafite/preto + branco, com acento vermelho ASCEND (text-primary)
- *  - silhuetas sólidas para categorias de treino
- *  - crestes/escudos angulares para ranks, níveis e conquistas
- *  - geometria compacta 24x24, mesma espessura e escala em todo o app
+ *  - desenho 2D plano, sem sombras ou efeitos tridimensionais
+ *  - branco/cinza por herança, com acento vermelho ASCEND (text-primary)
+ *  - geometria angular compacta e peso visual uniforme em 24x24
  */
 
 export type AscendIconName =
@@ -41,6 +40,10 @@ export type AscendIconName =
   | "chart"
   | "arena"
   | "spark"
+  | "fist"
+  | "clap"
+  | "mind"
+  | "book"
   | "rank1"
   | "rank2"
   | "rank3"
@@ -241,6 +244,30 @@ const PATHS: Record<AscendIconName, React.ReactNode> = {
       <path className={A} d="M12 1.8 14 9l7.2 2-7.2 2-2 7.2-2-7.2L2.8 11 10 9l2-7.2Z" />
     </>
   ),
+  fist: (
+    <>
+      <path d="M5.2 9.2h2.3V6.4a1.4 1.4 0 0 1 2.8 0v2.4h.8V5.2a1.4 1.4 0 0 1 2.8 0v3.6h.8V6.2a1.4 1.4 0 0 1 2.8 0v3.2h.7V8a1.4 1.4 0 0 1 2.8 0v5.1c0 5.2-3.1 8.2-8 8.2-4.8 0-7.7-2.7-8.8-7.3L3 11a1.5 1.5 0 0 1 2.2-1.8Z" />
+      <path className={A} d="M7.5 8.8h10v2.1h-10z" />
+    </>
+  ),
+  clap: (
+    <>
+      <path d="m7.2 10.2 1.5-5a1.4 1.4 0 0 1 2.7.8l-.7 2.5 1.4-5a1.4 1.4 0 0 1 2.7.8l-1.1 4 1-3.4a1.4 1.4 0 0 1 2.7.8l-1 3.5.7-2.3a1.4 1.4 0 0 1 2.7.8l-2.2 7.4c-1.3 4.4-4.7 6.4-8.8 5.2-3.8-1.1-5.7-4-5.3-7.7l.4-3.3a1.6 1.6 0 0 1 3.1.1l.2 1.5Z" />
+      <path className={A} d="m18.7 2.2 1.4-.8.9 2.3-1.6.4-.7-1.9ZM21 6h2.4v2H21V6ZM17.9.2l-.2 2.2-2-.3.4-2.1 1.8.2Z" />
+    </>
+  ),
+  mind: (
+    <>
+      <path d="M8.2 3.2A3.2 3.2 0 0 0 5 6.4v.4A3.5 3.5 0 0 0 3.2 12 3.5 3.5 0 0 0 6 17.5V19a2.5 2.5 0 0 0 4.8.9V4.8a2.8 2.8 0 0 0-2.6-1.6Zm7.6 0a3.2 3.2 0 0 1 3.2 3.2v.4a3.5 3.5 0 0 1 1.8 5.2 3.5 3.5 0 0 1-2.8 5.5V19a2.5 2.5 0 0 1-4.8.9V4.8a2.8 2.8 0 0 1 2.6-1.6Z" />
+      <path className={A} d="M10.8 10.8h2.4v2.4h-2.4z" />
+    </>
+  ),
+  book: (
+    <>
+      <path d="M3 4.2h7.8c1 0 1.2.4 1.2 1.2V21c-.8-1.5-2.1-2.2-4-2.2H3V4.2Zm18 0h-7.8c-1 0-1.2.4-1.2 1.2V21c.8-1.5 2.1-2.2 4-2.2h5V4.2Z" />
+      <path className={A} d="M11.2 4.2h1.6v16.4h-1.6z" />
+    </>
+  ),
   rank1: <Crest level={1} />,
   rank2: <Crest level={2} />,
   rank3: <Crest level={3} />,
@@ -337,6 +364,21 @@ const GLYPH_MAP: Record<string, AscendIconName> = {
   "⬆️": "levelup",
   "🆙": "levelup",
   "💡": "spark",
+  "👊": "fist",
+  "👏": "clap",
+  "🤯": "mind",
+  "📚": "book",
+  "💬": "spark",
+  "📸": "spark",
+  "🎬": "spark",
+  "🕊️": "upper",
+  "🪢": "pull",
+  "🧗": "pull",
+  "🚣": "pull",
+  "🦾": "upper",
+  "🛗": "legs",
+  "🪑": "legs",
+  "🦶": "legs",
 };
 
 /** Resolve um emoji legado (ou nome de categoria) para um ícone ASCEND. */

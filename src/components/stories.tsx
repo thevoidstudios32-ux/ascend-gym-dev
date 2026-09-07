@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { BroAvatar } from "@/components/bro";
 import { createStory, deleteStory, getStories, getStoryViewers, viewStory } from "@/lib/stories.functions";
 import { sendDm } from "@/lib/social.functions";
+import { Glyph } from "@/components/ascend-icon";
 import {
   backgroundCss,
   DEFAULT_STORY_DURATION,
@@ -471,7 +472,7 @@ function StoryViewer({
           ) : null}
 
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-5 px-8 text-center">
-            {sticker && !mediaUrl && <span className="text-6xl drop-shadow-lg">{sticker.icon}</span>}
+            {sticker && !mediaUrl && <Glyph value={sticker.icon} size={56} fallback="spark" />}
             {story.content && (
               <p
                 className={`text-balance font-extrabold leading-tight text-white drop-shadow-lg ${
@@ -483,7 +484,7 @@ function StoryViewer({
             )}
             {sticker && mediaUrl && (
               <span className="mb-24 rounded-full bg-black/60 px-3 py-1.5 text-sm font-bold text-white">
-                {sticker.icon} {sticker.label}
+                <Glyph value={sticker.icon} size={16} fallback="spark" /> {sticker.label}
               </span>
             )}
           </div>
@@ -569,11 +570,11 @@ function StoryViewer({
                 haptic();
                 react.mutate({ storyId: story.id, reaction: emoji });
               }}
-              className={`press rounded-full px-3 py-1.5 text-lg ${
+              className={`press grid size-10 place-items-center rounded-full ${
                 myView?.reaction === emoji ? "animate-pop bg-primary/25" : "bg-white/10"
               }`}
             >
-              {emoji}
+              <Glyph value={emoji} size={18} fallback="spark" />
             </button>
           ))}
         </div>
@@ -761,7 +762,7 @@ export function StoryComposer({ preset, onClose }: { preset: StoryDraft | null; 
         ) : null}
 
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 text-center">
-          {sticker && <span className="text-5xl drop-shadow">{stickerOf(sticker)?.icon}</span>}
+          {sticker && <Glyph value={stickerOf(sticker)?.icon} size={48} fallback="spark" />}
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value.slice(0, 300))}
@@ -821,7 +822,7 @@ export function StoryComposer({ preset, onClose }: { preset: StoryDraft | null; 
                 sticker === s.id ? "bg-primary text-primary-foreground" : "bg-white/10 text-white"
               }`}
             >
-              {s.icon} {s.label}
+              <Glyph value={s.icon} size={15} className="mr-1" fallback="spark" /> {s.label}
             </button>
           ))}
         </div>
@@ -845,9 +846,10 @@ export function StoryComposer({ preset, onClose }: { preset: StoryDraft | null; 
             <button
               key={e}
               onClick={() => setText((t) => (t + " " + e).slice(0, 300))}
-              className="press shrink-0 rounded-full bg-white/10 px-3 py-1.5 text-base"
+              className="press grid size-10 shrink-0 place-items-center rounded-full bg-white/10"
+              aria-label={`Adicionar reação ${e}`}
             >
-              {e}
+              <Glyph value={e} size={18} fallback="spark" />
             </button>
           ))}
         </div>
