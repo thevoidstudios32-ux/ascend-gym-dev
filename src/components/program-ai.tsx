@@ -648,7 +648,7 @@ export function CoachProgramSheet({
   };
 
   return (
-    <Sheet title="✨ Coach IA · Programa" onClose={onClose}>
+    <Sheet title="Coach IA · Programa" onClose={onClose}>
       <div className="space-y-4">
         <textarea
           rows={3}

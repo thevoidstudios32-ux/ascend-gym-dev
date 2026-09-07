@@ -11,6 +11,7 @@ import { useCustomWorkouts } from "@/hooks/use-custom";
 import { customToSplit, isUuid } from "@/lib/custom";
 import { finishWorkout } from "@/lib/extras.functions";
 import { estimateCalories, SPLITS, suggestLoad, todayISO, type Split } from "@/lib/ascend";
+import { AscendIcon, Glyph } from "@/components/ascend-icon";
 
 export const Route = createFileRoute("/_authenticated/app/treino/$split")({
   head: () => ({
@@ -140,8 +141,8 @@ function SessionPage() {
       } else {
         toast.success(`Treino salvo! +${res.xp} XP`);
       }
-      if (res.newPrs.length) toast.success(`Novo recorde: ${res.newPrs.join(", ")} 🏆`);
-      res.unlocked.forEach((a) => toast.success(`${a.emoji} Conquista: ${a.label}`));
+      if (res.newPrs.length) toast.success(`Novo recorde: ${res.newPrs.join(", ")}`);
+      res.unlocked.forEach((a) => toast.success(`Conquista: ${a.label}`));
       refresh();
       setShareCard({
         volume: entries
@@ -182,7 +183,7 @@ function SessionPage() {
       </button>
 
       <header className="glass flex items-center gap-4 p-5">
-        <span className="text-3xl animate-exercise">{split.emoji}</span>
+        <span className="animate-exercise"><Glyph value={split.emoji} size={30} /></span>
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-display text-3xl">{split.name}</h1>
           <p className="truncate text-xs text-muted-foreground">{split.focus}</p>
@@ -217,7 +218,7 @@ function SessionPage() {
         return (
           <section key={ex.name} className="panel p-4">
             <div className="flex items-center gap-3">
-              <span className="text-2xl animate-exercise">{ex.emoji}</span>
+              <span className="animate-exercise"><Glyph value={ex.emoji} size={24} /></span>
               <div className="min-w-0 flex-1">
                 <p className="truncate font-bold">{ex.name}</p>
                 <p className="text-xs text-muted-foreground">
@@ -232,7 +233,7 @@ function SessionPage() {
                 <MoreVertical className="size-4" />
               </button>
             </div>
-            <p className="mt-2 text-xs text-muted-foreground">💡 {ex.tip}</p>
+            <p className="mt-2 flex items-start gap-1.5 text-xs text-muted-foreground"><AscendIcon name="spark" size={13} className="mt-0.5" />{ex.tip}</p>
             {sug && (
               <p className="mt-1 text-xs font-semibold text-primary">
                 Sugestão: {sug.weight} kg — {sug.note}
@@ -310,7 +311,7 @@ function SessionPage() {
               className="space-y-1 rounded-3xl p-6 text-primary-foreground"
               style={{ background: "linear-gradient(150deg,#DC2626 0%,#7f1010 55%,#151515 100%)" }}
             >
-              <p className="text-4xl">{split.emoji}</p>
+              <p className="flex justify-center"><Glyph value={split.emoji} size={40} /></p>
               <p className="text-display text-2xl">{split.name}</p>
               <p className="text-xs opacity-80">
                 {minutes} min · {shareCard.sets} séries
@@ -329,7 +330,7 @@ function SessionPage() {
                     kind: "workout",
                     sticker: "workout",
                     bg: "ember",
-                    content: `${split.emoji} ${split.name} — ${minutes} min · ${shareCard.sets} séries · ${Math.round(shareCard.volume)} kg · ${calories} kcal`,
+                    content: `${split.name} — ${minutes} min · ${shareCard.sets} séries · ${Math.round(shareCard.volume)} kg · ${calories} kcal`,
                   })
                 }
                 className="press flex-1 rounded-full bg-primary py-3 text-sm font-extrabold text-primary-foreground shadow-glow"

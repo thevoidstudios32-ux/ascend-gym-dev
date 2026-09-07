@@ -14,6 +14,7 @@ import {
   trainingTime,
 } from "@/lib/social";
 import { requestBro, updateSocialProfile } from "@/lib/social.functions";
+import { Glyph } from "@/components/ascend-icon";
 
 export const Route = createFileRoute("/_authenticated/app/bros/$id")({
   head: () => ({
@@ -117,7 +118,7 @@ function BroProfilePage() {
           ) : null}
           {posts.map((p) => (
             <div key={p.id} className="rounded-xl bg-elevated p-3 text-sm">
-              <span className="mr-1">{(POST_KINDS[p.kind] ?? POST_KINDS['text']!).icon}</span>
+              <span className="mr-1"><Glyph value={(POST_KINDS[p.kind] ?? POST_KINDS['text']!).icon} size={14} fallback="spark" /></span>
               {p.content}
               <span className="ml-2 text-xs text-muted-foreground">{timeAgo(p.created_at)}</span>
             </div>

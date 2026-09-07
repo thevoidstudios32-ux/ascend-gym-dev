@@ -7,6 +7,7 @@ import { useCustomAction, useCustomWorkouts } from "@/hooks/use-custom";
 import { applyWorkoutChange, proposeWorkoutChange } from "@/lib/custom.functions";
 import { estimateMinutes, type Proposal } from "@/lib/custom";
 import { SPLITS } from "@/lib/ascend";
+import { Glyph } from "@/components/ascend-icon";
 
 const QUICK = [
   "Deixe mais focado em calistenia",
@@ -69,7 +70,7 @@ export function WorkoutTuner({ workoutId }: { workoutId?: string }) {
         onSuccess: (res) => {
           setProposal(null);
           setRequest("");
-          toast.success(res.created ? "Novo treino criado com o ajuste 💪" : "Treino atualizado 💪");
+          toast.success(res.created ? "Novo treino criado com o ajuste" : "Treino atualizado");
           navigate({ to: "/app/personalizado/$id", params: { id: res.id } });
         },
         onError: (e: Error) => toast.error(e.message),
@@ -100,7 +101,7 @@ export function WorkoutTuner({ workoutId }: { workoutId?: string }) {
           <optgroup label="Divisões padrão">
             {SPLITS.map((s) => (
               <option key={s.id} value={`split:${s.id}`}>
-                {s.emoji} {s.name}
+                <Glyph value={s.emoji} size={14} className="mr-1" />{s.name}
               </option>
             ))}
           </optgroup>
@@ -108,7 +109,7 @@ export function WorkoutTuner({ workoutId }: { workoutId?: string }) {
             <optgroup label="Meus treinos">
               {custom.data?.workouts.map((w) => (
                 <option key={w.id} value={w.id}>
-                  {w.emoji} {w.name}
+                  <Glyph value={w.emoji} size={14} className="mr-1" fallback="calisthenics" />{w.name}
                 </option>
               ))}
             </optgroup>
@@ -156,7 +157,7 @@ export function WorkoutTuner({ workoutId }: { workoutId?: string }) {
       {proposal && (
         <div className="animate-pop space-y-3 rounded-2xl bg-elevated p-4">
           <div className="flex items-center gap-2">
-            <span className="text-xl">{proposal.emoji}</span>
+            <Glyph value={proposal.emoji} size={20} />
             <div className="min-w-0">
               <p className="truncate text-sm font-extrabold">{proposal.name}</p>
               <p className="truncate text-[11px] text-muted-foreground">
@@ -179,7 +180,7 @@ export function WorkoutTuner({ workoutId }: { workoutId?: string }) {
           <ul className="space-y-1.5">
             {proposal.exercises.map((e, i) => (
               <li key={`${e.name}-${i}`} className="flex items-center gap-2 rounded-xl bg-surface p-2.5">
-                <span>{e.emoji}</span>
+                <Glyph value={e.emoji} size={16} />
                 <span className="min-w-0 flex-1 truncate text-xs font-bold">{e.name}</span>
                 <span className="shrink-0 text-[11px] text-muted-foreground">
                   {e.sets}x{e.hold ? `${e.hold}s` : e.reps} · {e.rest}s

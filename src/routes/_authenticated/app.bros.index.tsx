@@ -29,6 +29,7 @@ import {
   toggleReaction,
 } from "@/lib/social.functions";
 import { CHALLENGE_METRICS, POST_KINDS, REACTIONS, timeAgo } from "@/lib/social";
+import { AscendIcon, Glyph } from "@/components/ascend-icon";
 
 export const Route = createFileRoute("/_authenticated/app/bros/")({
   head: () => ({
@@ -228,7 +229,7 @@ function PostCard({
       </div>
 
       <p className="text-sm leading-relaxed">
-        <span className="mr-1">{kind.icon}</span>
+        <Glyph value={kind.icon} size={14} className="mr-1.5" fallback="spark" />
         {post.content}
       </p>
 
@@ -245,7 +246,7 @@ function PostCard({
                 mine ? "bg-primary text-primary-foreground" : "bg-elevated text-muted-foreground"
               }`}
             >
-              {r.icon} {list.length || ""}
+              <Glyph value={r.icon} size={15} className="mr-1" fallback="pr" />{list.length || ""}
             </button>
           );
         })}
@@ -438,7 +439,7 @@ function BrosTab({ data, profileOf }: { data: Social; profileOf: Lookup }) {
 /* ------------------------------ RANKING ------------------------------ */
 
 function RankingTab({ data, profileOf }: { data: Social; profileOf: Lookup }) {
-  const medals = ["🥇", "🥈", "🥉"];
+  const medals = [1, 2, 3];
   return (
     <section className="panel p-4">
       <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wide text-muted-foreground">
@@ -452,7 +453,7 @@ function RankingTab({ data, profileOf }: { data: Social; profileOf: Lookup }) {
               r.userId === data.me?.id ? "ember-border bg-primary/10" : "bg-elevated"
             }`}
           >
-            <span className="w-6 text-center text-lg">{medals[i] ?? i + 1}</span>
+            <span className="flex w-6 justify-center text-center text-sm font-black">{medals[i] ? <AscendIcon name="medal" size={18} /> : i + 1}</span>
             <BroIdentity
               profile={profileOf(r.userId)}
               subtitle={`${r.workouts} treinos · ${r.prs} PRs`}

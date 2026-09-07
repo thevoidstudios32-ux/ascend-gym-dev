@@ -7,6 +7,7 @@ import { WorkoutTuner } from "@/components/workout-tuner";
 import { useCustomAction, useCustomWorkouts } from "@/hooks/use-custom";
 import { deleteCustomWorkout, restoreWorkoutVersion, saveCustomWorkout } from "@/lib/custom.functions";
 import {
+import { Glyph } from "@/components/ascend-icon";
   CALISTHENICS,
   DIFFICULTIES,
   FOCUS_OPTIONS,
@@ -90,7 +91,7 @@ function CustomWorkoutPage() {
       },
       {
         onSuccess: (res) => {
-          toast.success("Treino salvo 💪");
+          toast.success("Treino salvo");
           if (isNew) navigate({ to: "/app/personalizado/$id", params: { id: res.id } });
         },
         onError: (e: Error) => toast.error(e.message),
@@ -269,7 +270,7 @@ function CustomWorkoutPage() {
                 }}
                 className="press flex items-center gap-2 rounded-xl bg-elevated p-3 text-left"
               >
-                <span className="text-lg">{c.emoji}</span>
+                <Glyph value={c.emoji} size={18} fallback="calisthenics" />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-xs font-bold">{c.name}</span>
                   <span className="block truncate text-[10px] text-muted-foreground">
