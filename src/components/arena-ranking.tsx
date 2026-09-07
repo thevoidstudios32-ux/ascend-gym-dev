@@ -3,6 +3,7 @@ import { Crown, Loader2 } from "lucide-react";
 import { BroAvatar } from "@/components/bro";
 import { useRanking } from "@/hooks/use-arena";
 import { CATEGORY_EMOJI, CATEGORY_LABEL, RANGES, medalFor, type ArenaRange } from "@/lib/arena";
+import { Glyph } from "@/components/ascend-icon";
 
 export function ArenaRanking({ category, myId }: { category: string; myId: string | undefined }) {
   const [range, setRange] = useState<ArenaRange>("week");
@@ -27,7 +28,7 @@ export function ArenaRanking({ category, myId }: { category: string; myId: strin
 
       <div className="panel overflow-hidden">
         <div className="flex items-center gap-2 border-b border-border p-4">
-          <span className="text-lg">{CATEGORY_EMOJI[category] ?? "🔥"}</span>
+          <Glyph value={CATEGORY_EMOJI[category]} size={18} fallback="arena" />
           <p className="text-sm font-extrabold">{CATEGORY_LABEL[category] ?? category}</p>
         </div>
 
