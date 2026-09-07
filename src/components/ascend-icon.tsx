@@ -384,7 +384,7 @@ export function Glyph({
   size?: number;
   className?: string;
   fallback?: AscendIconName;
-  title?: string;
+  title?: string | undefined;
 }) {
   return <AscendIcon name={iconForGlyph(value, fallback)} size={size} className={className} title={title} />;
 }
