@@ -1435,7 +1435,11 @@ function StoryViewersSheet({ storyId, onClose }: { storyId: string; onClose: () 
                     {new Date(v.viewedAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                   </p>
                 </div>
-                {v.reaction ? <span className="text-lg">{v.reaction}</span> : null}
+                {v.reaction ? (
+                  <span className="grid size-8 place-items-center rounded-full bg-white/10 text-white" aria-label="Reação">
+                    <Glyph value={v.reaction} size={16} fallback="spark" />
+                  </span>
+                ) : null}
               </div>
             ))
           )}
