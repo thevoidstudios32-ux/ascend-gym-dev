@@ -1,3 +1,4 @@
+import { Glyph } from "@/components/ascend-icon";
 import { useState } from "react";
 import { Eye, EyeOff, ImageIcon, Pencil, Plus, RotateCcw, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
@@ -106,7 +107,7 @@ export function ContentManagement() {
                 )
               ) : (
                 <span className="grid size-12 place-items-center rounded-lg bg-elevated text-xl">
-                  {r.emoji || "🏅"}
+                  <Glyph value={r.emoji} size={18} fallback="medal" />
                 </span>
               )}
 

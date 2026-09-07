@@ -1,3 +1,4 @@
+import { Glyph } from "@/components/ascend-icon";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -91,7 +92,7 @@ function ArenaPage() {
                   : "border-border bg-surface text-muted-foreground"
               }`}
             >
-              {c.emoji} {c.label}
+              <Glyph value={c.emoji} size={14} className="mr-1" fallback="arena" />{c.label}
               {data?.counts[c.id] ? (
                 <span className="ml-1 text-[10px] text-muted-foreground">· {data.counts[c.id]}</span>
               ) : c.id === "all" && data?.totalEntries ? (
@@ -148,7 +149,7 @@ function JoinPanel({ category }: { category: string }) {
     <div className="space-y-3">
       {camera ? (
         <CameraCapture
-          title={`${pose.emoji} ${pose.label}`}
+          title={pose.label}
           hint={pose.how}
           silhouette={pose.silhouette}
           busy={uploading}
@@ -168,7 +169,7 @@ function JoinPanel({ category }: { category: string }) {
               Como fazer a pose
             </p>
             <p className="mt-1 text-sm font-bold">
-              {pose.emoji} {pose.label}
+              <Glyph value={pose.emoji} size={14} className="mr-1" fallback="arena" />{pose.label}
             </p>
             <p className="mt-1 text-sm text-muted-foreground">{pose.how}</p>
             <div className="mt-2 flex flex-wrap gap-1.5">
@@ -233,7 +234,7 @@ function JoinPanel({ category }: { category: string }) {
             <div className="flex items-center justify-between gap-2 p-3">
               <div className="min-w-0">
                 <p className="truncate text-xs font-bold">
-                  {CATEGORY_EMOJI[e.category] ?? "🔥"} {CATEGORY_LABEL[e.category] ?? e.category}
+                  <Glyph value={CATEGORY_EMOJI[e.category]} size={14} className="mr-1" fallback="arena" />{CATEGORY_LABEL[e.category] ?? e.category}
                 </p>
                 <p className="text-[11px] text-muted-foreground">
                   {e.wins}V · {e.losses}D

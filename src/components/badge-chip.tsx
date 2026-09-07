@@ -1,3 +1,4 @@
+import { Glyph } from "@/components/ascend-icon";
 import { rarityStyle, type BadgeDef } from "@/lib/badges";
 
 /** Ícone do selo (imagem, emoji ou inicial) com anel/brilho por raridade. */
@@ -20,7 +21,7 @@ export function BadgeIcon({
       {badge.icon_url ? (
         <img src={badge.icon_url} alt="" className="size-full object-cover" loading="lazy" />
       ) : (
-        <span style={{ fontSize: Math.round(size * 0.5) }}>{badge.emoji || badge.name.slice(0, 1)}</span>
+        <Glyph value={badge.emoji} size={Math.round(size * 0.55)} fallback="shield" />
       )}
     </span>
   );

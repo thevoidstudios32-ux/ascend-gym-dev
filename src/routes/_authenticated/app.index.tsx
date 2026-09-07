@@ -1,3 +1,4 @@
+import { AscendIcon, Glyph } from "@/components/ascend-icon";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -82,7 +83,7 @@ function Onboarding({ onDone, profileName }: { onDone: () => void; profileName: 
         },
       }),
     onSuccess: () => {
-      toast.success("Perfil pronto! Bora treinar 🔥");
+      toast.success("Perfil pronto! Bora treinar");
       onDone();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -312,7 +313,7 @@ function Dashboard({ data }: { data: DashboardData }) {
         <p className="mt-2 text-[11px] text-muted-foreground">
           {title.next
             ? `Faltam ${Math.max(0, title.next.min - level.level)} níveis para ${title.next.name}`
-            : "Você alcançou o título máximo. Lenda. 👑"}
+            : "Você alcançou o título máximo. Lenda."}
         </p>
 
         <div className="mt-5 grid grid-cols-7 gap-1.5">
@@ -327,7 +328,7 @@ function Dashboard({ data }: { data: DashboardData }) {
                       : "bg-elevated text-muted-foreground"
                 }`}
               >
-                {d.done ? "🔥" : d.letter}
+                {d.done ? <AscendIcon name="streak" size={14} /> : d.letter}
               </div>
             </div>
           ))}
@@ -337,7 +338,7 @@ function Dashboard({ data }: { data: DashboardData }) {
       <section className="card overflow-hidden">
         <div className="flex items-center gap-4 p-5">
           <span className="animate-exercise text-3xl">
-            {todayProgramDay ? todayProgramDay.exercises[0]?.emoji || "✨" : split.emoji}
+            <Glyph value={todayProgramDay ? todayProgramDay.exercises[0]?.emoji : split.emoji} size={30} />
           </span>
           <div className="min-w-0 flex-1">
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
@@ -417,7 +418,7 @@ function Dashboard({ data }: { data: DashboardData }) {
       {lastWorkout && (
         <section className="card stagger flex items-center gap-4 p-5">
           <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-elevated text-lg">
-            ✅
+            <AscendIcon name="check" size={22} />
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">

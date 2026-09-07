@@ -1,3 +1,4 @@
+import { Glyph } from "@/components/ascend-icon";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -177,7 +178,7 @@ export function ExerciseSwapSheet({
                 } ${available ? "" : "opacity-50"}`}
               >
                 <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-elevated text-2xl">
-                  {exercise.emoji}
+                  <Glyph value={exercise.emoji} size={22} />
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="flex items-center gap-1.5 truncate font-bold">

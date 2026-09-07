@@ -1,3 +1,4 @@
+import { AscendIcon, Glyph } from "@/components/ascend-icon";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -48,7 +49,7 @@ export function ArenaBattle({ category }: { category: string }) {
     const others = data?.others ?? 0;
     return (
       <div className="glass space-y-3 p-6 text-center">
-        <p className="text-4xl">{category === "all" ? "🏟️" : (CATEGORY_EMOJI[category] ?? "🔥")}</p>
+        <p className="flex justify-center"><Glyph value={category === "all" ? null : CATEGORY_EMOJI[category]} size={38} fallback="arena" /></p>
         <p className="font-bold">
           {data?.reason === "voted" ? "Você já votou em todos os confrontos" : "Sem confrontos disponíveis"}
         </p>
@@ -79,7 +80,7 @@ export function ArenaBattle({ category }: { category: string }) {
       <Confetti fire={vote.isSuccess && picked !== null} />
       <div className="flex items-center justify-between">
         <p className="text-xs font-extrabold uppercase tracking-wide text-muted-foreground">
-          {CATEGORY_EMOJI[battle.category] ?? "🔥"} {CATEGORY_LABEL[battle.category] ?? battle.category} · quem
+          <Glyph value={CATEGORY_EMOJI[battle.category]} size={14} className="mr-1" fallback="arena" />{CATEGORY_LABEL[battle.category] ?? battle.category} · quem
           está com o melhor shape?
         </p>
         <button
@@ -136,7 +137,7 @@ function BattleSide({
 
       {isWinner ? (
         <span className="animate-pop absolute inset-0 grid place-items-center bg-background/40 text-5xl">
-          🏆
+          <AscendIcon name="trophy" size={26} />
         </span>
       ) : null}
 

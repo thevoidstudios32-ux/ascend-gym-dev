@@ -1,3 +1,4 @@
+import { Glyph } from "@/components/ascend-icon";
 import { Link } from "@tanstack/react-router";
 import { broRank, handleOf, initials } from "@/lib/social";
 import { VerifiedBadge } from "@/components/verified-badge";
@@ -66,7 +67,7 @@ export function BroIdentity({
         <span className="flex items-center gap-1.5 truncate font-bold leading-tight">
           {profile?.name ?? "Bro"}
           {profile?.verified && <VerifiedBadge size="sm" />}
-          <span title={rank.name}>{rank.icon}</span>
+          <Glyph value={rank.icon} size={16} title={rank.name} fallback="shield" />
         </span>
         <span className="block truncate text-xs text-muted-foreground">
           {subtitle ?? handleOf({ username: profile?.username ?? null, name: profile?.name ?? "bro" })}
@@ -84,7 +85,7 @@ export function RankBadge({ xp }: { xp: number }) {
       className="rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide"
       style={{ backgroundColor: `${rank.color}22`, color: rank.color }}
     >
-      {rank.icon} {rank.name}
+      <Glyph value={rank.icon} size={14} className="mr-1" fallback="shield" />{rank.name}
     </span>
   );
 }

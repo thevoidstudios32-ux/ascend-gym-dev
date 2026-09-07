@@ -46,7 +46,7 @@ function ProgressoPage() {
         },
       }),
     onSuccess: () => {
-      toast.success("Recorde salvo! 💪");
+      toast.success("Recorde salvo!");
       setRec({ exercise: "", weight_kg: "", reps: "" });
       refresh();
     },

@@ -1,3 +1,4 @@
+import { AscendIcon, Glyph, RankCrest } from "@/components/ascend-icon";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Confetti, PageHeader, ProgressBar } from "@/components/ui-kit";
@@ -85,26 +86,26 @@ function ConquistasPage() {
               Título atual
             </p>
             <p className="text-display text-3xl" style={{ color: title.color }}>
-              {title.emoji} {title.name}
+              <Glyph value={title.emoji} size={24} className="mr-2" fallback="crown" />{title.name}
             </p>
           </div>
           <span className="shrink-0 rounded-full bg-elevated px-3 py-1 text-xs font-bold">
-            {streak} 🔥
+            {streak} <AscendIcon name="streak" size={13} className="ml-1" />
           </span>
         </div>
         <ProgressBar value={title.pct} className="mt-4" tone="gold" />
         <div className="mt-2 flex items-center justify-between text-[11px] font-semibold text-muted-foreground">
           <span>
             {title.next
-              ? `Faltam ${title.xpToNext} XP (${title.levelsToNext} ${title.levelsToNext === 1 ? "nível" : "níveis"}) para ${title.next.emoji} ${title.next.name}`
-              : "Título máximo alcançado — você é Lenda 👑"}
+              ? `Faltam ${title.xpToNext} XP (${title.levelsToNext} ${title.levelsToNext === 1 ? "nível" : "níveis"}) para ${title.next.name}`
+              : "Título máximo alcançado — você é Lenda"}
           </span>
           <span className="shrink-0 text-foreground">{title.pct}%</span>
         </div>
         <div className="mt-3 flex justify-between gap-1 text-center">
           {TITLES.map((t, i) => (
             <div key={t.name} className={`flex-1 ${i <= title.index ? "" : "opacity-35"}`}>
-              <p className="text-lg">{t.emoji}</p>
+              <p className="flex justify-center"><RankCrest index={i} size={20} /></p>
               <p className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
                 {t.name}
               </p>
@@ -166,7 +167,7 @@ function ConquistasPage() {
               className={`panel p-4 text-center ${has ? "" : "opacity-40 grayscale"}`}
               title={a.desc}
             >
-              <p className="text-3xl">{a.emoji}</p>
+              <p className="flex justify-center"><Glyph value={a.emoji} size={30} fallback="medal" /></p>
               <p className="mt-1 text-xs font-bold">{a.label}</p>
               <p className="text-[10px] text-muted-foreground">{a.desc}</p>
             </div>

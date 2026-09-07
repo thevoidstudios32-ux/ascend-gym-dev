@@ -1,3 +1,4 @@
+import { Glyph } from "@/components/ascend-icon";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { useDashboard } from "@/hooks/use-dashboard";
@@ -48,7 +49,7 @@ function TreinosPage() {
             params={{ split: s.id }}
             className="press panel flex items-center gap-4 p-4"
           >
-            <span className="text-3xl">{s.emoji}</span>
+            <Glyph value={s.emoji} size={30} fallback={s.id === "pull" ? "pull" : s.id === "legs" ? "legs" : s.id === "full" ? "fullbody" : "push"} />
             <div className="min-w-0 flex-1">
               <p className="flex items-center gap-2 font-bold">
                 {s.name}
@@ -87,7 +88,7 @@ function TreinosPage() {
         ) : (
           mine.map((w) => (
             <div key={w.id} className="panel flex items-center gap-4 p-4">
-              <span className="text-3xl">{w.emoji}</span>
+              <Glyph value={w.emoji} size={30} fallback="calisthenics" />
               <Link
                 to="/app/treino/$split"
                 params={{ split: w.id }}

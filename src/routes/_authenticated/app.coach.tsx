@@ -1,3 +1,4 @@
+import { AscendIcon } from "@/components/ascend-icon";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -28,10 +29,10 @@ const SUGGESTIONS = [
   "Como aumentar meu supino?",
   "O que comer no pós-treino?",
   "Estou sem motivação, me ajuda",
-  "📊 Como está meu volume de treino?",
+  "Como está meu volume de treino?",
   "📅 Monta minha semana de treinos",
   "🎯 Quais metas devo bater esse mês?",
-  "🏆 Como quebrar meus PRs atuais?",
+  "Como quebrar meus PRs atuais?",
 ];
 
 
@@ -104,7 +105,7 @@ function CoachPage() {
             to="/app/coach-painel"
             className="rounded-full ember-border bg-elevated px-3 py-1.5 text-xs font-bold"
           >
-            📊 Painel
+            <AscendIcon name="chart" size={14} className="mr-1" /> Painel
           </Link>
           {messages.length > 0 && (
             <button

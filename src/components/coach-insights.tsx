@@ -1,3 +1,4 @@
+import { AscendIcon, type AscendIconName } from "@/components/ascend-icon";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getCoachInsights } from "@/lib/coach.functions";
@@ -26,17 +27,17 @@ export function CoachInsights({
     queryFn: () => fetcher(),
   });
 
-  const metrics: { icon: string; text: string }[] = [];
+  const metrics: { icon: AscendIconName; text: string }[] = [];
   if (data) {
-    if (data.streak !== null && data.streak > 0) metrics.push({ icon: "🔥", text: `${data.streak} DIAS DE STREAK` });
+    if (data.streak !== null && data.streak > 0) metrics.push({ icon: "streak", text: `${data.streak} DIAS DE STREAK` });
     if (data.workoutsThisWeek !== null)
       metrics.push({
-        icon: "🏋️",
+        icon: "workout",
         text: `${data.workoutsThisWeek}${data.workoutsGoal ? ` / ${data.workoutsGoal}` : ""} TREINOS NA SEMANA`,
       });
-    if (data.newPrs !== null && data.newPrs > 0) metrics.push({ icon: "🏆", text: `${data.newPrs} NOVOS PRs` });
-    if (data.xpRecent !== null && data.xpRecent > 0) metrics.push({ icon: "⚡", text: `+${data.xpRecent} XP` });
-    if (data.consistency !== null) metrics.push({ icon: "📈", text: `${data.consistency}% CONSISTÊNCIA` });
+    if (data.newPrs !== null && data.newPrs > 0) metrics.push({ icon: "trophy", text: `${data.newPrs} NOVOS PRs` });
+    if (data.xpRecent !== null && data.xpRecent > 0) metrics.push({ icon: "xp", text: `+${data.xpRecent} XP` });
+    if (data.consistency !== null) metrics.push({ icon: "chart", text: `${data.consistency}% CONSISTÊNCIA` });
   }
 
   return (
@@ -53,7 +54,7 @@ export function CoachInsights({
         <ul className="mt-3 grid gap-1.5 sm:grid-cols-2">
           {metrics.map((m) => (
             <li key={m.text} className="flex items-center gap-2 text-sm font-bold">
-              <span aria-hidden>{m.icon}</span>
+              <AscendIcon name={m.icon} size={16} />
               <span className="truncate">{m.text}</span>
             </li>
           ))}
