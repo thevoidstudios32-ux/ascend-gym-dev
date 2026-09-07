@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import type { TitleVisual } from "@/lib/titles";
+import { Glyph } from "@/components/ascend-icon";
 
 type Size = "sm" | "md" | "lg";
 
@@ -67,7 +68,7 @@ export function TitleBadge({
         />
       ))}
       <i aria-hidden className="title-sweep" />
-      <span className="title-emoji">{visual.emoji}</span>
+      <Glyph value={visual.emoji} size={14} className="title-emoji" fallback="crown" />
       <span className="title-text">{visual.name}</span>
     </Tag>
   );

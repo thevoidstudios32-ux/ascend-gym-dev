@@ -520,7 +520,7 @@ function StoryViewer({
               <p className="truncate text-sm font-bold text-white">{profile?.name ?? "Gym Bro"}</p>
               <p className="text-[11px] text-white/60">
                 {hoursLeft(story.expires_at)}h restantes
-                {story.location ? ` · 📍 ${story.location}` : ""}
+                {story.location ? ` · ${story.location}` : ""}
               </p>
             </div>
             {isMine && (
@@ -878,7 +878,7 @@ export function StoryComposer({ preset, onClose }: { preset: StoryDraft | null; 
           </div>
           {track?.preview ? (
             <p className="mt-2 text-[11px] text-white/50">
-              🎵 Trecho: {fmtTime(track.start)} → {fmtTime(track.end ?? track.start + duration)} ·{" "}
+              Trecho: {fmtTime(track.start)} → {fmtTime(track.end ?? track.start + duration)} ·{" "}
               {Math.round((track.end ?? track.start + duration) - track.start)}s de música
             </p>
           ) : null}
@@ -913,7 +913,7 @@ export function StoryComposer({ preset, onClose }: { preset: StoryDraft | null; 
         <input
           value={location}
           onChange={(e) => setLocation(e.target.value)}
-          placeholder="📍 Marcar local (opcional)"
+          placeholder="Marcar local (opcional)"
           className="w-full rounded-2xl bg-white/10 px-4 py-3 text-sm text-white outline-none placeholder:text-white/40"
         />
 

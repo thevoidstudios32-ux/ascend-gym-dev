@@ -10,6 +10,7 @@ import {
   useUploadBannerImage,
 } from "@/hooks/use-content";
 import {
+import { Glyph } from "@/components/ascend-icon";
   CONTENT_RARITIES,
   UNLOCK_LABEL,
   UNLOCK_TYPES,
@@ -106,7 +107,7 @@ export function ContentManagement() {
                 )
               ) : (
                 <span className="grid size-12 place-items-center rounded-lg bg-elevated text-xl">
-                  {r.emoji || "🏅"}
+                  <Glyph value={r.emoji} size={18} fallback="medal" />
                 </span>
               )}
 
