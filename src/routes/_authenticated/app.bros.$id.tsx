@@ -1,3 +1,4 @@
+import { Glyph } from "@/components/ascend-icon";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -14,7 +15,6 @@ import {
   trainingTime,
 } from "@/lib/social";
 import { requestBro, updateSocialProfile } from "@/lib/social.functions";
-import { Glyph } from "@/components/ascend-icon";
 
 export const Route = createFileRoute("/_authenticated/app/bros/$id")({
   head: () => ({

@@ -1,7 +1,7 @@
+import { AscendIcon, type AscendIconName } from "@/components/ascend-icon";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getCoachInsights } from "@/lib/coach.functions";
-import { AscendIcon, type AscendIconName } from "@/components/ascend-icon";
 
 export type AnalysisMode = "progress" | "improve" | "weekly" | "prs";
 

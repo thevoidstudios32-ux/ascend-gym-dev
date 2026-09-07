@@ -1,9 +1,9 @@
+import { Glyph } from "@/components/ascend-icon";
 import { useState } from "react";
 import { Crown, Loader2 } from "lucide-react";
 import { BroAvatar } from "@/components/bro";
 import { useRanking } from "@/hooks/use-arena";
 import { CATEGORY_EMOJI, CATEGORY_LABEL, RANGES, medalFor, type ArenaRange } from "@/lib/arena";
-import { Glyph } from "@/components/ascend-icon";
 
 export function ArenaRanking({ category, myId }: { category: string; myId: string | undefined }) {
   const [range, setRange] = useState<ArenaRange>("week");

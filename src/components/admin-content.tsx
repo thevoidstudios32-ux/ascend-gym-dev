@@ -1,3 +1,4 @@
+import { Glyph } from "@/components/ascend-icon";
 import { useState } from "react";
 import { Eye, EyeOff, ImageIcon, Pencil, Plus, RotateCcw, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
@@ -10,7 +11,6 @@ import {
   useUploadBannerImage,
 } from "@/hooks/use-content";
 import {
-import { Glyph } from "@/components/ascend-icon";
   CONTENT_RARITIES,
   UNLOCK_LABEL,
   UNLOCK_TYPES,

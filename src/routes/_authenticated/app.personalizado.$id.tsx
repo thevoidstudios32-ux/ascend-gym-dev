@@ -1,3 +1,4 @@
+import { Glyph } from "@/components/ascend-icon";
 import { createFileRoute, useNavigate, useParams } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -7,7 +8,6 @@ import { WorkoutTuner } from "@/components/workout-tuner";
 import { useCustomAction, useCustomWorkouts } from "@/hooks/use-custom";
 import { deleteCustomWorkout, restoreWorkoutVersion, saveCustomWorkout } from "@/lib/custom.functions";
 import {
-import { Glyph } from "@/components/ascend-icon";
   CALISTHENICS,
   DIFFICULTIES,
   FOCUS_OPTIONS,

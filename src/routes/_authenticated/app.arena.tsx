@@ -1,3 +1,4 @@
+import { Glyph } from "@/components/ascend-icon";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -18,7 +19,6 @@ import {
 import { joinBattle, leaveBattle } from "@/lib/arena.functions";
 import { CameraCapture } from "@/components/camera-capture";
 import { poseOf } from "@/lib/poses";
-import { Glyph } from "@/components/ascend-icon";
 
 export const Route = createFileRoute("/_authenticated/app/arena")({
   head: () => ({

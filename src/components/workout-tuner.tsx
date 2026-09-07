@@ -1,3 +1,4 @@
+import { Glyph } from "@/components/ascend-icon";
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
@@ -7,7 +8,6 @@ import { useCustomAction, useCustomWorkouts } from "@/hooks/use-custom";
 import { applyWorkoutChange, proposeWorkoutChange } from "@/lib/custom.functions";
 import { estimateMinutes, type Proposal } from "@/lib/custom";
 import { SPLITS } from "@/lib/ascend";
-import { Glyph } from "@/components/ascend-icon";
 
 const QUICK = [
   "Deixe mais focado em calistenia",

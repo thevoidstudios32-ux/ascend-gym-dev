@@ -1,9 +1,9 @@
+import { AscendIcon, Glyph, RankCrest } from "@/components/ascend-icon";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Confetti, PageHeader, ProgressBar } from "@/components/ui-kit";
 import { useDashboard, useExtras } from "@/hooks/use-dashboard";
 import {
-import { AscendIcon, Glyph, RankCrest } from "@/components/ascend-icon";
   ACHIEVEMENTS,
   computeStreak,
   levelFromXp,

@@ -1,3 +1,4 @@
+import { AscendIcon, Glyph } from "@/components/ascend-icon";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -7,7 +8,6 @@ import { Confetti } from "@/components/ui-kit";
 import { useArenaAction, useBattle } from "@/hooks/use-arena";
 import { castVote } from "@/lib/arena.functions";
 import { CATEGORY_EMOJI, CATEGORY_LABEL, type ArenaCard } from "@/lib/arena";
-import { AscendIcon, Glyph } from "@/components/ascend-icon";
 
 export function ArenaBattle({ category }: { category: string }) {
   const { data, isLoading, refetch, isFetching } = useBattle(category);

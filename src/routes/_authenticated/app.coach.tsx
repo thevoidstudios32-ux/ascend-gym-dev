@@ -1,3 +1,4 @@
+import { AscendIcon } from "@/components/ascend-icon";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -9,7 +10,6 @@ import { runCoachAnalysis } from "@/lib/coach.functions";
 import { CoachInsights, type AnalysisMode } from "@/components/coach-insights";
 import { useRefreshDashboard } from "@/hooks/use-dashboard";
 import { WorkoutTuner } from "@/components/workout-tuner";
-import { AscendIcon } from "@/components/ascend-icon";
 
 export const Route = createFileRoute("/_authenticated/app/coach")({
   head: () => ({

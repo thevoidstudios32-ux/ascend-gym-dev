@@ -1,5 +1,5 @@
-import { rarityStyle, type BadgeDef } from "@/lib/badges";
 import { Glyph } from "@/components/ascend-icon";
+import { rarityStyle, type BadgeDef } from "@/lib/badges";
 
 /** Ícone do selo (imagem, emoji ou inicial) com anel/brilho por raridade. */
 export function BadgeIcon({

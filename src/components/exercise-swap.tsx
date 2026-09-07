@@ -1,3 +1,4 @@
+import { Glyph } from "@/components/ascend-icon";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -12,7 +13,6 @@ import {
   type MuscleGroup,
 } from "@/lib/exercises";
 import { getGymSetup, suggestSubstitution, toggleFavoriteExercise } from "@/lib/exercises.functions";
-import { Glyph } from "@/components/ascend-icon";
 
 export function useGymSetup() {
   const fetcher = useServerFn(getGymSetup);

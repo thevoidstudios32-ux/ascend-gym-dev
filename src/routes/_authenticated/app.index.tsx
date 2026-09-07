@@ -1,3 +1,4 @@
+import { AscendIcon, Glyph } from "@/components/ascend-icon";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -15,7 +16,6 @@ import { useProgram, useStartProgramDay } from "@/hooks/use-program";
 import { WEEKDAYS } from "@/lib/program";
 import { saveProfile } from "@/lib/ascend.functions";
 import {
-import { AscendIcon, Glyph } from "@/components/ascend-icon";
   computeStreak,
   EXPERIENCES,
   GOALS,

@@ -1,3 +1,4 @@
+import { AscendIcon, Glyph } from "@/components/ascend-icon";
 import { createFileRoute, useNavigate, useParams } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -11,7 +12,6 @@ import { useCustomWorkouts } from "@/hooks/use-custom";
 import { customToSplit, isUuid } from "@/lib/custom";
 import { finishWorkout } from "@/lib/extras.functions";
 import { estimateCalories, SPLITS, suggestLoad, todayISO, type Split } from "@/lib/ascend";
-import { AscendIcon, Glyph } from "@/components/ascend-icon";
 
 export const Route = createFileRoute("/_authenticated/app/treino/$split")({
   head: () => ({

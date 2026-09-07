@@ -1,6 +1,6 @@
+import { Glyph } from "@/components/ascend-icon";
 import { useMemo } from "react";
 import type { TitleVisual } from "@/lib/titles";
-import { Glyph } from "@/components/ascend-icon";
 
 type Size = "sm" | "md" | "lg";
 

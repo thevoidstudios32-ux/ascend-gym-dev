@@ -1,8 +1,8 @@
+import { Glyph } from "@/components/ascend-icon";
 import { Link } from "@tanstack/react-router";
 import { broRank, handleOf, initials } from "@/lib/social";
 import { VerifiedBadge } from "@/components/verified-badge";
 import { useHasStory } from "@/hooks/use-story-ring";
-import { Glyph } from "@/components/ascend-icon";
 
 type MiniProfile = {
   id: string;

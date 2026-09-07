@@ -1,3 +1,4 @@
+import { AscendIcon, Glyph } from "@/components/ascend-icon";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
@@ -29,7 +30,6 @@ import {
   toggleReaction,
 } from "@/lib/social.functions";
 import { CHALLENGE_METRICS, POST_KINDS, REACTIONS, timeAgo } from "@/lib/social";
-import { AscendIcon, Glyph } from "@/components/ascend-icon";
 
 export const Route = createFileRoute("/_authenticated/app/bros/")({
   head: () => ({
