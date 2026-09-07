@@ -1,4 +1,4 @@
-import { Glyph } from "@/components/ascend-icon";
+import { AscendIcon, Glyph, type AscendIconName } from "@/components/ascend-icon";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { useDashboard } from "@/hooks/use-dashboard";
@@ -49,7 +49,10 @@ function TreinosPage() {
             params={{ split: s.id }}
             className="press panel flex items-center gap-4 p-4"
           >
-            <Glyph value={s.emoji} size={30} fallback={s.id === "pull" ? "pull" : s.id === "legs" ? "legs" : s.id === "full" ? "fullbody" : "push"} />
+            <AscendIcon
+              name={({ push: "push", pull: "pull", legs: "legs", full: "fullbody" } as Record<string, AscendIconName>)[s.id] ?? "workout"}
+              size={30}
+            />
             <div className="min-w-0 flex-1">
               <p className="flex items-center gap-2 font-bold">
                 {s.name}
