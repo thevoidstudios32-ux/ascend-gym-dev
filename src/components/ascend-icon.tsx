@@ -256,8 +256,8 @@ export function AscendIcon({
   title,
 }: {
   name: AscendIconName;
-  size?: number;
-  className?: string;
+  size?: number | undefined;
+  className?: string | undefined;
   title?: string | undefined;
 }) {
   return (
@@ -380,10 +380,10 @@ export function Glyph({
   fallback = "workout",
   title,
 }: {
-  value?: string | null;
-  size?: number;
-  className?: string;
-  fallback?: AscendIconName;
+  value?: string | null | undefined;
+  size?: number | undefined;
+  className?: string | undefined;
+  fallback?: AscendIconName | undefined;
   title?: string | undefined;
 }) {
   return <AscendIcon name={iconForGlyph(value, fallback)} size={size} className={className} title={title} />;
