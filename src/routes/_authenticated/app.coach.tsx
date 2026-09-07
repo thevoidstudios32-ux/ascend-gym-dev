@@ -30,8 +30,8 @@ const SUGGESTIONS = [
   "O que comer no pós-treino?",
   "Estou sem motivação, me ajuda",
   "Como está meu volume de treino?",
-  "📅 Monta minha semana de treinos",
-  "🎯 Quais metas devo bater esse mês?",
+  "Monta minha semana de treinos",
+  "Quais metas devo bater esse mês?",
   "Como quebrar meus PRs atuais?",
 ];
 

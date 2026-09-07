@@ -249,7 +249,7 @@ function CustomWorkoutPage() {
             onClick={() => setShowCatalog((v) => !v)}
             className="press panel flex-1 py-3 text-xs font-bold"
           >
-            📚 Catálogo de calistenia
+            <Glyph value="📚" size={15} className="mr-1" fallback="calisthenics" /> Catálogo de calistenia
           </button>
           <button
             onClick={() => setExercises((prev) => [...prev, emptyExercise()])}
