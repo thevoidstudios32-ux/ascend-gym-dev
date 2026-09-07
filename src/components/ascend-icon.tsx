@@ -68,21 +68,21 @@ function Crest({ level }: { level: 1 | 2 | 3 | 4 | 5 }) {
 const PATHS: Record<AscendIconName, React.ReactNode> = {
   push: (
     <>
-      <path d="M2 10h3v4H2zM19 10h3v4h-3zM6 8.5h2.4v7H6zM15.6 8.5H18v7h-2.4z" />
-      <path className={A} d="M9.2 10.8h5.6v2.4H9.2z" />
+      <path d="M10.8 19.8V8.2L7.2 11.8 5.5 10.1 12 3.6l6.5 6.5-1.7 1.7-3.6-3.6v11.6h-2.4Z" />
+      <path className={A} d="M4 20.2h16v2.2H4z" />
     </>
   ),
   pull: (
     <>
-      <path d="M3 3h18v2H3z" />
-      <path className={A} d="M11 5h2v6h-2z" />
-      <path d="M12 11a4 4 0 0 0-4 4v6h2.2v-6a1.8 1.8 0 0 1 3.6 0v6H16v-6a4 4 0 0 0-4-4Z" />
+      <path className={A} d="M4 1.6h16v2.2H4z" />
+      <path d="M10.8 4.2v11.6l-3.6-3.6-1.7 1.7 6.5 6.5 6.5-6.5-1.7-1.7-3.6 3.6V4.2h-2.4Z" />
     </>
   ),
   legs: (
     <>
-      <path d="M7 2h4l-.6 8.4L12 21H9.4L8 12.4 6.2 21H3.6l1.7-10.8L7 2Z" />
-      <path className={A} d="M14 2h4l1.7 8.2L21 21h-2.6l-1.8-8.6L15.2 21h-2.6l1.4-10.8L14 2Z" />
+      <path d="M5.6 2h2.6v17H5.6zM15.8 2h2.6v17h-2.6z" />
+      <path d="M2.6 6.2h3v2.4h-3zM18.4 6.2h3v2.4h-3z" opacity=".7" />
+      <path className={A} d="M2 19.4h20v2.6H2z" />
     </>
   ),
   fullbody: (
