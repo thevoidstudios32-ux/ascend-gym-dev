@@ -79,43 +79,32 @@ export const toggleWorkout = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const existing = await supabase
       .from("workouts")
-      .select("id, xp")
+      .select("id")
       .eq("user_id", userId)
       .eq("date", data.date)
       .maybeSingle();
 
-    const profile = await supabase.from("profiles").select("xp").eq("id", userId).maybeSingle();
-    const currentXp = profile.data?.xp ?? 0;
-    // XP é campo protegido no banco: só o client de serviço pode gravar.
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
+    // Marcar/desmarcar o dia usa o motor de recompensas do banco: o XP é
+    // calculado e devolvido lá, nunca enviado pelo frontend.
     if (existing.data) {
-      await supabase.from("workouts").delete().eq("id", existing.data.id);
-      await supabaseAdmin
-        .from("profiles")
-        .update({ xp: Math.max(0, currentXp - (existing.data.xp ?? 0)) })
-        .eq("id", userId);
+      const { error } = await supabase.rpc("remove_workout", { _date: data.date });
+      if (error) throw new Error(error.message);
       return { added: false };
     }
 
-    const xp = 120;
-    const { error } = await supabase.from("workouts").insert({
-      user_id: userId,
-      date: data.date,
-      title: data.title ?? "Treino",
-      duration_min: data.duration_min ?? 60,
-      xp,
+    const { data: result, error } = await supabase.rpc("complete_workout", {
+      _payload: {
+        date: data.date,
+        title: data.title ?? "Treino",
+        kind: "manual",
+        duration_min: data.duration_min ?? 60,
+        calories: 0,
+        sets: [],
+      } as never,
     });
     if (error) throw new Error(error.message);
-    await supabaseAdmin.from("profiles").update({ xp: currentXp + xp }).eq("id", userId);
-
-    await supabase.from("posts").insert({
-      user_id: userId,
-      kind: "workout",
-      content: `${data.title ?? "Treino"} concluído · ${data.duration_min ?? 60} min`,
-      meta: { xp, date: data.date } as never,
-    });
-    return { added: true, xp };
+    const r = (result ?? {}) as { xp?: number };
+    return { added: true, xp: r.xp ?? 0 };
   });
 
 export const addRecord = createServerFn({ method: "POST" })
