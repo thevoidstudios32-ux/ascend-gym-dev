@@ -1498,7 +1498,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      complete_workout: { Args: { _payload: Json }; Returns: Json }
+      remove_workout: { Args: { _date: string }; Returns: Json }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user" | "super_admin"
