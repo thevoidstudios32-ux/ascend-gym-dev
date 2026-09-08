@@ -68,133 +68,40 @@ export const finishWorkout = createServerFn({ method: "POST" })
       .parse(data),
   )
   .handler(async ({ context, data }) => {
-    const { supabase, userId } = context;
-    const volume = data.sets.reduce((acc, s) => acc + s.reps * s.weight_kg, 0);
-    const xp = 120 + Math.min(200, Math.round(volume / 100)) + data.sets.length * 5;
+    const { supabase } = context;
 
-    // Anti-duplicação: um registro por usuário/dia/tipo de treino.
-    const { data: already } = await supabase
-      .from("workouts")
-      .select("id,xp")
-      .eq("user_id", userId)
-      .eq("date", data.date)
-      .eq("kind", data.kind)
-      .maybeSingle();
-
-    if (already) {
-      const { data: prof } = await supabase.from("profiles").select("xp").eq("id", userId).maybeSingle();
-      return {
-        xp: 0,
-        duplicate: true,
-        newPrs: [] as string[],
-        unlocked: [] as { code: string; label: string; emoji: string; desc: string }[],
-        totalXp: prof?.xp ?? 0,
-      };
-    }
-
-    const { data: workout, error } = await supabase
-      .from("workouts")
-      .insert({
-        user_id: userId,
+    // Toda a conclusão do treino (XP, séries, PRs, selos e post) acontece em
+    // uma única transação no banco: atômica, idempotente e imune ao frontend.
+    const { data: result, error } = await supabase.rpc("complete_workout", {
+      _payload: {
         date: data.date,
         title: data.title,
         kind: data.kind,
         duration_min: data.duration_min,
         calories: data.calories,
-        xp,
-      })
-      .select()
-      .single();
-    if (error) {
-      // Corrida com outro clique: trata como duplicado, sem pontuar de novo.
-      if (error.code === "23505") {
-        const { data: prof } = await supabase.from("profiles").select("xp").eq("id", userId).maybeSingle();
-        return { xp: 0, duplicate: true, newPrs: [], unlocked: [], totalXp: prof?.xp ?? 0 };
-      }
-      throw new Error(error.message);
-    }
-
-    if (data.sets.length) {
-      await supabase.from("exercise_sets").insert(
-        data.sets.map((s) => ({ ...s, user_id: userId, workout_id: workout.id, date: data.date })),
-      );
-    }
-
-    // Atualiza PRs automaticamente
-    const newPrs: string[] = [];
-    const best = new Map<string, { reps: number; weight: number }>();
-    for (const s of data.sets) {
-      const cur = best.get(s.exercise);
-      if (!cur || s.weight_kg > cur.weight) best.set(s.exercise, { reps: s.reps, weight: s.weight_kg });
-    }
-    const { data: existing } = await supabase.from("records").select("*").eq("user_id", userId);
-    for (const [exercise, v] of best) {
-      if (v.weight <= 0) continue;
-      const prev = (existing ?? []).filter((r) => r.exercise === exercise).sort((a, b) => Number(b.weight_kg) - Number(a.weight_kg))[0];
-      if (!prev || v.weight > Number(prev.weight_kg)) {
-        await supabase.from("records").insert({
-          user_id: userId,
-          exercise,
-          weight_kg: v.weight,
-          reps: v.reps,
-          achieved_on: data.date,
-        });
-        newPrs.push(exercise);
-      }
-    }
-
-    const { data: profile } = await supabase.from("profiles").select("xp").eq("id", userId).maybeSingle();
-    const totalXp = (profile?.xp ?? 0) + xp;
-    // XP é campo protegido no banco: só o client de serviço pode gravar.
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    await supabaseAdmin.from("profiles").update({ xp: totalXp }).eq("id", userId);
-
-
-    // Publica no feed dos Gym Bros (histórico social do treino concluído).
-    await supabase.from("posts").insert({
-      user_id: userId,
-      kind: "workout",
-      content: `${data.title} concluído · ${data.duration_min} min · ${data.calories} kcal`,
-      meta: { xp, date: data.date, kind: data.kind, sets: data.sets.length, volume } as never,
+        sets: data.sets,
+      } as never,
     });
+    if (error) throw new Error(error.message);
 
-    const unlocked = await unlockFor(supabase, userId, totalXp, newPrs.length > 0);
-    return { xp, duplicate: false, newPrs, unlocked, totalXp };
+    const r = (result ?? {}) as {
+      xp?: number;
+      duplicate?: boolean;
+      newPrs?: string[];
+      unlocked?: string[];
+      totalXp?: number;
+    };
+
+    return {
+      xp: r.xp ?? 0,
+      duplicate: r.duplicate ?? false,
+      newPrs: r.newPrs ?? [],
+      unlocked: (r.unlocked ?? [])
+        .map((code) => ACHIEVEMENTS.find((a) => a.code === code))
+        .filter(Boolean) as { code: string; label: string; emoji: string; desc: string }[],
+      totalXp: r.totalXp ?? 0,
+    };
   });
-
-
-async function unlockFor(
-  supabase: { from: (t: string) => any },
-  userId: string,
-  totalXp: number,
-  gotPr: boolean,
-) {
-  const { data: workouts } = await supabase.from("workouts").select("date").eq("user_id", userId);
-  const dates = (workouts ?? []).map((w: { date: string }) => w.date);
-  const streak = computeStreak(dates);
-  const level = levelFromXp(totalXp).level;
-  const count = dates.length;
-
-  const codes: string[] = [];
-  if (count >= 1) codes.push("first_workout");
-  if (count >= 10) codes.push("workouts_10");
-  if (count >= 50) codes.push("workouts_50");
-  if (count >= 100) codes.push("workouts_100");
-  if (streak >= 3) codes.push("streak_3");
-  if (streak >= 7) codes.push("streak_7");
-  if (streak >= 30) codes.push("streak_30");
-  if (level >= 10) codes.push("level_10");
-  if (level >= 25) codes.push("level_25");
-  if (gotPr) codes.push("first_pr");
-
-  const { data: owned } = await supabase.from("achievements").select("code").eq("user_id", userId);
-  const ownedSet = new Set((owned ?? []).map((a: { code: string }) => a.code));
-  const fresh = codes.filter((c) => !ownedSet.has(c));
-  if (fresh.length) {
-    await supabase.from("achievements").insert(fresh.map((code) => ({ user_id: userId, code })));
-  }
-  return fresh.map((c) => ACHIEVEMENTS.find((a) => a.code === c)!).filter(Boolean);
-}
 
 /* ---------------------------------- água ---------------------------------- */
 
