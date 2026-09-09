@@ -128,8 +128,9 @@ export const markTitleRewardShown = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => z.object({ titleId: z.string().min(1).max(60) }).parse(data))
   .handler(async ({ context, data }) => {
-    const { supabase, userId } = context;
-    await supabase
+    const { userId } = context;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin
       .from("user_titles")
       .update({ reward_shown: true })
       .eq("user_id", userId)
