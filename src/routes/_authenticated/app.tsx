@@ -14,6 +14,7 @@ import {
   LineChart,
   LogOut,
   MessageSquareText,
+  Settings,
   Shield,
   Swords,
   Trophy,
@@ -24,6 +25,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getSocialBadge } from "@/lib/social.functions";
 import { useAdminStatus, useLoginTracking } from "@/hooks/use-admin";
 import { AscendSymbol, AscendWordmark } from "@/components/brand";
+import { useT } from "@/lib/i18n";
 
 
 export const Route = createFileRoute("/_authenticated/app")({
