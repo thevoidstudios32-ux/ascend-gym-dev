@@ -41,6 +41,7 @@ const NAV = [
   { to: "/app/progresso", label: "Stats", icon: LineChart, exact: false },
   { to: "/app/conquistas", label: "Medalhas", icon: Trophy, exact: false },
   { to: "/app/perfil", label: "Perfil", icon: User, exact: false },
+  { to: "/app/config", label: "Config", icon: Settings, exact: false },
 ] as const;
 
 function AppLayout() {
