@@ -1,0 +1,47 @@
+/* Traduções EN — navegação, ações e textos compartilhados. */
+export const common: Record<string, string> = {
+  // Navegação
+  Início: "Home",
+  Treinos: "Workouts",
+  "Gym Bros": "Gym Bros",
+  Arena: "Arena",
+  Coach: "Coach",
+  Dieta: "Nutrition",
+  Shape: "Shape",
+  Stats: "Stats",
+  Medalhas: "Badges",
+  Perfil: "Profile",
+  Config: "Settings",
+  Configurações: "Settings",
+  Sair: "Sign out",
+  "Admin Panel": "Admin Panel",
+  "Expandir menu": "Expand menu",
+  "Recolher menu": "Collapse menu",
+
+  // Configurações
+  "Idioma / Language": "Idioma / Language",
+  "Escolha o idioma da interface. A preferência fica salva neste dispositivo.":
+    "Choose the interface language. Your preference is saved on this device.",
+  Português: "Portuguese",
+  Inglês: "English",
+  "Preferências do app": "App preferences",
+  "Idioma alterado para Português": "Language changed to Portuguese",
+  "Idioma alterado para Inglês": "Language changed to English",
+  Conta: "Account",
+  "Editar perfil": "Edit profile",
+  "Sair da conta": "Sign out",
+  "Ajuste o app do seu jeito": "Tune the app your way",
+
+  // Ações comuns
+  Salvar: "Save",
+  "Salvando…": "Saving…",
+  Cancelar: "Cancel",
+  Fechar: "Close",
+  Voltar: "Back",
+  Enviar: "Send",
+  Excluir: "Delete",
+  "Carregando…": "Loading…",
+  Concluir: "Finish",
+  Começar: "Start",
+  "Tentar de novo": "Try again",
+};

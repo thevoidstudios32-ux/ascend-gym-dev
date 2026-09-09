@@ -14,6 +14,7 @@ import {
   LineChart,
   LogOut,
   MessageSquareText,
+  Settings,
   Shield,
   Swords,
   Trophy,
@@ -24,6 +25,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getSocialBadge } from "@/lib/social.functions";
 import { useAdminStatus, useLoginTracking } from "@/hooks/use-admin";
 import { AscendSymbol, AscendWordmark } from "@/components/brand";
+import { useT } from "@/lib/i18n";
 
 
 export const Route = createFileRoute("/_authenticated/app")({
@@ -41,6 +43,7 @@ const NAV = [
   { to: "/app/progresso", label: "Stats", icon: LineChart, exact: false },
   { to: "/app/conquistas", label: "Medalhas", icon: Trophy, exact: false },
   { to: "/app/perfil", label: "Perfil", icon: User, exact: false },
+  { to: "/app/config", label: "Config", icon: Settings, exact: false },
 ] as const;
 
 function AppLayout() {
