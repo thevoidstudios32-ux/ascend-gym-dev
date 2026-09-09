@@ -40,7 +40,7 @@ export const common: Record<string, string> = {
   Voltar: "Back",
   Enviar: "Send",
   Excluir: "Delete",
-  Carregando…: "Loading…",
+  "Carregando…": "Loading…",
   Concluir: "Finish",
   Começar: "Start",
   "Tentar de novo": "Try again",
