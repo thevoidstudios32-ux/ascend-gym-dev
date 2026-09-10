@@ -15,6 +15,7 @@ import { useDashboard, useExtras, useRefreshDashboard } from "@/hooks/use-dashbo
 import { useProgram, useStartProgramDay } from "@/hooks/use-program";
 import { WEEKDAYS } from "@/lib/program";
 import { saveProfile } from "@/lib/ascend.functions";
+import { useT } from "@/lib/i18n";
 import {
   computeStreak,
   EXPERIENCES,
@@ -42,14 +43,15 @@ export const Route = createFileRoute("/_authenticated/app/")({
 });
 
 function HomePage() {
+  const t = useT();
   const { data, isLoading, error } = useDashboard();
   const refresh = useRefreshDashboard();
 
   if (isLoading) return <LoadingPage />;
   if (error)
-    return <p className="py-20 text-center text-destructive">Erro ao carregar seus dados.</p>;
+    return <p className="py-20 text-center text-destructive">{t("Erro ao carregar seus dados.")}</p>;
 
-  if (!data?.profile) return <p className="py-20 text-center">Perfil não encontrado.</p>;
+  if (!data?.profile) return <p className="py-20 text-center">{t("Perfil não encontrado.")}</p>;
 
   if (!data.profile.onboarded)
     return <Onboarding onDone={refresh} profileName={data.profile.name} />;
@@ -58,6 +60,7 @@ function HomePage() {
 }
 
 function Onboarding({ onDone, profileName }: { onDone: () => void; profileName: string }) {
+  const t = useT();
   const save = useServerFn(saveProfile);
   const [form, setForm] = useState({
     name: profileName === "Atleta" ? "" : profileName,
@@ -83,7 +86,7 @@ function Onboarding({ onDone, profileName }: { onDone: () => void; profileName: 
         },
       }),
     onSuccess: () => {
-      toast.success("Perfil pronto! Bora treinar");
+      toast.success(t("Perfil pronto! Bora treinar"));
       onDone();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -94,14 +97,14 @@ function Onboarding({ onDone, profileName }: { onDone: () => void; profileName: 
 
   return (
     <div className="panel animate-rise p-6">
-      <h1 className="text-display text-4xl">VAMOS TE CONHECER</h1>
+      <h1 className="text-display text-4xl">{t("VAMOS TE CONHECER")}</h1>
       <p className="mt-2 text-sm text-muted-foreground">
-        Esses dados personalizam seu plano, suas metas e o Coach IA.
+        {t("Esses dados personalizam seu plano, suas metas e o Coach IA.")}
       </p>
       <div className="mt-6 space-y-3">
         <input
           className={field}
-          placeholder="Como podemos te chamar?"
+          placeholder={t("Como podemos te chamar?")}
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
         />
@@ -113,7 +116,7 @@ function Onboarding({ onDone, profileName }: { onDone: () => void; profileName: 
           >
             {GOALS.map((g) => (
               <option key={g} value={g}>
-                {g}
+                {t(g)}
               </option>
             ))}
           </select>
@@ -124,7 +127,7 @@ function Onboarding({ onDone, profileName }: { onDone: () => void; profileName: 
           >
             {EXPERIENCES.map((g) => (
               <option key={g} value={g}>
-                {g}
+                {t(g)}
               </option>
             ))}
           </select>
@@ -133,28 +136,28 @@ function Onboarding({ onDone, profileName }: { onDone: () => void; profileName: 
           <input
             className={field}
             type="number"
-            placeholder="Idade"
+            placeholder={t("Idade")}
             value={form.age}
             onChange={(e) => setForm({ ...form, age: e.target.value })}
           />
           <input
             className={field}
             type="number"
-            placeholder="Altura (cm)"
+            placeholder={t("Altura (cm)")}
             value={form.height_cm}
             onChange={(e) => setForm({ ...form, height_cm: e.target.value })}
           />
           <input
             className={field}
             type="number"
-            placeholder="Peso (kg)"
+            placeholder={t("Peso (kg)")}
             value={form.weight_kg}
             onChange={(e) => setForm({ ...form, weight_kg: e.target.value })}
           />
         </div>
         <div>
           <p className="mb-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-            Dias de treino por semana
+            {t("Dias de treino por semana")}
           </p>
           <div className="flex gap-2">
             {[1, 2, 3, 4, 5, 6, 7].map((d) => (
@@ -177,7 +180,7 @@ function Onboarding({ onDone, profileName }: { onDone: () => void; profileName: 
           disabled={mutation.isPending}
           className="press w-full rounded-full bg-primary py-3.5 font-bold text-primary-foreground shadow-glow disabled:opacity-60"
         >
-          {mutation.isPending ? "Salvando…" : "Começar"}
+          {mutation.isPending ? t("Salvando…") : t("Começar")}
         </button>
       </div>
     </div>
@@ -194,6 +197,7 @@ function greeting() {
 }
 
 function Dashboard({ data }: { data: DashboardData }) {
+  const t = useT();
   const { data: extras } = useExtras();
   const { data: titles } = useTitles();
   const [titlesOpen, setTitlesOpen] = useState(false);
@@ -225,7 +229,7 @@ function Dashboard({ data }: { data: DashboardData }) {
       const res = await startDay.mutateAsync(dayKey);
       await navigate({ to: "/app/treino/$split", params: { split: res.workoutId } });
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Não foi possível iniciar o treino.");
+      toast.error(e instanceof Error ? e.message : t("Não foi possível iniciar o treino."));
     }
   };
 
@@ -276,13 +280,13 @@ function Dashboard({ data }: { data: DashboardData }) {
       <header className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
         <UserAvatar src={profile.avatar_url ?? null} name={profile.name} userId={profile.id} className="size-12" />
         <div className="min-w-0">
-          <p className="text-xs text-muted-foreground">{greeting()},</p>
+          <p className="text-xs text-muted-foreground">{t(greeting())},</p>
           <h1 className="truncate text-display text-3xl">{profile.name}</h1>
         </div>
         <div className="glass flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2">
           <Flame className="size-4 animate-flame text-primary" />
           <span className="font-extrabold">{streak}</span>
-          <span className="text-[10px] uppercase text-muted-foreground">dias</span>
+          <span className="text-[10px] uppercase text-muted-foreground">{t("dias")}</span>
         </div>
       </header>
 
@@ -294,11 +298,11 @@ function Dashboard({ data }: { data: DashboardData }) {
               open={titlesOpen}
               onClose={() => setTitlesOpen(false)}
               userId={profile.id ?? null}
-              owned={(titles?.owned ?? []).map((t) => t.id)}
+              owned={(titles?.owned ?? []).map((owned) => owned.id)}
               equipped={titles?.equipped ?? null}
             />
             <p className="mt-2 text-display text-4xl">
-              Nível <span className="text-primary">{level.level}</span>
+              {t("Nível")} <span className="text-primary">{level.level}</span>
             </p>
           </div>
           <p className="shrink-0 text-right text-sm text-muted-foreground">
@@ -306,14 +310,17 @@ function Dashboard({ data }: { data: DashboardData }) {
               <CountUp value={level.into} />
             </b>
             <br />
-            <span className="text-xs">de {level.need} XP</span>
+            <span className="text-xs">{t("de {need} XP", { need: level.need })}</span>
           </p>
         </div>
         <ProgressBar value={level.pct} className="mt-4" />
         <p className="mt-2 text-[11px] text-muted-foreground">
           {title.next
-            ? `Faltam ${Math.max(0, title.next.min - level.level)} níveis para ${title.next.name}`
-            : "Você alcançou o título máximo. Lenda."}
+            ? t("Faltam {n} níveis para {name}", {
+                n: Math.max(0, title.next.min - level.level),
+                name: title.next.name,
+              })
+            : t("Você alcançou o título máximo. Lenda.")}
         </p>
 
         <div className="mt-5 grid grid-cols-7 gap-1.5">
@@ -342,16 +349,24 @@ function Dashboard({ data }: { data: DashboardData }) {
           </span>
           <div className="min-w-0 flex-1">
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
-              {doneToday ? "Treino de hoje concluído" : "Treino de hoje"}
-              {todayProgramDay ? " · programa IA" : ""}
+              {doneToday ? t("Treino de hoje concluído") : t("Treino de hoje")}
+              {todayProgramDay ? t(" · programa IA") : ""}
             </p>
             <p className="truncate text-lg font-bold">
               {todayProgramDay ? todayProgramDay.title : split.name}
             </p>
             <p className="truncate text-xs text-muted-foreground">
               {todayProgramDay
-                ? `${todayProgramDay.focus} · ${todayProgramDay.minutes} min · ${todayProgramDay.exercises.length} exercícios`
-                : `${split.focus} · ${split.minutes} min · ${split.exercises.length} exercícios`}
+                ? t("{focus} · {min} min · {n} exercícios", {
+                    focus: todayProgramDay.focus,
+                    min: todayProgramDay.minutes,
+                    n: todayProgramDay.exercises.length,
+                  })
+                : t("{focus} · {min} min · {n} exercícios", {
+                    focus: split.focus,
+                    min: split.minutes,
+                    n: split.exercises.length,
+                  })}
             </p>
           </div>
         </div>
@@ -363,10 +378,10 @@ function Dashboard({ data }: { data: DashboardData }) {
           >
             <Play className="size-5 fill-current" />
             {startDay.isPending
-              ? "Preparando…"
+              ? t("Preparando…")
               : doneToday
-                ? "Treinar de novo"
-                : "Iniciar treino"}
+                ? t("Treinar de novo")
+                : t("Iniciar treino")}
           </button>
         ) : (
           <Link
@@ -375,7 +390,7 @@ function Dashboard({ data }: { data: DashboardData }) {
             className="press flex items-center justify-center gap-2 bg-primary py-4 text-base font-extrabold uppercase tracking-wide text-primary-foreground"
           >
             <Play className="size-5 fill-current" />
-            {doneToday ? "Treinar de novo" : "Iniciar treino"}
+            {doneToday ? t("Treinar de novo") : t("Iniciar treino")}
           </Link>
         )}
       </section>
@@ -384,32 +399,32 @@ function Dashboard({ data }: { data: DashboardData }) {
         <StatCard
           icon={Dumbbell}
           value={<CountUp value={weekVolume} />}
-          label="volume semanal"
-          hint="kg levantados"
+          label={t("volume semanal")}
+          hint={t("kg levantados")}
           delay={0}
         />
         <StatCard
           icon={Timer}
           value={`${Math.round(totals.min / 60)}h`}
-          label="tempo treinado"
-          hint={`média ${totals.avg} min`}
+          label={t("tempo treinado")}
+          hint={t("média {n} min", { n: totals.avg })}
           delay={60}
         />
         <StatCard
           icon={Zap}
           value={<CountUp value={totals.cal} />}
-          label="kcal queimadas"
-          hint={`${totals.week} treinos na semana`}
+          label={t("kcal queimadas")}
+          hint={t("{n} treinos na semana", { n: totals.week })}
           delay={120}
         />
         <StatCard
           icon={Flame}
           value={weightDelta === null ? "—" : `${weightDelta > 0 ? "+" : ""}${weightDelta}kg`}
-          label="evolução peso"
+          label={t("evolução peso")}
           hint={
             data.weights.length
-              ? `atual ${data.weights[data.weights.length - 1]!.weight_kg} kg`
-              : "sem registros"
+              ? t("atual {n} kg", { n: data.weights[data.weights.length - 1]!.weight_kg })
+              : t("sem registros")
           }
           delay={180}
         />
@@ -422,7 +437,7 @@ function Dashboard({ data }: { data: DashboardData }) {
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-              Último treino
+              {t("Último treino")}
             </p>
             <p className="truncate text-sm font-bold">{lastWorkout.title}</p>
             <p className="text-xs text-muted-foreground">
@@ -435,15 +450,30 @@ function Dashboard({ data }: { data: DashboardData }) {
 
       <section className="grid grid-cols-2 gap-3">
         {[
-          { to: "/app/nutricao", icon: Apple, t: "Alimentação", d: "Calorias, macros e água" },
-          { to: "/app/shape", icon: Camera, t: "Shape Tracker", d: "Fotos analisadas pela IA" },
+          {
+            to: "/app/nutricao",
+            icon: Apple,
+            title: t("Alimentação"),
+            d: t("Calorias, macros e água"),
+          },
+          {
+            to: "/app/shape",
+            icon: Camera,
+            title: t("Shape Tracker"),
+            d: t("Fotos analisadas pela IA"),
+          },
           {
             to: "/app/conquistas",
             icon: Trophy,
-            t: "Conquistas",
-            d: `${medals} medalhas · missões`,
+            title: t("Conquistas"),
+            d: t("{n} medalhas · missões", { n: medals }),
           },
-          { to: "/app/coach", icon: Bot, t: "Coach IA", d: "Treino sob medida agora" },
+          {
+            to: "/app/coach",
+            icon: Bot,
+            title: t("Coach IA"),
+            d: t("Treino sob medida agora"),
+          },
         ].map((q, i) => (
           <Link
             key={q.to}
