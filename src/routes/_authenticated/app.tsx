@@ -91,7 +91,7 @@ function AppLayout() {
         <button
           onClick={() => setCollapsed((v) => !v)}
           className="press mt-3 rounded-full bg-elevated p-1.5 text-muted-foreground hover:text-foreground"
-          aria-label={collapsed ? "Expandir menu" : "Recolher menu"}
+          aria-label={collapsed ? t("Expandir menu") : t("Recolher menu")}
         >
           {collapsed ? <ChevronRight className="size-4" /> : <ChevronLeft className="size-4" />}
         </button>
@@ -103,7 +103,7 @@ function AppLayout() {
               <Link
                 key={item.to}
                 to={item.to}
-                title={item.label}
+                title={t(item.label)}
                 className={`press flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors ${
                   collapsed ? "justify-center" : ""
                 } ${
@@ -113,7 +113,7 @@ function AppLayout() {
                 }`}
               >
                 <item.icon className="size-4 shrink-0" />
-                {collapsed ? null : item.label}
+                {collapsed ? null : t(item.label)}
                 {item.to === "/app/bros" && broBadge > 0 ? (
                   <span
                     className={`grid min-w-5 place-items-center rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-black text-primary-foreground ${
@@ -130,12 +130,12 @@ function AppLayout() {
         {isAdmin ? (
           <Link
             to="/admin"
-            title="Admin Panel"
+            title={t("Admin Panel")}
             className={`press mb-1 flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/10 px-3 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/20 ${
               collapsed ? "justify-center" : ""
             }`}
           >
-            <Shield className="size-4 shrink-0" /> {collapsed ? null : "Admin Panel"}
+            <Shield className="size-4 shrink-0" /> {collapsed ? null : t("Admin Panel")}
           </Link>
         ) : null}
         <button
@@ -144,7 +144,7 @@ function AppLayout() {
             collapsed ? "justify-center" : ""
           }`}
         >
-          <LogOut className="size-4" /> {collapsed ? null : "Sair"}
+          <LogOut className="size-4" /> {collapsed ? null : t("Sair")}
         </button>
       </aside>
 
@@ -181,7 +181,7 @@ function AppLayout() {
                   </span>
                 ) : null}
               </span>
-              {item.label}
+              {t(item.label)}
             </Link>
           );
         })}
