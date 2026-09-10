@@ -60,6 +60,7 @@ function HomePage() {
 }
 
 function Onboarding({ onDone, profileName }: { onDone: () => void; profileName: string }) {
+  const t = useT();
   const save = useServerFn(saveProfile);
   const [form, setForm] = useState({
     name: profileName === "Atleta" ? "" : profileName,
@@ -85,7 +86,7 @@ function Onboarding({ onDone, profileName }: { onDone: () => void; profileName: 
         },
       }),
     onSuccess: () => {
-      toast.success("Perfil pronto! Bora treinar");
+      toast.success(t("Perfil pronto! Bora treinar"));
       onDone();
     },
     onError: (e: Error) => toast.error(e.message),
