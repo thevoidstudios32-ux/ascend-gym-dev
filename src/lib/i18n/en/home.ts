@@ -14,6 +14,13 @@ export const home: Record<string, string> = {
   "Peso (kg)": "Weight (kg)",
   "Dias de treino por semana": "Training days per week",
   "Perfil pronto! Bora treinar": "Profile ready! Let's train",
+  hipertrofia: "muscle gain",
+  emagrecer: "lose weight",
+  "ganhar massa": "bulk up",
+  condicionamento: "conditioning",
+  iniciante: "beginner",
+  intermediário: "intermediate",
+  avançado: "advanced",
 
   // Saudações
   "Bom dia": "Good morning",
