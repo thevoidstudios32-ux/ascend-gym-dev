@@ -15,6 +15,7 @@ import { useDashboard, useExtras, useRefreshDashboard } from "@/hooks/use-dashbo
 import { useProgram, useStartProgramDay } from "@/hooks/use-program";
 import { WEEKDAYS } from "@/lib/program";
 import { saveProfile } from "@/lib/ascend.functions";
+import { useT } from "@/lib/i18n";
 import {
   computeStreak,
   EXPERIENCES,
@@ -42,14 +43,15 @@ export const Route = createFileRoute("/_authenticated/app/")({
 });
 
 function HomePage() {
+  const t = useT();
   const { data, isLoading, error } = useDashboard();
   const refresh = useRefreshDashboard();
 
   if (isLoading) return <LoadingPage />;
   if (error)
-    return <p className="py-20 text-center text-destructive">Erro ao carregar seus dados.</p>;
+    return <p className="py-20 text-center text-destructive">{t("Erro ao carregar seus dados.")}</p>;
 
-  if (!data?.profile) return <p className="py-20 text-center">Perfil não encontrado.</p>;
+  if (!data?.profile) return <p className="py-20 text-center">{t("Perfil não encontrado.")}</p>;
 
   if (!data.profile.onboarded)
     return <Onboarding onDone={refresh} profileName={data.profile.name} />;
