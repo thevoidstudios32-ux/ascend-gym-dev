@@ -280,13 +280,13 @@ function Dashboard({ data }: { data: DashboardData }) {
       <header className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
         <UserAvatar src={profile.avatar_url ?? null} name={profile.name} userId={profile.id} className="size-12" />
         <div className="min-w-0">
-          <p className="text-xs text-muted-foreground">{greeting()},</p>
+          <p className="text-xs text-muted-foreground">{t(greeting())},</p>
           <h1 className="truncate text-display text-3xl">{profile.name}</h1>
         </div>
         <div className="glass flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2">
           <Flame className="size-4 animate-flame text-primary" />
           <span className="font-extrabold">{streak}</span>
-          <span className="text-[10px] uppercase text-muted-foreground">dias</span>
+          <span className="text-[10px] uppercase text-muted-foreground">{t("dias")}</span>
         </div>
       </header>
 
@@ -298,11 +298,11 @@ function Dashboard({ data }: { data: DashboardData }) {
               open={titlesOpen}
               onClose={() => setTitlesOpen(false)}
               userId={profile.id ?? null}
-              owned={(titles?.owned ?? []).map((t) => t.id)}
+              owned={(titles?.owned ?? []).map((owned) => owned.id)}
               equipped={titles?.equipped ?? null}
             />
             <p className="mt-2 text-display text-4xl">
-              Nível <span className="text-primary">{level.level}</span>
+              {t("Nível")} <span className="text-primary">{level.level}</span>
             </p>
           </div>
           <p className="shrink-0 text-right text-sm text-muted-foreground">
@@ -310,14 +310,17 @@ function Dashboard({ data }: { data: DashboardData }) {
               <CountUp value={level.into} />
             </b>
             <br />
-            <span className="text-xs">de {level.need} XP</span>
+            <span className="text-xs">{t("de {need} XP", { need: level.need })}</span>
           </p>
         </div>
         <ProgressBar value={level.pct} className="mt-4" />
         <p className="mt-2 text-[11px] text-muted-foreground">
           {title.next
-            ? `Faltam ${Math.max(0, title.next.min - level.level)} níveis para ${title.next.name}`
-            : "Você alcançou o título máximo. Lenda."}
+            ? t("Faltam {n} níveis para {name}", {
+                n: Math.max(0, title.next.min - level.level),
+                name: title.next.name,
+              })
+            : t("Você alcançou o título máximo. Lenda.")}
         </p>
 
         <div className="mt-5 grid grid-cols-7 gap-1.5">
