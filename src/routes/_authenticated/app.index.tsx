@@ -197,6 +197,7 @@ function greeting() {
 }
 
 function Dashboard({ data }: { data: DashboardData }) {
+  const t = useT();
   const { data: extras } = useExtras();
   const { data: titles } = useTitles();
   const [titlesOpen, setTitlesOpen] = useState(false);
@@ -228,7 +229,7 @@ function Dashboard({ data }: { data: DashboardData }) {
       const res = await startDay.mutateAsync(dayKey);
       await navigate({ to: "/app/treino/$split", params: { split: res.workoutId } });
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Não foi possível iniciar o treino.");
+      toast.error(e instanceof Error ? e.message : t("Não foi possível iniciar o treino."));
     }
   };
 
