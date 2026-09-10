@@ -399,32 +399,32 @@ function Dashboard({ data }: { data: DashboardData }) {
         <StatCard
           icon={Dumbbell}
           value={<CountUp value={weekVolume} />}
-          label="volume semanal"
-          hint="kg levantados"
+          label={t("volume semanal")}
+          hint={t("kg levantados")}
           delay={0}
         />
         <StatCard
           icon={Timer}
           value={`${Math.round(totals.min / 60)}h`}
-          label="tempo treinado"
-          hint={`média ${totals.avg} min`}
+          label={t("tempo treinado")}
+          hint={t("média {n} min", { n: totals.avg })}
           delay={60}
         />
         <StatCard
           icon={Zap}
           value={<CountUp value={totals.cal} />}
-          label="kcal queimadas"
-          hint={`${totals.week} treinos na semana`}
+          label={t("kcal queimadas")}
+          hint={t("{n} treinos na semana", { n: totals.week })}
           delay={120}
         />
         <StatCard
           icon={Flame}
           value={weightDelta === null ? "—" : `${weightDelta > 0 ? "+" : ""}${weightDelta}kg`}
-          label="evolução peso"
+          label={t("evolução peso")}
           hint={
             data.weights.length
-              ? `atual ${data.weights[data.weights.length - 1]!.weight_kg} kg`
-              : "sem registros"
+              ? t("atual {n} kg", { n: data.weights[data.weights.length - 1]!.weight_kg })
+              : t("sem registros")
           }
           delay={180}
         />
@@ -437,7 +437,7 @@ function Dashboard({ data }: { data: DashboardData }) {
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-              Último treino
+              {t("Último treino")}
             </p>
             <p className="truncate text-sm font-bold">{lastWorkout.title}</p>
             <p className="text-xs text-muted-foreground">
@@ -450,15 +450,30 @@ function Dashboard({ data }: { data: DashboardData }) {
 
       <section className="grid grid-cols-2 gap-3">
         {[
-          { to: "/app/nutricao", icon: Apple, t: "Alimentação", d: "Calorias, macros e água" },
-          { to: "/app/shape", icon: Camera, t: "Shape Tracker", d: "Fotos analisadas pela IA" },
+          {
+            to: "/app/nutricao",
+            icon: Apple,
+            title: t("Alimentação"),
+            d: t("Calorias, macros e água"),
+          },
+          {
+            to: "/app/shape",
+            icon: Camera,
+            title: t("Shape Tracker"),
+            d: t("Fotos analisadas pela IA"),
+          },
           {
             to: "/app/conquistas",
             icon: Trophy,
-            t: "Conquistas",
-            d: `${medals} medalhas · missões`,
+            title: t("Conquistas"),
+            d: t("{n} medalhas · missões", { n: medals }),
           },
-          { to: "/app/coach", icon: Bot, t: "Coach IA", d: "Treino sob medida agora" },
+          {
+            to: "/app/coach",
+            icon: Bot,
+            title: t("Coach IA"),
+            d: t("Treino sob medida agora"),
+          },
         ].map((q, i) => (
           <Link
             key={q.to}
