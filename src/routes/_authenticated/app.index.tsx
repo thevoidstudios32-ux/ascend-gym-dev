@@ -349,16 +349,24 @@ function Dashboard({ data }: { data: DashboardData }) {
           </span>
           <div className="min-w-0 flex-1">
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
-              {doneToday ? "Treino de hoje concluído" : "Treino de hoje"}
-              {todayProgramDay ? " · programa IA" : ""}
+              {doneToday ? t("Treino de hoje concluído") : t("Treino de hoje")}
+              {todayProgramDay ? t(" · programa IA") : ""}
             </p>
             <p className="truncate text-lg font-bold">
               {todayProgramDay ? todayProgramDay.title : split.name}
             </p>
             <p className="truncate text-xs text-muted-foreground">
               {todayProgramDay
-                ? `${todayProgramDay.focus} · ${todayProgramDay.minutes} min · ${todayProgramDay.exercises.length} exercícios`
-                : `${split.focus} · ${split.minutes} min · ${split.exercises.length} exercícios`}
+                ? t("{focus} · {min} min · {n} exercícios", {
+                    focus: todayProgramDay.focus,
+                    min: todayProgramDay.minutes,
+                    n: todayProgramDay.exercises.length,
+                  })
+                : t("{focus} · {min} min · {n} exercícios", {
+                    focus: split.focus,
+                    min: split.minutes,
+                    n: split.exercises.length,
+                  })}
             </p>
           </div>
         </div>
@@ -370,10 +378,10 @@ function Dashboard({ data }: { data: DashboardData }) {
           >
             <Play className="size-5 fill-current" />
             {startDay.isPending
-              ? "Preparando…"
+              ? t("Preparando…")
               : doneToday
-                ? "Treinar de novo"
-                : "Iniciar treino"}
+                ? t("Treinar de novo")
+                : t("Iniciar treino")}
           </button>
         ) : (
           <Link
@@ -382,7 +390,7 @@ function Dashboard({ data }: { data: DashboardData }) {
             className="press flex items-center justify-center gap-2 bg-primary py-4 text-base font-extrabold uppercase tracking-wide text-primary-foreground"
           >
             <Play className="size-5 fill-current" />
-            {doneToday ? "Treinar de novo" : "Iniciar treino"}
+            {doneToday ? t("Treinar de novo") : t("Iniciar treino")}
           </Link>
         )}
       </section>
