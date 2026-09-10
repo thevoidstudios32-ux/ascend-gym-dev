@@ -47,6 +47,7 @@ const NAV = [
 ] as const;
 
 function AppLayout() {
+  const t = useT();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
