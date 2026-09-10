@@ -97,14 +97,14 @@ function Onboarding({ onDone, profileName }: { onDone: () => void; profileName: 
 
   return (
     <div className="panel animate-rise p-6">
-      <h1 className="text-display text-4xl">VAMOS TE CONHECER</h1>
+      <h1 className="text-display text-4xl">{t("VAMOS TE CONHECER")}</h1>
       <p className="mt-2 text-sm text-muted-foreground">
-        Esses dados personalizam seu plano, suas metas e o Coach IA.
+        {t("Esses dados personalizam seu plano, suas metas e o Coach IA.")}
       </p>
       <div className="mt-6 space-y-3">
         <input
           className={field}
-          placeholder="Como podemos te chamar?"
+          placeholder={t("Como podemos te chamar?")}
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
         />
@@ -116,7 +116,7 @@ function Onboarding({ onDone, profileName }: { onDone: () => void; profileName: 
           >
             {GOALS.map((g) => (
               <option key={g} value={g}>
-                {g}
+                {t(g)}
               </option>
             ))}
           </select>
@@ -127,7 +127,7 @@ function Onboarding({ onDone, profileName }: { onDone: () => void; profileName: 
           >
             {EXPERIENCES.map((g) => (
               <option key={g} value={g}>
-                {g}
+                {t(g)}
               </option>
             ))}
           </select>
@@ -136,28 +136,28 @@ function Onboarding({ onDone, profileName }: { onDone: () => void; profileName: 
           <input
             className={field}
             type="number"
-            placeholder="Idade"
+            placeholder={t("Idade")}
             value={form.age}
             onChange={(e) => setForm({ ...form, age: e.target.value })}
           />
           <input
             className={field}
             type="number"
-            placeholder="Altura (cm)"
+            placeholder={t("Altura (cm)")}
             value={form.height_cm}
             onChange={(e) => setForm({ ...form, height_cm: e.target.value })}
           />
           <input
             className={field}
             type="number"
-            placeholder="Peso (kg)"
+            placeholder={t("Peso (kg)")}
             value={form.weight_kg}
             onChange={(e) => setForm({ ...form, weight_kg: e.target.value })}
           />
         </div>
         <div>
           <p className="mb-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-            Dias de treino por semana
+            {t("Dias de treino por semana")}
           </p>
           <div className="flex gap-2">
             {[1, 2, 3, 4, 5, 6, 7].map((d) => (
@@ -180,7 +180,7 @@ function Onboarding({ onDone, profileName }: { onDone: () => void; profileName: 
           disabled={mutation.isPending}
           className="press w-full rounded-full bg-primary py-3.5 font-bold text-primary-foreground shadow-glow disabled:opacity-60"
         >
-          {mutation.isPending ? "Salvando…" : "Começar"}
+          {mutation.isPending ? t("Salvando…") : t("Começar")}
         </button>
       </div>
     </div>
