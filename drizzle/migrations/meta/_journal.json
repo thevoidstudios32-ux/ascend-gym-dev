@@ -43,6 +43,13 @@
       "when": 1788826014245,
       "tag": "0005_central_reward_engine",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789085619742,
+      "tag": "0006_add_profile_language",
+      "breakpoints": true
     }
   ]
 }
