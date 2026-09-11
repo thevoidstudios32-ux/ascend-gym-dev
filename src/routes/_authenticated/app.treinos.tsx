@@ -60,7 +60,7 @@ function TreinosPage() {
                 {s.name}
                 {s.id === today.id && (
                   <span className="rounded-full bg-primary px-2 py-0.5 text-[9px] font-bold uppercase text-primary-foreground">
-                    hoje
+                    {t("hoje")}
                   </span>
                 )}
               </p>
