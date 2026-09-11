@@ -129,7 +129,7 @@ function ConquistasPage() {
 
 
       <section className="panel p-5">
-        <h2 className="font-bold">Missões de hoje</h2>
+        <h2 className="font-bold">{tr("Missões de hoje")}</h2>
         <div className="mt-3 space-y-2">
           {missions.map((m) => (
             <div key={m.id} className="flex items-center gap-3 rounded-xl bg-elevated p-3">
