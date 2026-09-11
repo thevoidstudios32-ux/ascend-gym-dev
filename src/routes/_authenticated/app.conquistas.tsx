@@ -13,6 +13,7 @@ import {
   waterTarget,
   WEEKLY_CHALLENGES,
 } from "@/lib/ascend";
+import { useT } from "@/lib/i18n";
 
 
 export const Route = createFileRoute("/_authenticated/app/conquistas")({
@@ -30,6 +31,7 @@ export const Route = createFileRoute("/_authenticated/app/conquistas")({
 
 function ConquistasPage() {
   const { data } = useDashboard();
+  const tr = useT();
   const { data: extras } = useExtras();
   const owned = new Set(extras?.achievements ?? []);
   const today = todayISO();
@@ -40,12 +42,12 @@ function ConquistasPage() {
     const water = extras?.water.find((w) => w.date === today)?.ml ?? 0;
     const target = waterTarget(data?.profile?.weight_kg ? Number(data.profile.weight_kg) : null);
     return [
-      { id: "m1", label: "Concluir o treino de hoje", xp: 120, done: (data?.workouts ?? []).some((w) => w.date === today) },
-      { id: "m2", label: "Bater a meta de água", xp: 60, done: water >= target },
-      { id: "m3", label: "Registrar uma refeição", xp: 40, done: (extras?.meals.length ?? 0) > 0 },
-      { id: "m4", label: "Manter a sequência viva", xp: 80, done: streak > 0 },
+      { id: "m1", label: tr("Concluir o treino de hoje"), xp: 120, done: (data?.workouts ?? []).some((w) => w.date === today) },
+      { id: "m2", label: tr("Bater a meta de água"), xp: 60, done: water >= target },
+      { id: "m3", label: tr("Registrar uma refeição"), xp: 40, done: (extras?.meals.length ?? 0) > 0 },
+      { id: "m4", label: tr("Manter a sequência viva"), xp: 80, done: streak > 0 },
     ];
-  }, [data, extras, streak, today]);
+  }, [data, extras, streak, today, tr]);
 
   const weekWorkouts = (data?.workouts ?? []).filter(
     (w) => new Date(w.date).getTime() > Date.now() - 7 * 86400000,
@@ -75,15 +77,19 @@ function ConquistasPage() {
     <div className="animate-rise space-y-4">
       <Confetti fire={celebrate} />
       <PageHeader
-        title="CONQUISTAS"
-        subtitle={`Nível ${level.level} · ${owned.size}/${ACHIEVEMENTS.length} medalhas`}
+        title={tr("CONQUISTAS")}
+        subtitle={tr("Nível {level} · {owned}/{total} medalhas", {
+          level: level.level,
+          owned: owned.size,
+          total: ACHIEVEMENTS.length,
+        })}
       />
 
       <section className="glass animate-pop p-5">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-              Título atual
+              {tr("Título atual")}
             </p>
             <p className="text-display text-3xl" style={{ color: title.color }}>
               <Glyph value={title.emoji} size={24} className="mr-2" fallback="crown" />{title.name}
@@ -97,8 +103,13 @@ function ConquistasPage() {
         <div className="mt-2 flex items-center justify-between text-[11px] font-semibold text-muted-foreground">
           <span>
             {title.next
-              ? `Faltam ${title.xpToNext} XP (${title.levelsToNext} ${title.levelsToNext === 1 ? "nível" : "níveis"}) para ${title.next.name}`
-              : "Título máximo alcançado — você é Lenda"}
+              ? tr("Faltam {xp} XP ({levels} {word}) para {next}", {
+                  xp: title.xpToNext,
+                  levels: title.levelsToNext,
+                  word: tr(title.levelsToNext === 1 ? "nível" : "níveis"),
+                  next: title.next.name,
+                })
+              : tr("Título máximo alcançado — você é Lenda")}
           </span>
           <span className="shrink-0 text-foreground">{title.pct}%</span>
         </div>
@@ -109,7 +120,7 @@ function ConquistasPage() {
               <p className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
                 {t.name}
               </p>
-              <p className="text-[9px] text-muted-foreground">Nv {t.min}</p>
+              <p className="text-[9px] text-muted-foreground">{tr("Nv")} {t.min}</p>
             </div>
           ))}
         </div>
@@ -118,7 +129,7 @@ function ConquistasPage() {
 
 
       <section className="panel p-5">
-        <h2 className="font-bold">Missões de hoje</h2>
+        <h2 className="font-bold">{tr("Missões de hoje")}</h2>
         <div className="mt-3 space-y-2">
           {missions.map((m) => (
             <div key={m.id} className="flex items-center gap-3 rounded-xl bg-elevated p-3">
@@ -137,7 +148,7 @@ function ConquistasPage() {
       </section>
 
       <section className="panel p-5">
-        <h2 className="font-bold">Desafios da semana</h2>
+        <h2 className="font-bold">{tr("Desafios da semana")}</h2>
         <div className="mt-3 space-y-3">
           {WEEKLY_CHALLENGES.map((c) => {
             const p = Math.min(100, (progressOf(c.id) / c.target) * 100);
