@@ -103,8 +103,13 @@ function ConquistasPage() {
         <div className="mt-2 flex items-center justify-between text-[11px] font-semibold text-muted-foreground">
           <span>
             {title.next
-              ? `Faltam ${title.xpToNext} XP (${title.levelsToNext} ${title.levelsToNext === 1 ? "nível" : "níveis"}) para ${title.next.name}`
-              : "Título máximo alcançado — você é Lenda"}
+              ? tr("Faltam {xp} XP ({levels} {word}) para {next}", {
+                  xp: title.xpToNext,
+                  levels: title.levelsToNext,
+                  word: tr(title.levelsToNext === 1 ? "nível" : "níveis"),
+                  next: title.next.name,
+                })
+              : tr("Título máximo alcançado — você é Lenda")}
           </span>
           <span className="shrink-0 text-foreground">{title.pct}%</span>
         </div>
