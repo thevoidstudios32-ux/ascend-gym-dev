@@ -483,7 +483,7 @@ function Dashboard({ data }: { data: DashboardData }) {
           >
             <q.icon className="size-5 shrink-0 text-primary" />
             <div className="min-w-0">
-              <p className="truncate text-sm font-bold">{q.t}</p>
+              <p className="truncate text-sm font-bold">{q.title}</p>
               <p className="truncate text-[11px] text-muted-foreground">{q.d}</p>
             </div>
           </Link>
