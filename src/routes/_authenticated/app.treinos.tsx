@@ -26,14 +26,15 @@ function TreinosPage() {
   const custom = useCustomWorkouts();
   const mine = custom.data?.workouts ?? [];
   const today = splitOfDay();
+  const t = useT();
 
 
   return (
     <div className="animate-rise space-y-5">
       <header>
-        <h1 className="text-display text-4xl">TREINOS</h1>
+        <h1 className="text-display text-4xl">{t("TREINOS")}</h1>
         <p className="text-sm text-muted-foreground">
-          Escolha a divisão. Séries, descanso e cargas são registrados automaticamente.
+          {t("Escolha a divisão. Séries, descanso e cargas são registrados automaticamente.")}
         </p>
       </header>
 
