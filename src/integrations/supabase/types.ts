@@ -995,6 +995,7 @@ export type Database = {
           id: string
           injuries: string | null
           is_public: boolean
+          language: string
           last_login_at: string | null
           last_seen_at: string | null
           login_count: number
@@ -1026,6 +1027,7 @@ export type Database = {
           id: string
           injuries?: string | null
           is_public?: boolean
+          language?: string
           last_login_at?: string | null
           last_seen_at?: string | null
           login_count?: number
@@ -1057,6 +1059,7 @@ export type Database = {
           id?: string
           injuries?: string | null
           is_public?: boolean
+          language?: string
           last_login_at?: string | null
           last_seen_at?: string | null
           login_count?: number
