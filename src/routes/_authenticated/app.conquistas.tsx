@@ -31,6 +31,7 @@ export const Route = createFileRoute("/_authenticated/app/conquistas")({
 
 function ConquistasPage() {
   const { data } = useDashboard();
+  const tr = useT();
   const { data: extras } = useExtras();
   const owned = new Set(extras?.achievements ?? []);
   const today = todayISO();
