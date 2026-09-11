@@ -42,12 +42,12 @@ function ConquistasPage() {
     const water = extras?.water.find((w) => w.date === today)?.ml ?? 0;
     const target = waterTarget(data?.profile?.weight_kg ? Number(data.profile.weight_kg) : null);
     return [
-      { id: "m1", label: "Concluir o treino de hoje", xp: 120, done: (data?.workouts ?? []).some((w) => w.date === today) },
-      { id: "m2", label: "Bater a meta de água", xp: 60, done: water >= target },
-      { id: "m3", label: "Registrar uma refeição", xp: 40, done: (extras?.meals.length ?? 0) > 0 },
-      { id: "m4", label: "Manter a sequência viva", xp: 80, done: streak > 0 },
+      { id: "m1", label: tr("Concluir o treino de hoje"), xp: 120, done: (data?.workouts ?? []).some((w) => w.date === today) },
+      { id: "m2", label: tr("Bater a meta de água"), xp: 60, done: water >= target },
+      { id: "m3", label: tr("Registrar uma refeição"), xp: 40, done: (extras?.meals.length ?? 0) > 0 },
+      { id: "m4", label: tr("Manter a sequência viva"), xp: 80, done: streak > 0 },
     ];
-  }, [data, extras, streak, today]);
+  }, [data, extras, streak, today, tr]);
 
   const weekWorkouts = (data?.workouts ?? []).filter(
     (w) => new Date(w.date).getTime() > Date.now() - 7 * 86400000,
