@@ -77,8 +77,12 @@ function ConquistasPage() {
     <div className="animate-rise space-y-4">
       <Confetti fire={celebrate} />
       <PageHeader
-        title="CONQUISTAS"
-        subtitle={`Nível ${level.level} · ${owned.size}/${ACHIEVEMENTS.length} medalhas`}
+        title={tr("CONQUISTAS")}
+        subtitle={tr("Nível {level} · {owned}/{total} medalhas", {
+          level: level.level,
+          owned: owned.size,
+          total: ACHIEVEMENTS.length,
+        })}
       />
 
       <section className="glass animate-pop p-5">
