@@ -121,8 +121,8 @@ function TreinosPage() {
 
       <section className="panel p-5">
 
-        <h2 className="font-bold">Histórico</h2>
-        {isLoading && <p className="mt-3 text-sm text-muted-foreground">Carregando…</p>}
+        <h2 className="font-bold">{t("Histórico")}</h2>
+        {isLoading && <p className="mt-3 text-sm text-muted-foreground">{t("Carregando…")}</p>}
         <div className="mt-3 space-y-2">
           {(data?.workouts ?? []).slice(0, 20).map((w) => (
             <div key={w.id} className="flex items-center justify-between rounded-xl bg-elevated p-3">
