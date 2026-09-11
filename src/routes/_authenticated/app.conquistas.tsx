@@ -148,7 +148,7 @@ function ConquistasPage() {
       </section>
 
       <section className="panel p-5">
-        <h2 className="font-bold">Desafios da semana</h2>
+        <h2 className="font-bold">{tr("Desafios da semana")}</h2>
         <div className="mt-3 space-y-3">
           {WEEKLY_CHALLENGES.map((c) => {
             const p = Math.min(100, (progressOf(c.id) / c.target) * 100);
