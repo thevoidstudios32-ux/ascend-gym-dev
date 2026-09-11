@@ -120,7 +120,7 @@ function ConquistasPage() {
               <p className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
                 {t.name}
               </p>
-              <p className="text-[9px] text-muted-foreground">Nv {t.min}</p>
+              <p className="text-[9px] text-muted-foreground">{tr("Nv")} {t.min}</p>
             </div>
           ))}
         </div>
