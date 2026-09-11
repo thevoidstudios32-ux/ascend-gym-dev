@@ -66,10 +66,10 @@ function TreinosPage() {
               </p>
               <p className="truncate text-xs text-muted-foreground">{s.focus}</p>
               <p className="text-xs text-muted-foreground">
-                {s.minutes} min · {s.exercises.length} exercícios
+                {s.minutes} {t("min")} · {s.exercises.length} {t("exercícios")}
               </p>
             </div>
-            <span className="rounded-full bg-elevated px-4 py-2 text-xs font-bold">Iniciar</span>
+            <span className="rounded-full bg-elevated px-4 py-2 text-xs font-bold">{t("Iniciar")}</span>
           </Link>
         ))}
       </section>
