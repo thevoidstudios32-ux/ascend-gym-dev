@@ -104,7 +104,7 @@ function TreinosPage() {
                   {w.focus} · {w.difficulty}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  ~{estimateMinutes(w.exercises)} min · {w.exercises.length} exercícios
+                  ~{estimateMinutes(w.exercises)} {t("min")} · {w.exercises.length} {t("exercícios")}
                 </p>
               </Link>
               <Link
@@ -112,7 +112,7 @@ function TreinosPage() {
                 params={{ id: w.id }}
                 className="press shrink-0 rounded-full bg-elevated px-3.5 py-2 text-xs font-bold"
               >
-                Editar
+                {t("Editar")}
               </Link>
             </div>
           ))
