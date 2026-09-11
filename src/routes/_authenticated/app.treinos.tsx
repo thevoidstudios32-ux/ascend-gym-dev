@@ -137,7 +137,7 @@ function TreinosPage() {
             </div>
           ))}
           {!isLoading && (data?.workouts.length ?? 0) === 0 && (
-            <p className="text-sm text-muted-foreground">Nenhum treino registrado ainda.</p>
+            <p className="text-sm text-muted-foreground">{t("Nenhum treino registrado ainda.")}</p>
           )}
         </div>
       </section>
