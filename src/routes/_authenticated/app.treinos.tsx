@@ -7,6 +7,7 @@ import { estimateMinutes } from "@/lib/custom";
 import { SPLITS, splitOfDay } from "@/lib/ascend";
 import { AiProgramSection } from "@/components/program-ai";
 import { WorkoutSheetButton } from "@/components/workout-sheet";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/app/treinos")({
   head: () => ({
