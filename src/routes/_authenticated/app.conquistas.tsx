@@ -89,7 +89,7 @@ function ConquistasPage() {
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-              Título atual
+              {tr("Título atual")}
             </p>
             <p className="text-display text-3xl" style={{ color: title.color }}>
               <Glyph value={title.emoji} size={24} className="mr-2" fallback="crown" />{title.name}
