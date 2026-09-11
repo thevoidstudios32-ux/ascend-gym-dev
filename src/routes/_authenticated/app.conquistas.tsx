@@ -13,6 +13,7 @@ import {
   waterTarget,
   WEEKLY_CHALLENGES,
 } from "@/lib/ascend";
+import { useT } from "@/lib/i18n";
 
 
 export const Route = createFileRoute("/_authenticated/app/conquistas")({
