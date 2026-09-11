@@ -76,19 +76,19 @@ function TreinosPage() {
 
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="font-bold">Meus treinos</h2>
+          <h2 className="font-bold">{t("Meus treinos")}</h2>
           <Link
             to="/app/personalizado/$id"
             params={{ id: "novo" }}
             className="press flex items-center gap-1 rounded-full bg-primary px-3.5 py-1.5 text-xs font-extrabold text-primary-foreground shadow-glow"
           >
-            <Plus className="size-3.5" /> Criar
+            <Plus className="size-3.5" /> {t("Criar")}
           </Link>
         </div>
 
         {mine.length === 0 ? (
           <p className="panel p-5 text-sm text-muted-foreground">
-            Monte treinos de calistenia do seu jeito — ou peça ao Coach IA para criar e ajustar por você.
+            {t("Monte treinos de calistenia do seu jeito — ou peça ao Coach IA para criar e ajustar por você.")}
           </p>
         ) : (
           mine.map((w) => (
