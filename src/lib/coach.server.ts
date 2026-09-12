@@ -105,6 +105,8 @@ export async function analyzeShape(
 
   return callGateway({
     vision: true,
+    maxTokens: 1_200,
+    timeoutMs: 75_000,
     meta: { feature: "shape-tracker", ...meta },
     messages: [
       {

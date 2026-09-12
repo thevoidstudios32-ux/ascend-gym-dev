@@ -49,9 +49,12 @@ function ShapePage() {
     try {
       const { data: auth } = await supabase.auth.getUser();
       if (!auth.user) throw new Error("Sessão expirada.");
-      const ext = file.name.split(".").pop() || "jpg";
+      const optimized = await optimizeProgressPhoto(file);
+      const ext = optimized.name.split(".").pop() || "jpg";
       const path = `${auth.user.id}/${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from("progress-photos").upload(path, file);
+      const { error } = await supabase.storage.from("progress-photos").upload(path, optimized, {
+        contentType: optimized.type,
+      });
       if (error) throw new Error(error.message);
       await register({ data: { path, pose } });
       toast.success("Foto enviada!");
@@ -225,6 +228,33 @@ function ShapePage() {
       </section>
     </div>
   );
+}
+
+async function optimizeProgressPhoto(file: File): Promise<File> {
+  if (!file.type.startsWith("image/") || file.type === "image/gif") return file;
+
+  const bitmap = await createImageBitmap(file);
+  const maxSide = 1_280;
+  const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+  const width = Math.max(1, Math.round(bitmap.width * scale));
+  const height = Math.max(1, Math.round(bitmap.height * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext("2d");
+  if (!context) {
+    bitmap.close();
+    return file;
+  }
+  context.drawImage(bitmap, 0, 0, width, height);
+  bitmap.close();
+
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.82));
+  if (!blob || blob.size >= file.size) return file;
+  return new File([blob], `${file.name.replace(/\.[^.]+$/, "") || "shape"}.jpg`, {
+    type: "image/jpeg",
+    lastModified: file.lastModified,
+  });
 }
 
 function parseScores(text: string | null) {

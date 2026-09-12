@@ -11,8 +11,8 @@
  *   AI_MODEL_VISION  modelo com visão (fotos: Shape Tracker / nutrição)
  */
 
-/** Geração de programa completo pode levar minutos — nunca abortar cedo. */
-const TIMEOUT_MS = 300_000;
+/** Limites por tarefa evitam que uma tentativa travada segure a tela por minutos. */
+const DEFAULT_TIMEOUT_MS = 90_000;
 
 export type AiMessage = { role: "system" | "user" | "assistant"; content: unknown };
 
@@ -25,6 +25,8 @@ export type AiChatInput = {
   tool_choice?: unknown;
   vision?: boolean;
   temperature?: number;
+  maxTokens?: number;
+  timeoutMs?: number;
   meta?: AiMeta;
 };
 
@@ -53,11 +55,11 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** Modelos alternativos usados quando o principal está sobrecarregado (503/429). */
 function fallbackModels(primary: string) {
-  const extra = (process.env["AI_MODEL_FALLBACKS"] ?? "gemini-flash-latest,gemini-2.0-flash")
+  const extra = (process.env["AI_MODEL_FALLBACKS"] ?? "gemini-flash-latest")
     .split(",")
     .map((m) => m.trim())
-    .filter(Boolean);
-  return [primary, ...extra.filter((m) => m !== primary)];
+    .filter((model) => model && model !== "gemini-2.0-flash" && model !== "gemini-1.5-flash");
+  return [primary, ...extra.filter((m) => m !== primary)].slice(0, 2);
 }
 
 /** Uma tentativa contra um modelo específico. */
@@ -67,9 +69,10 @@ async function attempt(model: string, input: AiChatInput, key: string, base: str
   if (input.tools) body["tools"] = input.tools;
   if (input.tool_choice) body["tool_choice"] = input.tool_choice;
   if (typeof input.temperature === "number") body["temperature"] = input.temperature;
+  if (typeof input.maxTokens === "number") body["max_tokens"] = input.maxTokens;
 
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  const timer = setTimeout(() => controller.abort(), input.timeoutMs ?? DEFAULT_TIMEOUT_MS);
 
   let res: Response;
   try {
@@ -164,36 +167,35 @@ export async function aiChat(input: AiChatInput): Promise<any> {
 
   let last: unknown;
   for (let i = 0; i < models.length; i++) {
-    for (let tryN = 0; tryN < 2; tryN++) {
-      try {
-        const json = await attempt(models[i]!, input, key, base);
-        await logUsage({
-          userId,
-          feature,
-          model: models[i]!,
-          durationMs: Date.now() - started,
-          ok: true,
-          usage: json?.usage,
-        });
-        return json;
-      } catch (err) {
-        last = err;
-        // Modelo inexistente/descontinuado: pula direto para o próximo da lista.
-        if (err instanceof AiError && err.status === 404) break;
-        const retryable = err instanceof AiError && (err.status === 503 || err.status === 429);
-        if (!retryable) {
-          await logUsage({
-            userId,
-            feature,
-            model: models[i]!,
-            durationMs: Date.now() - started,
-            ok: false,
-            error: err instanceof Error ? err.message : String(err),
-          });
-          throw err;
-        }
-        await sleep(600 * (tryN + 1));
+    try {
+      const json = await attempt(models[i]!, input, key, base);
+      await logUsage({
+        userId,
+        feature,
+        model: models[i]!,
+        durationMs: Date.now() - started,
+        ok: true,
+        usage: json?.usage,
+      });
+      return json;
+    } catch (err) {
+      last = err;
+      const canUseFallback =
+        i < models.length - 1 && err instanceof AiError && [404, 429, 503, 504].includes(err.status);
+      if (canUseFallback) {
+        // Uma pausa curta evita rajadas, sem repetir o mesmo modelo lento.
+        await sleep(err.status === 429 ? 1_500 : 250);
+        continue;
       }
+      await logUsage({
+        userId,
+        feature,
+        model: models[i]!,
+        durationMs: Date.now() - started,
+        ok: false,
+        error: err instanceof Error ? err.message : String(err),
+      });
+      throw err;
     }
   }
   const fail = last instanceof AiError

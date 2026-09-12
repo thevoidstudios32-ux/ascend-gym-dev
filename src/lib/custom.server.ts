@@ -51,6 +51,8 @@ export async function proposeWorkout(input: {
 }): Promise<Proposal> {
   const json = (await aiChat({
     meta: { userId: input.userId ?? null, feature: "treino-personalizado" },
+    maxTokens: 3_000,
+    timeoutMs: 75_000,
     messages: [
       {
         role: "system",
