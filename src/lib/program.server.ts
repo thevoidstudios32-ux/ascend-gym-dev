@@ -67,6 +67,8 @@ async function callGateway(body: {
 }) {
   const input: Parameters<typeof aiChat>[0] = {
     messages: body.messages,
+    maxTokens: 6_000,
+    timeoutMs: 120_000,
     meta: { userId: body.userId ?? null, feature: "programa-ia" },
   };
   if (body.tools) input.tools = body.tools;
