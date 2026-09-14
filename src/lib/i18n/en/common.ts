@@ -20,8 +20,8 @@ export const common: Record<string, string> = {
 
   // Configurações
   "Idioma / Language": "Idioma / Language",
-  "Escolha o idioma da interface. A preferência fica salva neste dispositivo.":
-    "Choose the interface language. Your preference is saved on this device.",
+  "Escolha o idioma da interface. A preferência fica salva na sua conta e neste dispositivo.":
+    "Choose the interface language. Your preference is saved to your account and this device.",
   Português: "Portuguese",
   Inglês: "English",
   "Preferências do app": "App preferences",
@@ -44,4 +44,8 @@ export const common: Record<string, string> = {
   Concluir: "Finish",
   Começar: "Start",
   "Tentar de novo": "Try again",
+  "Sessão expirada.": "Your session has expired.",
+  "Falha no envio.": "Upload failed.",
+  "Nenhum resultado.": "No results.",
+  "Algo deu errado.": "Something went wrong.",
 };

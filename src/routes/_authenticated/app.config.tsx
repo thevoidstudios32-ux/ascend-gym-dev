@@ -51,7 +51,7 @@ function SettingsPage() {
           <h2 className="text-sm font-extrabold uppercase tracking-widest">Idioma / Language</h2>
         </div>
         <p className="mt-2 text-sm text-muted-foreground">
-          {t("Escolha o idioma da interface. A preferência fica salva neste dispositivo.")}
+          {t("Escolha o idioma da interface. A preferência fica salva na sua conta e neste dispositivo.")}
         </p>
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2">

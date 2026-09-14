@@ -3,6 +3,7 @@
    Sem tradução cadastrada, o próprio texto em português é usado (fallback seguro). */
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { EN } from "./i18n/en";
+import { supabase } from "@/integrations/supabase/client";
 
 export type Lang = "pt" | "en";
 
@@ -23,6 +24,7 @@ function interpolate(text: string, vars?: Record<string, string | number>) {
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>("pt");
+  const [userId, setUserId] = useState<string | null>(null);
 
   // Lê a preferência salva só no cliente (evita divergência de hidratação).
   useEffect(() => {
@@ -32,6 +34,42 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     } catch {
       /* storage indisponível */
     }
+  }, []);
+
+  // O perfil autenticado é a fonte de verdade; o armazenamento local cobre
+  // apenas o período anterior ao carregamento da sessão.
+  useEffect(() => {
+    let active = true;
+
+    async function syncFromProfile(id: string) {
+      const { data } = await supabase.from("profiles").select("language").eq("id", id).maybeSingle();
+      if (!active || (data?.language !== "pt" && data?.language !== "en")) return;
+      setLangState(data.language);
+      try {
+        localStorage.setItem(STORAGE_KEY, data.language);
+      } catch {
+        /* storage indisponível */
+      }
+    }
+
+    void supabase.auth.getUser().then(({ data }) => {
+      if (!active) return;
+      const id = data.user?.id ?? null;
+      setUserId(id);
+      if (id) void syncFromProfile(id);
+    });
+
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+      const id = session?.user.id ?? null;
+      setUserId(id);
+      if (id) void syncFromProfile(id);
+    });
+
+    return () => {
+      active = false;
+      listener.subscription.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
@@ -47,7 +85,13 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     } catch {
       /* storage indisponível */
     }
-  }, []);
+    if (userId) {
+      void supabase
+        .from("profiles")
+        .update({ language: l, updated_at: new Date().toISOString() })
+        .eq("id", userId);
+    }
+  }, [userId]);
 
   const t = useCallback(
     (pt: string, vars?: Record<string, string | number>) => {
