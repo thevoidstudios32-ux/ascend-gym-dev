@@ -64,25 +64,37 @@ function Onboarding({ onDone, profileName }: { onDone: () => void; profileName: 
   const save = useServerFn(saveProfile);
   const [form, setForm] = useState({
     name: profileName === "Atleta" ? "" : profileName,
-    goal: GOALS[0]!,
-    experience: EXPERIENCES[0]!,
-    age: "28",
-    height_cm: "175",
-    weight_kg: "78",
-    days_per_week: "3",
+    gender: "",
+    goal: "",
+    experience: "",
+    age: "",
+    height_cm: "",
+    weight_kg: "",
+    days_per_week: "",
   });
+
+  const isComplete =
+    form.name.trim().length > 0 &&
+    form.gender.length > 0 &&
+    form.goal.length > 0 &&
+    form.experience.length > 0 &&
+    Number(form.age) >= 10 &&
+    Number(form.height_cm) >= 100 &&
+    Number(form.weight_kg) >= 30 &&
+    Number(form.days_per_week) >= 1;
 
   const mutation = useMutation({
     mutationFn: () =>
       save({
         data: {
           name: form.name.trim() || "Atleta",
+          gender: form.gender as "feminino" | "masculino",
           goal: form.goal,
           experience: form.experience,
           age: Number(form.age) || null,
           height_cm: Number(form.height_cm) || null,
           weight_kg: Number(form.weight_kg) || null,
-          days_per_week: Number(form.days_per_week) || 3,
+          days_per_week: Number(form.days_per_week),
         },
       }),
     onSuccess: () => {
@@ -110,10 +122,24 @@ function Onboarding({ onDone, profileName }: { onDone: () => void; profileName: 
         />
         <div className="grid grid-cols-2 gap-3">
           <select
+            aria-label={t("Sexo")}
+            required
+            className={field}
+            value={form.gender}
+            onChange={(e) => setForm({ ...form, gender: e.target.value })}
+          >
+            <option value="" disabled>{t("Sexo")}</option>
+            <option value="feminino">{t("Feminino")}</option>
+            <option value="masculino">{t("Masculino")}</option>
+          </select>
+          <select
+            aria-label={t("Objetivo")}
+            required
             className={field}
             value={form.goal}
             onChange={(e) => setForm({ ...form, goal: e.target.value })}
           >
+            <option value="" disabled>{t("Objetivo")}</option>
             {GOALS.map((g) => (
               <option key={g} value={g}>
                 {t(g)}
@@ -121,10 +147,13 @@ function Onboarding({ onDone, profileName }: { onDone: () => void; profileName: 
             ))}
           </select>
           <select
+            aria-label={t("Experiência")}
+            required
             className={field}
             value={form.experience}
             onChange={(e) => setForm({ ...form, experience: e.target.value })}
           >
+            <option value="" disabled>{t("Experiência")}</option>
             {EXPERIENCES.map((g) => (
               <option key={g} value={g}>
                 {t(g)}
@@ -136,6 +165,9 @@ function Onboarding({ onDone, profileName }: { onDone: () => void; profileName: 
           <input
             className={field}
             type="number"
+            min={10}
+            max={100}
+            required
             placeholder={t("Idade")}
             value={form.age}
             onChange={(e) => setForm({ ...form, age: e.target.value })}
@@ -143,6 +175,9 @@ function Onboarding({ onDone, profileName }: { onDone: () => void; profileName: 
           <input
             className={field}
             type="number"
+            min={100}
+            max={250}
+            required
             placeholder={t("Altura (cm)")}
             value={form.height_cm}
             onChange={(e) => setForm({ ...form, height_cm: e.target.value })}
@@ -150,6 +185,10 @@ function Onboarding({ onDone, profileName }: { onDone: () => void; profileName: 
           <input
             className={field}
             type="number"
+            min={30}
+            max={300}
+            step="0.1"
+            required
             placeholder={t("Peso (kg)")}
             value={form.weight_kg}
             onChange={(e) => setForm({ ...form, weight_kg: e.target.value })}
@@ -177,7 +216,7 @@ function Onboarding({ onDone, profileName }: { onDone: () => void; profileName: 
         </div>
         <button
           onClick={() => mutation.mutate()}
-          disabled={mutation.isPending}
+          disabled={mutation.isPending || !isComplete}
           className="press w-full rounded-full bg-primary py-3.5 font-bold text-primary-foreground shadow-glow disabled:opacity-60"
         >
           {mutation.isPending ? t("Salvando…") : t("Começar")}

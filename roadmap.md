@@ -6,4 +6,4 @@
 - [ ] Validate types and key authenticated screens
 
 ## Questionário inicial
-- [ ] Remover pré-seleções, adicionar sexo e usar a resposta na personalização do treino
+- [x] Remover pré-seleções, adicionar sexo e usar a resposta na personalização do treino

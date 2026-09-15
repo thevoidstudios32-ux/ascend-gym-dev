@@ -1,6 +1,7 @@
 export type Profile = {
   id: string;
   name: string;
+  gender: "feminino" | "masculino" | null;
   goal: string;
   experience: string;
   age: number | null;

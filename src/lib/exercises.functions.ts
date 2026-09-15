@@ -79,7 +79,7 @@ export const suggestSubstitution = createServerFn({ method: "POST" })
     const [profileRes, setsRes] = await Promise.all([
       supabase
         .from("profiles")
-        .select("goal,experience,equipment,injuries,weight_kg")
+        .select("gender,goal,experience,equipment,injuries,weight_kg")
         .eq("id", userId)
         .maybeSingle(),
       supabase
@@ -97,6 +97,7 @@ export const suggestSubstitution = createServerFn({ method: "POST" })
       .join("; ");
 
     const summary = [
+      `Sexo: ${p?.gender ?? "não informado"}`,
       `Objetivo: ${p?.goal ?? "hipertrofia"}`,
       `Experiência: ${p?.experience ?? "iniciante"}`,
       `Peso: ${p?.weight_kg ?? "-"} kg`,
