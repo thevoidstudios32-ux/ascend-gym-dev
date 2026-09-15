@@ -36,6 +36,7 @@ export const saveProfile = createServerFn({ method: "POST" })
     z
       .object({
         name: z.string().min(1).max(40),
+        gender: z.enum(["feminino", "masculino"]),
         goal: z.string().min(1).max(40),
         experience: z.string().min(1).max(40),
         age: z.number().int().min(10).max(100).nullable(),

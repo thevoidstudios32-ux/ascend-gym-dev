@@ -150,12 +150,13 @@ export const proposeWorkoutChange = createServerFn({ method: "POST" })
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("name,goal,experience,equipment,injuries,days_per_week,xp")
+      .select("name,gender,goal,experience,equipment,injuries,days_per_week,xp")
       .eq("id", userId)
       .maybeSingle();
 
     const athlete = [
       `Nome: ${profile?.name ?? "Atleta"}`,
+      `Sexo: ${profile?.gender ?? "não informado"}`,
       `Objetivo: ${profile?.goal ?? "-"} | Experiência: ${profile?.experience ?? "-"}`,
       `Equipamentos: ${(profile?.equipment ?? []).join(", ") || "não informado"}`,
       `Lesões/limitações: ${profile?.injuries || "nenhuma"}`,

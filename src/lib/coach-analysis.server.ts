@@ -142,6 +142,7 @@ export function buildContextSummary(data: Awaited<ReturnType<typeof collectCoach
 
   return [
     `Nome: ${profile?.name ?? "Atleta"}`,
+    `Sexo: ${profile?.gender ?? "não informado"}`,
     `Objetivo: ${profile?.goal ?? "-"} | Experiência: ${profile?.experience ?? "-"}`,
     `Peso: ${profile?.weight_kg ?? "?"} kg | Altura: ${profile?.height_cm ?? "?"} cm | Idade: ${profile?.age ?? "?"}`,
     `Meta de treinos por semana: ${profile?.days_per_week ?? "?"}`,

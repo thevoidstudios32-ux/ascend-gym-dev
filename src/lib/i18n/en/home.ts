@@ -9,6 +9,11 @@ export const home: Record<string, string> = {
   "Esses dados personalizam seu plano, suas metas e o Coach IA.":
     "This info personalizes your plan, your goals and the AI Coach.",
   "Como podemos te chamar?": "What should we call you?",
+  Sexo: "Sex",
+  Feminino: "Female",
+  Masculino: "Male",
+  Objetivo: "Goal",
+  Experiência: "Experience",
   Idade: "Age",
   "Altura (cm)": "Height (cm)",
   "Peso (kg)": "Weight (kg)",

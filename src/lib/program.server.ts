@@ -190,7 +190,7 @@ export async function buildProgramContext(supabase: any, userId: string) {
   const [profileRes, workoutsRes, setsRes, feedbackRes, photosRes] = await Promise.all([
     supabase
       .from("profiles")
-      .select("name,goal,experience,age,weight_kg,height_cm,days_per_week,equipment,injuries,xp")
+      .select("name,gender,goal,experience,age,weight_kg,height_cm,days_per_week,equipment,injuries,xp")
       .eq("id", userId)
       .maybeSingle(),
     supabase
@@ -256,6 +256,7 @@ export async function buildProgramContext(supabase: any, userId: string) {
 
   const summary = [
     `Nome: ${profile?.name ?? "Atleta"}`,
+    `Sexo: ${profile?.gender ?? "não informado"}`,
     `Objetivo: ${profile?.goal ?? "-"} | Experiência: ${profile?.experience ?? "-"}`,
     `Peso: ${profile?.weight_kg ?? "?"} kg | Altura: ${profile?.height_cm ?? "?"} cm | Idade: ${profile?.age ?? "?"}`,
     `Meta de treinos por semana: ${profile?.days_per_week ?? "?"}`,
