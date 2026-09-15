@@ -4,3 +4,6 @@
 - [ ] Translate nutrition, shape, progress, coach, community, profile, and notices
 - [ ] Translate reward and title messages
 - [ ] Validate types and key authenticated screens
+
+## Questionário inicial
+- [ ] Remover pré-seleções, adicionar sexo e usar a resposta na personalização do treino
