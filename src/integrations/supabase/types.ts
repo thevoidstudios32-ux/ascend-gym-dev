@@ -989,6 +989,7 @@ export type Database = {
           equipped_title_id: string | null
           experience: string
           first_login_at: string | null
+          gender: string | null
           goal: string
           gym: string | null
           height_cm: number | null
@@ -1021,6 +1022,7 @@ export type Database = {
           equipped_title_id?: string | null
           experience?: string
           first_login_at?: string | null
+          gender?: string | null
           goal?: string
           gym?: string | null
           height_cm?: number | null
@@ -1053,6 +1055,7 @@ export type Database = {
           equipped_title_id?: string | null
           experience?: string
           first_login_at?: string | null
+          gender?: string | null
           goal?: string
           gym?: string | null
           height_cm?: number | null

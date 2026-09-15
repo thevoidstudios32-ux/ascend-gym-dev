@@ -50,6 +50,13 @@
       "when": 1789085619742,
       "tag": "0006_add_profile_language",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1789431645282,
+      "tag": "0007_add_profile_gender",
+      "breakpoints": true
     }
   ]
 }
