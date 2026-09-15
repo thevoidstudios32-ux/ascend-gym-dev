@@ -161,7 +161,6 @@ function Onboarding({ onDone, profileName }: { onDone: () => void; profileName: 
             ))}
           </select>
         </div>
-        </div>
         <div className="grid grid-cols-3 gap-3">
           <input
             className={field}
