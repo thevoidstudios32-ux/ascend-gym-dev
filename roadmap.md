@@ -7,3 +7,6 @@
 
 ## Questionário inicial
 - [x] Remover pré-seleções, adicionar sexo e usar a resposta na personalização do treino
+
+## Desempenho da IA
+- [ ] Reduzir a espera da personalização de treino e impedir tentativas longas em sequência
