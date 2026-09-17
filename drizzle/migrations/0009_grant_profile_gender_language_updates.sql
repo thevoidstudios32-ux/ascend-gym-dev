@@ -1,0 +1,1 @@
+GRANT UPDATE (gender, language) ON public.profiles TO authenticated;
