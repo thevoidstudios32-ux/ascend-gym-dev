@@ -181,7 +181,7 @@ export async function aiChat(input: AiChatInput): Promise<any> {
     } catch (err) {
       last = err;
       const canUseFallback =
-        i < models.length - 1 && err instanceof AiError && [404, 429, 503, 504].includes(err.status);
+        i < models.length - 1 && err instanceof AiError && [404, 429, 503].includes(err.status);
       if (canUseFallback) {
         // Uma pausa curta evita rajadas, sem repetir o mesmo modelo lento.
         await sleep(err.status === 429 ? 1_500 : 250);

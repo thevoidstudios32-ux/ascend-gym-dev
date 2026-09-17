@@ -125,7 +125,7 @@ export const proposeProgramChange = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
 
-    const [prefRes, programRes] = await Promise.all([
+    const [prefRes, programRes, ctx] = await Promise.all([
       supabase.from("training_preferences").select("*").eq("user_id", userId).maybeSingle(),
       supabase
         .from("ai_programs")
@@ -135,10 +135,10 @@ export const proposeProgramChange = createServerFn({ method: "POST" })
         .order("updated_at", { ascending: false })
         .limit(1)
         .maybeSingle(),
+      buildProgramContext(supabase, userId),
     ]);
 
     const preferences = { ...defaultPreferences(), ...((prefRes.data ?? {}) as object) };
-    const ctx = await buildProgramContext(supabase, userId);
 
     const proposal = await proposeProgram({
       request: data.request,
