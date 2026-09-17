@@ -67,8 +67,8 @@ async function callGateway(body: {
 }) {
   const input: Parameters<typeof aiChat>[0] = {
     messages: body.messages,
-    maxTokens: 6_000,
-    timeoutMs: 120_000,
+    maxTokens: 3_500,
+    timeoutMs: 55_000,
     meta: { userId: body.userId ?? null, feature: "programa-ia" },
   };
   if (body.tools) input.tools = body.tools;
@@ -123,6 +123,27 @@ export type ProposeInput = {
 };
 
 export async function proposeProgram(input: ProposeInput): Promise<ProgramProposal> {
+  const compactCurrent = input.current
+    ? {
+        name: input.current.name,
+        split_label: input.current.split_label,
+        days: input.current.days.map((day) => ({
+          key: day.key,
+          weekday: day.weekday,
+          title: day.title,
+          focus: day.focus,
+          intensity: day.intensity,
+          minutes: day.minutes,
+          exercises: day.exercises.map((exercise) => ({
+            name: exercise.name,
+            sets: exercise.sets,
+            reps: exercise.reps,
+            rest: exercise.rest,
+          })),
+        })),
+      }
+    : null;
+
   const json = await callGateway({
     userId: input.userId,
     messages: [
@@ -136,6 +157,7 @@ export async function proposeProgram(input: ProposeInput): Promise<ProgramPropos
           "de forma equilibrada priorizando os músculos que o atleta escolheu; considere a RECUPERAÇÃO " +
           "(não coloque dois dias pesados seguidos para o mesmo grupo, inclua dias leves/recovery quando " +
           "a frequência for alta); evite exercícios que o atleta não gosta e favoreça os que ele gosta. " +
+           "Use de 4 a 8 exercícios por dia e mantenha nomes, objetivos e justificativas curtos. " +
           "Se houver contexto do Shape Tracker, use apenas como preferência estética de prioridade muscular — " +
           "nunca faça diagnóstico, avaliação médica ou julgamento corporal. Nunca invente dados do atleta.\n\n" +
           "ATLETA:\n" + input.athlete,
@@ -144,7 +166,7 @@ export async function proposeProgram(input: ProposeInput): Promise<ProgramPropos
         role: "user",
         content:
           `PEDIDO: ${input.request}\n\nPREFERÊNCIAS (JSON):\n${JSON.stringify(input.preferences)}\n\n` +
-          `PROGRAMA ATUAL (JSON, null = criar do zero):\n${JSON.stringify(input.current)}`,
+          `PROGRAMA ATUAL RESUMIDO (JSON, null = criar do zero):\n${JSON.stringify(compactCurrent)}`,
       },
     ],
     tools: [{ type: "function", function: schema }],
@@ -204,7 +226,7 @@ export async function buildProgramContext(supabase: any, userId: string) {
       .select("exercise,reps,weight_kg,date")
       .eq("user_id", userId)
       .order("date", { ascending: false })
-      .limit(250),
+      .limit(100),
     supabase
       .from("training_feedback")
       .select("day_key,rating,duration_min,comment,created_at")
@@ -240,7 +262,7 @@ export async function buildProgramContext(supabase: any, userId: string) {
   }
   const topExercises = [...byExercise.entries()]
     .sort((a, b) => b[1].volume - a[1].volume)
-    .slice(0, 10)
+    .slice(0, 8)
     .map(([n, v]) => `${n}: ${v.count} séries, melhor carga ${v.best}kg`);
 
   const last30 = workouts.filter((w) => w.date >= since30);
@@ -251,8 +273,8 @@ export async function buildProgramContext(supabase: any, userId: string) {
 
   const shape = photos
     .filter((p) => p.analysis)
-    .slice(0, 2)
-    .map((p) => `${p.date} (${p.pose}): ${String(p.analysis).slice(0, 400)}`);
+    .slice(0, 1)
+    .map((p) => `${p.date} (${p.pose}): ${String(p.analysis).slice(0, 240)}`);
 
   const summary = [
     `Nome: ${profile?.name ?? "Atleta"}`,
@@ -264,7 +286,7 @@ export async function buildProgramContext(supabase: any, userId: string) {
     profile?.injuries ? `Lesões/limitações: ${profile.injuries}` : "",
     `Sequência atual: ${streak} dias | Treinos nos últimos 30 dias: ${last30.length}`,
     avgMinutes ? `Duração média das sessões: ${avgMinutes} min` : "",
-    `Treinos recentes: ${workouts.slice(0, 10).map((w) => `${w.date} ${w.title}`).join("; ") || "nenhum"}`,
+    `Treinos recentes: ${workouts.slice(0, 6).map((w) => `${w.date} ${w.title}`).join("; ") || "nenhum"}`,
     `Cargas por exercício: ${topExercises.join(" || ") || "nenhuma registrada"}`,
     `Feedback recente das sessões: ${
       feedback.map((f) => `${f.day_key ?? "dia"}: ${f.rating}${f.comment ? ` (${f.comment})` : ""}`).join("; ") ||
