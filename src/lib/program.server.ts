@@ -149,9 +149,9 @@ export async function proposeProgram(input: ProposeInput): Promise<ProgramPropos
         content:
           "Você é o Coach IA do ASCEND. Monta e ajusta o PROGRAMA SEMANAL de treino do atleta. " +
           "Responda SEMPRE em português do Brasil e devolva somente JSON válido, sem markdown. " +
-          "Estrutura obrigatória: {name,goal,split_label,days_per_week,priorities,week_focus,notes,summary,changes,days}. " +
-          "Cada item de days deve ter {key,weekday,title,focus,muscles,intensity,minutes,exercises}; " +
-          "cada exercício deve ter {name,emoji,muscle,sets,reps,rest,purpose}. " +
+          "Use esta estrutura compacta: {name,goal,split_label,summary,changes,days}. " +
+          "Cada item de days deve ter somente {weekday,title,focus,intensity,minutes,exercises}; " +
+          "cada exercício deve ter somente {name,muscle,sets,reps,rest}. " +
           "Regras: respeite o número de dias por semana e a duração por sessão; respeite equipamentos " +
           "disponíveis e restrições/lesões (nunca prescreva o que o atleta não pode fazer); distribua o volume " +
           "de forma equilibrada priorizando os músculos que o atleta escolheu; considere a RECUPERAÇÃO " +
