@@ -9,4 +9,4 @@
 - [x] Remover pré-seleções, adicionar sexo e usar a resposta na personalização do treino
 
 ## Desempenho da IA
-- [x] Fazer a personalização responder mais rápido e impedir que termine apenas com erro de demora
+- [x] Fazer a personalização responder mais rápido, sem erro de demora ou sobrecarga do formato antigo

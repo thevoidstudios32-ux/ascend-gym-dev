@@ -61,18 +61,15 @@ const schema = {
 
 async function callGateway(body: {
   messages: AiMessage[];
-  tools?: unknown[];
-  tool_choice?: unknown;
   userId?: string | null | undefined;
 }) {
   const input: Parameters<typeof aiChat>[0] = {
     messages: body.messages,
+    response_format: { type: "json_object" },
     maxTokens: 3_500,
     timeoutMs: 55_000,
     meta: { userId: body.userId ?? null, feature: "programa-ia" },
   };
-  if (body.tools) input.tools = body.tools;
-  if (body.tool_choice) input.tool_choice = body.tool_choice;
   return aiChat(input) as Promise<any>;
 }
 
@@ -151,7 +148,8 @@ export async function proposeProgram(input: ProposeInput): Promise<ProgramPropos
         role: "system",
         content:
           "Você é o Coach IA do ASCEND. Monta e ajusta o PROGRAMA SEMANAL de treino do atleta. " +
-          "Responda SEMPRE em português do Brasil e devolva o programa COMPLETO pela função propose_program. " +
+          "Responda SEMPRE em português do Brasil e devolva somente JSON válido, sem markdown, seguindo esta estrutura: " +
+          JSON.stringify(schema.parameters) + ". " +
           "Regras: respeite o número de dias por semana e a duração por sessão; respeite equipamentos " +
           "disponíveis e restrições/lesões (nunca prescreva o que o atleta não pode fazer); distribua o volume " +
           "de forma equilibrada priorizando os músculos que o atleta escolheu; considere a RECUPERAÇÃO " +
@@ -169,11 +167,11 @@ export async function proposeProgram(input: ProposeInput): Promise<ProgramPropos
           `PROGRAMA ATUAL RESUMIDO (JSON, null = criar do zero):\n${JSON.stringify(compactCurrent)}`,
       },
     ],
-    tools: [{ type: "function", function: schema }],
-    tool_choice: { type: "function", function: { name: "propose_program" } },
   });
 
-  const raw = json?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+  const raw =
+    json?.choices?.[0]?.message?.content ??
+    json?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
   if (!raw) throw new Error("O coach não conseguiu montar o programa. Tente reformular o pedido.");
 
   const parsed = JSON.parse(raw) as any;
