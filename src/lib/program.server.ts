@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * ASCEND AI PROGRAM — geração/ajuste do programa semanal pelo Coach IA.
- * Server-only. Usa tool-calling para receber sempre um JSON válido.
+ * Server-only. Usa JSON estruturado para receber uma proposta completa.
  */
 import type { ProgramDay, ProgramExercise, ProgramProposal, TrainingPreferences } from "@/lib/program";
 import { WEEKDAYS } from "@/lib/program";
@@ -148,14 +148,16 @@ export async function proposeProgram(input: ProposeInput): Promise<ProgramPropos
         role: "system",
         content:
           "Você é o Coach IA do ASCEND. Monta e ajusta o PROGRAMA SEMANAL de treino do atleta. " +
-          "Responda SEMPRE em português do Brasil e devolva somente JSON válido, sem markdown, seguindo esta estrutura: " +
-          JSON.stringify(schema.parameters) + ". " +
+          "Responda SEMPRE em português do Brasil e devolva somente JSON válido, sem markdown. " +
+          "Estrutura obrigatória: {name,goal,split_label,days_per_week,priorities,week_focus,notes,summary,changes,days}. " +
+          "Cada item de days deve ter {key,weekday,title,focus,muscles,intensity,minutes,exercises}; " +
+          "cada exercício deve ter {name,emoji,muscle,sets,reps,rest,purpose}. " +
           "Regras: respeite o número de dias por semana e a duração por sessão; respeite equipamentos " +
           "disponíveis e restrições/lesões (nunca prescreva o que o atleta não pode fazer); distribua o volume " +
           "de forma equilibrada priorizando os músculos que o atleta escolheu; considere a RECUPERAÇÃO " +
           "(não coloque dois dias pesados seguidos para o mesmo grupo, inclua dias leves/recovery quando " +
           "a frequência for alta); evite exercícios que o atleta não gosta e favoreça os que ele gosta. " +
-           "Use de 4 a 8 exercícios por dia e mantenha nomes, objetivos e justificativas curtos. " +
+           "Use exatamente 4 exercícios por dia e mantenha todos os textos muito curtos. " +
           "Se houver contexto do Shape Tracker, use apenas como preferência estética de prioridade muscular — " +
           "nunca faça diagnóstico, avaliação médica ou julgamento corporal. Nunca invente dados do atleta.\n\n" +
           "ATLETA:\n" + input.athlete,
@@ -174,7 +176,12 @@ export async function proposeProgram(input: ProposeInput): Promise<ProgramPropos
     json?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
   if (!raw) throw new Error("O coach não conseguiu montar o programa. Tente reformular o pedido.");
 
-  const parsed = JSON.parse(raw) as any;
+  let parsed: any;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new Error("A resposta do Coach veio incompleta. Tente gerar novamente.");
+  }
   const days = (parsed.days ?? []).slice(0, 7).map(sanitizeDay);
   if (!days.length) throw new Error("A proposta veio vazia. Tente reformular o pedido.");
 
