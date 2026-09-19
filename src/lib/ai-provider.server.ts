@@ -23,6 +23,7 @@ export type AiChatInput = {
   messages: AiMessage[];
   tools?: unknown[];
   tool_choice?: unknown;
+  response_format?: unknown;
   vision?: boolean;
   temperature?: number;
   maxTokens?: number;
@@ -68,6 +69,7 @@ async function attempt(model: string, input: AiChatInput, key: string, base: str
   const body: Record<string, unknown> = { model, messages: input.messages };
   if (input.tools) body["tools"] = input.tools;
   if (input.tool_choice) body["tool_choice"] = input.tool_choice;
+  if (input.response_format) body["response_format"] = input.response_format;
   if (typeof input.temperature === "number") body["temperature"] = input.temperature;
   if (typeof input.maxTokens === "number") body["max_tokens"] = input.maxTokens;
 
