@@ -83,8 +83,14 @@ function num(v: unknown, min: number, max: number, fallback: number) {
   return Math.min(max, Math.max(min, Number.isFinite(n) ? Math.round(n) : fallback));
 }
 
+function list(v: unknown): unknown[] {
+  if (Array.isArray(v)) return v;
+  if (typeof v === "string" && v.trim()) return [v];
+  return [];
+}
+
 function sanitizeDay(raw: any, index: number): ProgramDay {
-  const exercises: ProgramExercise[] = (raw?.exercises ?? []).slice(0, 12).map((e: any) => ({
+  const exercises: ProgramExercise[] = list(raw?.exercises).slice(0, 12).map((e: any) => ({
     name: str(e?.name, 80, "Exercício"),
     emoji: str(e?.emoji, 4, "🏋️"),
     muscle: str(e?.muscle, 40),
@@ -104,7 +110,7 @@ function sanitizeDay(raw: any, index: number): ProgramDay {
     weekday,
     title: str(raw?.title, 60, `Treino ${index + 1}`),
     focus: str(raw?.focus, 60, "Corpo inteiro"),
-    muscles: (raw?.muscles ?? []).slice(0, 8).map((m: unknown) => str(m, 30)).filter(Boolean),
+    muscles: list(raw?.muscles).slice(0, 8).map((m: unknown) => str(m, 30)).filter(Boolean),
     intensity,
     minutes: num(raw?.minutes, 10, 180, 60),
     exercises,
@@ -182,7 +188,7 @@ export async function proposeProgram(input: ProposeInput): Promise<ProgramPropos
   } catch {
     throw new Error("A resposta do Coach veio incompleta. Tente gerar novamente.");
   }
-  const days = (parsed.days ?? []).slice(0, 7).map(sanitizeDay);
+  const days = list(parsed.days).slice(0, 7).map(sanitizeDay);
   if (!days.length) throw new Error("A proposta veio vazia. Tente reformular o pedido.");
 
   return {
@@ -190,12 +196,12 @@ export async function proposeProgram(input: ProposeInput): Promise<ProgramPropos
     goal: str(parsed.goal, 40, input.preferences.goal),
     split_label: str(parsed.split_label, 60, "Personalizado"),
     days_per_week: num(parsed.days_per_week, 1, 7, days.length),
-    priorities: (parsed.priorities ?? []).slice(0, 8).map((p: unknown) => str(p, 30)).filter(Boolean),
+    priorities: list(parsed.priorities).slice(0, 8).map((p: unknown) => str(p, 30)).filter(Boolean),
     week_focus: parsed.week_focus ? str(parsed.week_focus, 200) : null,
     notes: parsed.notes ? str(parsed.notes, 600) : null,
     days,
     summary: str(parsed.summary, 400, "Proposta de programa."),
-    changes: (parsed.changes ?? []).slice(0, 12).map((c: unknown) => str(c, 140)).filter(Boolean),
+    changes: list(parsed.changes).slice(0, 12).map((c: unknown) => str(c, 140)).filter(Boolean),
   };
 }
 
