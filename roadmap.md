@@ -10,3 +10,4 @@
 
 ## Desempenho da IA
 - [x] Fazer a personalização responder mais rápido, sem erro de demora ou sobrecarga do formato antigo
+- [x] Manter a personalização disponível quando os modelos principais estiverem temporariamente sobrecarregados
