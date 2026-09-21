@@ -71,6 +71,13 @@
       "when": 1789648463050,
       "tag": "0009_grant_profile_gender_language_updates",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1790030683759,
+      "tag": "0010_add_default_rest_seconds_to_training_preferences",
+      "breakpoints": true
     }
   ]
 }
