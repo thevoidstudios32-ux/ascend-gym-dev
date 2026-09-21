@@ -1261,6 +1261,7 @@ export type Database = {
         Row: {
           created_at: string
           days_per_week: number
+          default_rest_seconds: number
           disliked_exercises: string[]
           equipment: string[]
           experience: string
@@ -1277,6 +1278,7 @@ export type Database = {
         Insert: {
           created_at?: string
           days_per_week?: number
+          default_rest_seconds?: number
           disliked_exercises?: string[]
           equipment?: string[]
           experience?: string
@@ -1293,6 +1295,7 @@ export type Database = {
         Update: {
           created_at?: string
           days_per_week?: number
+          default_rest_seconds?: number
           disliked_exercises?: string[]
           equipment?: string[]
           experience?: string

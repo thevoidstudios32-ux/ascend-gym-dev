@@ -161,6 +161,24 @@ export function PreferencesForm({
         </label>
       </div>
 
+      <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground">
+        Descanso entre séries (segundos)
+        <input
+          type="number"
+          min={15}
+          max={600}
+          step={15}
+          value={form.default_rest_seconds}
+          onChange={(e) =>
+            setForm({
+              ...form,
+              default_rest_seconds: Math.max(15, Math.min(600, Number(e.target.value) || 15)),
+            })
+          }
+          className="mt-1 w-full rounded-xl bg-elevated p-3 text-base font-bold text-foreground"
+        />
+      </label>
+
       <div>
         <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Objetivo</p>
         <div className="mt-2 flex flex-wrap gap-2">
