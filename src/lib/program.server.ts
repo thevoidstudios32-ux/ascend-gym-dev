@@ -97,14 +97,14 @@ function list(v: unknown): unknown[] {
   return [];
 }
 
-function sanitizeDay(raw: any, index: number): ProgramDay {
+function sanitizeDay(raw: any, index: number, defaultRestSeconds = 90): ProgramDay {
   const exercises: ProgramExercise[] = list(raw?.exercises).slice(0, 12).map((e: any) => ({
     name: str(e?.name, 80, "Exercício"),
     emoji: str(e?.emoji, 4, "🏋️"),
     muscle: str(e?.muscle, 40),
     sets: num(e?.sets, 1, 10, 3),
     reps: str(e?.reps, 20, "8-12"),
-    rest: num(e?.rest, 15, 600, 90),
+    rest: num(e?.rest, 15, 600, defaultRestSeconds),
     purpose: str(e?.purpose, 200),
   }));
 
@@ -167,6 +167,8 @@ export async function proposeProgram(input: ProposeInput): Promise<ProgramPropos
           "Cada item de days deve ter somente {weekday,title,focus,intensity,minutes,exercises}; " +
           "cada exercício deve ter somente {name,muscle,sets,reps,rest}. " +
           "Regras: respeite o número de dias por semana e a duração por sessão; respeite equipamentos " +
+           "use o descanso entre séries indicado nas preferências como padrão em todos os exercícios, " +
+           "ajustando-o apenas quando a intensidade do exercício exigir; " +
           "disponíveis e restrições/lesões (nunca prescreva o que o atleta não pode fazer); distribua o volume " +
           "de forma equilibrada priorizando os músculos que o atleta escolheu; considere a RECUPERAÇÃO " +
           "(não coloque dois dias pesados seguidos para o mesmo grupo, inclua dias leves/recovery quando " +
@@ -196,7 +198,9 @@ export async function proposeProgram(input: ProposeInput): Promise<ProgramPropos
   } catch {
     throw new Error("A resposta do Coach veio incompleta. Tente gerar novamente.");
   }
-  const days = list(parsed.days).slice(0, 7).map(sanitizeDay);
+  const days = list(parsed.days)
+    .slice(0, 7)
+    .map((day, index) => sanitizeDay(day, index, input.preferences.default_rest_seconds));
   if (!days.length) throw new Error("A proposta veio vazia. Tente reformular o pedido.");
 
   return {

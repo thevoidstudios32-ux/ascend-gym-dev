@@ -81,6 +81,7 @@ export type ProgramVersion = {
 export type TrainingPreferences = {
   days_per_week: number;
   minutes_per_session: number;
+  default_rest_seconds: number;
   goal: string;
   experience: string;
   equipment: string[];
@@ -194,6 +195,7 @@ export function defaultPreferences(): TrainingPreferences {
   return {
     days_per_week: 4,
     minutes_per_session: 60,
+    default_rest_seconds: 90,
     goal: "hipertrofia",
     experience: "intermediário",
     equipment: [],

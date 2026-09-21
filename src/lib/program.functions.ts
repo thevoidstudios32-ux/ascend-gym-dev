@@ -39,6 +39,7 @@ const programSchema = z.object({
 const preferencesSchema = z.object({
   days_per_week: z.number().int().min(1).max(7),
   minutes_per_session: z.number().int().min(15).max(180),
+  default_rest_seconds: z.number().int().min(15).max(600),
   goal: z.string().min(2).max(40),
   experience: z.string().min(2).max(30),
   equipment: z.array(z.string().max(40)).max(20).default([]),
