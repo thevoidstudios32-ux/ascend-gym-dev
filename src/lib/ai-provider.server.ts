@@ -189,6 +189,9 @@ export async function aiChat(input: AiChatInput): Promise<any> {
         await sleep(err.status === 429 ? 1_500 : 250);
         continue;
       }
+      if (err instanceof AiError && [429, 503, 504].includes(err.status)) {
+        break;
+      }
       await logUsage({
         userId,
         feature,
