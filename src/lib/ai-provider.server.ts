@@ -203,6 +203,32 @@ export async function aiChat(input: AiChatInput): Promise<any> {
   const fail = last instanceof AiError
     ? last
     : new AiError("A IA está sobrecarregada agora. Tente de novo em instantes.", 503);
+
+  if ([429, 503, 504].includes(fail.status)) {
+    try {
+      const { generateWithLovableAi } = await import("@/lib/program-ai-fallback.server");
+      const json = await generateWithLovableAi(input.messages);
+      await logUsage({
+        userId,
+        feature,
+        model: "openai/gpt-6-astra",
+        durationMs: Date.now() - started,
+        ok: true,
+      });
+      return json;
+    } catch (fallbackError) {
+      const message = fallbackError instanceof Error ? fallbackError.message : String(fallbackError);
+      await logUsage({
+        userId,
+        feature,
+        model: "openai/gpt-6-astra",
+        durationMs: Date.now() - started,
+        ok: false,
+        error: message,
+      });
+      throw new AiError(message || fail.message, 503);
+    }
+  }
   await logUsage({
     userId,
     feature,

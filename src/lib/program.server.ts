@@ -6,8 +6,7 @@
 import type { ProgramDay, ProgramExercise, ProgramProposal, TrainingPreferences } from "@/lib/program";
 import { WEEKDAYS } from "@/lib/program";
 import { computeStreak, todayISO } from "@/lib/ascend";
-import { AiError, aiChat, type AiMessage } from "@/lib/ai-provider.server";
-import { generateProgramWithLovableAi } from "@/lib/program-ai-fallback.server";
+import { aiChat, type AiMessage } from "@/lib/ai-provider.server";
 
 const exerciseSchema = {
   type: "object",
@@ -71,14 +70,7 @@ async function callGateway(body: {
     timeoutMs: 55_000,
     meta: { userId: body.userId ?? null, feature: "programa-ia" },
   };
-  try {
-    return await aiChat(input) as any;
-  } catch (error) {
-    if (error instanceof AiError && [429, 503, 504].includes(error.status)) {
-      return generateProgramWithLovableAi(body.messages);
-    }
-    throw error;
-  }
+  return await aiChat(input) as any;
 }
 
 function str(v: unknown, max: number, fallback = "") {
