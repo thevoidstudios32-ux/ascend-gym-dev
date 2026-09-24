@@ -1,5 +1,5 @@
 import { createOpenAI } from "@ai-sdk/openai";
-import { streamText } from "ai";
+import { streamText, type ModelMessage } from "ai";
 import type { AiMessage } from "@/lib/ai-provider.server";
 
 type TextPart = { type: "text"; text: string };
@@ -22,6 +22,18 @@ function normalizeContent(content: unknown): string | Array<TextPart | ImagePart
   });
 }
 
+function normalizeMessages(messages: AiMessage[]): ModelMessage[] {
+  return messages.map((message): ModelMessage => {
+    if (message.role === "user") {
+      return { role: "user", content: normalizeContent(message.content) };
+    }
+    const content = typeof message.content === "string" ? message.content : JSON.stringify(message.content);
+    return message.role === "system"
+      ? { role: "system", content }
+      : { role: "assistant", content };
+  });
+}
+
 /** Reserva comum: acionada somente após indisponibilidade temporária do provedor principal. */
 export async function generateWithLovableAi(messages: AiMessage[]) {
   const key = process.env["LOVABLE_API_KEY"];
@@ -38,10 +50,7 @@ export async function generateWithLovableAi(messages: AiMessage[]) {
 
   const result = streamText({
     model: lovable.responses("openai/gpt-6-astra"),
-    messages: messages.map((message) => ({
-      role: message.role,
-      content: normalizeContent(message.content),
-    })),
+    messages: normalizeMessages(messages),
     maxRetries: 0,
     providerOptions: {
       openai: {
