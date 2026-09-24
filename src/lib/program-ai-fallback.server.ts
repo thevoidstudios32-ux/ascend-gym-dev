@@ -1,9 +1,41 @@
 import { createOpenAI } from "@ai-sdk/openai";
-import { streamText } from "ai";
+import { streamText, type ModelMessage } from "ai";
 import type { AiMessage } from "@/lib/ai-provider.server";
 
-/** Reserva do programa: usada somente quando o provedor principal está indisponível. */
-export async function generateProgramWithLovableAi(messages: AiMessage[]) {
+type TextPart = { type: "text"; text: string };
+type ImagePart = { type: "image"; image: string };
+
+function normalizeContent(content: unknown): string | Array<TextPart | ImagePart> {
+  if (typeof content === "string") return content;
+  if (!Array.isArray(content)) return JSON.stringify(content);
+
+  return content.flatMap((part): Array<TextPart | ImagePart> => {
+    if (!part || typeof part !== "object") return [];
+    const item = part as { type?: unknown; text?: unknown; image_url?: { url?: unknown } };
+    if (item.type === "text" && typeof item.text === "string") {
+      return [{ type: "text", text: item.text }];
+    }
+    if (item.type === "image_url" && typeof item.image_url?.url === "string") {
+      return [{ type: "image", image: item.image_url.url }];
+    }
+    return [];
+  });
+}
+
+function normalizeMessages(messages: AiMessage[]): ModelMessage[] {
+  return messages.map((message): ModelMessage => {
+    if (message.role === "user") {
+      return { role: "user", content: normalizeContent(message.content) };
+    }
+    const content = typeof message.content === "string" ? message.content : JSON.stringify(message.content);
+    return message.role === "system"
+      ? { role: "system", content }
+      : { role: "assistant", content };
+  });
+}
+
+/** Reserva comum: acionada somente após indisponibilidade temporária do provedor principal. */
+export async function generateWithLovableAi(messages: AiMessage[]) {
   const key = process.env["LOVABLE_API_KEY"];
   if (!key) throw new Error("Serviço de IA de reserva não configurado.");
 
@@ -18,10 +50,8 @@ export async function generateProgramWithLovableAi(messages: AiMessage[]) {
 
   const result = streamText({
     model: lovable.responses("openai/gpt-6-astra"),
-    messages: messages.map((message) => ({
-      role: message.role,
-      content: typeof message.content === "string" ? message.content : JSON.stringify(message.content),
-    })),
+    messages: normalizeMessages(messages),
+    maxRetries: 0,
     providerOptions: {
       openai: {
         forceReasoning: true,
