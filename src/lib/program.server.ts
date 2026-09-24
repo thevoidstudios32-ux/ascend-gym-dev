@@ -89,9 +89,9 @@ function list(v: unknown): unknown[] {
   return [];
 }
 
-function parseCoachResponse(raw: unknown): Record<string, any> | null {
+function parseCoachResponse(raw: unknown): any | null {
   if (raw && typeof raw === "object" && !Array.isArray(raw)) {
-    return raw as Record<string, any>;
+    return raw;
   }
 
   const text = Array.isArray(raw)
@@ -125,7 +125,7 @@ function parseCoachResponse(raw: unknown): Record<string, any> | null {
     try {
       const value = JSON.parse(candidate);
       if (value && typeof value === "object" && !Array.isArray(value)) {
-        return value as Record<string, any>;
+        return value;
       }
     } catch {
       // Tenta o próximo formato; nunca repete a chamada paga de IA.
