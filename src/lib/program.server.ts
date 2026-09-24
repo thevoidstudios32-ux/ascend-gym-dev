@@ -7,6 +7,7 @@ import type { ProgramDay, ProgramExercise, ProgramProposal, TrainingPreferences 
 import { WEEKDAYS } from "@/lib/program";
 import { computeStreak, todayISO } from "@/lib/ascend";
 import { aiChat, type AiMessage } from "@/lib/ai-provider.server";
+import { jsonrepair } from "jsonrepair";
 
 const exerciseSchema = {
   type: "object",
@@ -128,7 +129,14 @@ function parseCoachResponse(raw: unknown): any | null {
         return value;
       }
     } catch {
-      // Tenta o próximo formato; nunca repete a chamada paga de IA.
+      try {
+        const repaired = JSON.parse(jsonrepair(candidate));
+        if (repaired && typeof repaired === "object" && !Array.isArray(repaired)) {
+          return repaired;
+        }
+      } catch {
+        // Tenta o próximo formato; nunca repete a chamada paga de IA.
+      }
     }
   }
   return null;
