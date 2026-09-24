@@ -1,18 +1,19 @@
-# Acelerar a personalização de treino
+# Corrigir indisponibilidade geral da IA
 
 ## Objetivo
-Fazer o Coach IA entregar a proposta de treino em menos tempo e falhar rapidamente quando o provedor estiver travado, sem alterar os dados do atleta nem a qualidade essencial do programa.
+Fazer Coach, personalização, troca de exercícios, nutrição e Shape Tracker continuarem respondendo quando o provedor principal estiver temporariamente sobrecarregado, com o menor consumo possível.
 
 ## Alterações
-- Reduzir o limite de espera exclusivo da geração de programas, hoje configurado para até dois minutos por tentativa.
-- Diminuir o tamanho máximo da resposta para o necessário ao programa semanal.
-- Evitar que uma tentativa lenta seja seguida automaticamente por outra tentativa igualmente longa.
-- Manter fallback apenas para indisponibilidade rápida do modelo e preservar mensagens claras de erro.
+- Centralizar a reserva já existente no ponto comum usado por todas as funções de IA.
+- Acionar a reserva somente depois de respostas 429, 503 ou demora excessiva; chamadas normais continuam no provedor atual.
+- Adaptar texto e fotos ao formato esperado pela reserva, preservando os pedidos e dados existentes.
+- Remover a reserva duplicada exclusiva da personalização para impedir chamadas repetidas.
+- Manter erros de créditos, credenciais, conteúdo ou pedidos inválidos como finais, sem novas tentativas.
 
-## Validação
-- Conferir tipos e executar uma chamada real de personalização.
-- Comparar o tempo registrado com o histórico atual de 15–27 segundos nas respostas normais e 123 segundos nas falhas.
+## Validação econômica
+- Validar tipos e o fluxo local sem chamada paga.
+- Fazer no máximo uma pergunta curta real no Coach para confirmar a recuperação.
+- Conferir o registro da chamada e parar imediatamente após o primeiro resultado conclusivo.
 
-## Detalhes técnicos
-- Mudanças focadas no fluxo `programa-ia`; Shape Tracker e demais recursos não serão alterados.
-- Nenhuma mudança no banco, autenticação, treinos existentes, XP ou conquistas.
+## Fora do escopo
+- Nenhuma mudança em treinos salvos, banco, autenticação, XP, conquistas ou aparência.
