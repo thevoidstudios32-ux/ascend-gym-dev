@@ -7,6 +7,7 @@ import type { ProgramDay, ProgramExercise, ProgramProposal, TrainingPreferences 
 import { WEEKDAYS } from "@/lib/program";
 import { computeStreak, todayISO } from "@/lib/ascend";
 import { aiChat, type AiMessage } from "@/lib/ai-provider.server";
+import { jsonrepair } from "jsonrepair";
 
 const exerciseSchema = {
   type: "object",
@@ -87,6 +88,58 @@ function list(v: unknown): unknown[] {
   if (Array.isArray(v)) return v;
   if (typeof v === "string" && v.trim()) return [v];
   return [];
+}
+
+function parseCoachResponse(raw: unknown): any | null {
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    return raw;
+  }
+
+  const text = Array.isArray(raw)
+    ? raw
+        .map((part) => {
+          if (typeof part === "string") return part;
+          if (!part || typeof part !== "object") return "";
+          const value = part as { text?: unknown; content?: unknown };
+          return typeof value.text === "string"
+            ? value.text
+            : typeof value.content === "string"
+              ? value.content
+              : "";
+        })
+        .join("")
+        .trim()
+    : typeof raw === "string"
+      ? raw.trim()
+      : "";
+
+  if (!text) return null;
+
+  const candidates = [text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "")];
+  const firstBrace = text.indexOf("{");
+  const lastBrace = text.lastIndexOf("}");
+  if (firstBrace >= 0 && lastBrace > firstBrace) {
+    candidates.push(text.slice(firstBrace, lastBrace + 1));
+  }
+
+  for (const candidate of candidates) {
+    try {
+      const value = JSON.parse(candidate);
+      if (value && typeof value === "object" && !Array.isArray(value)) {
+        return value;
+      }
+    } catch {
+      try {
+        const repaired = JSON.parse(jsonrepair(candidate));
+        if (repaired && typeof repaired === "object" && !Array.isArray(repaired)) {
+          return repaired;
+        }
+      } catch {
+        // Tenta o próximo formato; nunca repete a chamada paga de IA.
+      }
+    }
+  }
+  return null;
 }
 
 function sanitizeDay(raw: any, index: number, defaultRestSeconds = 90): ProgramDay {
@@ -184,10 +237,8 @@ export async function proposeProgram(input: ProposeInput): Promise<ProgramPropos
     json?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
   if (!raw) throw new Error("O coach não conseguiu montar o programa. Tente reformular o pedido.");
 
-  let parsed: any;
-  try {
-    parsed = JSON.parse(raw);
-  } catch {
+  const parsed = parseCoachResponse(raw);
+  if (!parsed) {
     throw new Error("A resposta do Coach veio incompleta. Tente gerar novamente.");
   }
   const days = list(parsed.days)
