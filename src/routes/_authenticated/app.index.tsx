@@ -262,6 +262,7 @@ function Dashboard({ data }: { data: DashboardData }) {
     return program.days.find((d) => d.weekday === weekday) ?? null;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [programData?.program]);
+  const hasPersonalizedProgram = !!programData?.program?.active;
 
   const startProgramWorkout = async (dayKey: string) => {
     try {
@@ -383,16 +384,16 @@ function Dashboard({ data }: { data: DashboardData }) {
 
       <section className="card overflow-hidden">
         <div className="flex items-center gap-4 p-5">
-          <span className="animate-exercise text-3xl">
-            <Glyph value={todayProgramDay ? todayProgramDay.exercises[0]?.emoji : split.emoji} size={30} />
-          </span>
+            <span className="animate-exercise text-3xl">
+              <Glyph value={todayProgramDay ? todayProgramDay.exercises[0]?.emoji : hasPersonalizedProgram ? "mobility" : split.emoji} size={30} />
+            </span>
           <div className="min-w-0 flex-1">
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
               {doneToday ? t("Treino de hoje concluído") : t("Treino de hoje")}
-              {todayProgramDay ? t(" · programa IA") : ""}
+              {hasPersonalizedProgram ? t(" · programa IA") : ""}
             </p>
             <p className="truncate text-lg font-bold">
-              {todayProgramDay ? todayProgramDay.title : split.name}
+              {todayProgramDay ? todayProgramDay.title : hasPersonalizedProgram ? "Dia de descanso" : split.name}
             </p>
             <p className="truncate text-xs text-muted-foreground">
               {todayProgramDay
@@ -401,7 +402,9 @@ function Dashboard({ data }: { data: DashboardData }) {
                     min: todayProgramDay.minutes,
                     n: todayProgramDay.exercises.length,
                   })
-                : t("{focus} · {min} min · {n} exercícios", {
+                : hasPersonalizedProgram
+                  ? "Seu programa personalizado não tem treino marcado para hoje."
+                  : t("{focus} · {min} min · {n} exercícios", {
                     focus: split.focus,
                     min: split.minutes,
                     n: split.exercises.length,
@@ -422,6 +425,13 @@ function Dashboard({ data }: { data: DashboardData }) {
                 ? t("Treinar de novo")
                 : t("Iniciar treino")}
           </button>
+        ) : hasPersonalizedProgram ? (
+          <Link
+            to="/app/treinos"
+            className="press flex items-center justify-center gap-2 bg-primary py-4 text-base font-extrabold uppercase tracking-wide text-primary-foreground"
+          >
+            Ver meu programa
+          </Link>
         ) : (
           <Link
             to="/app/treino/$split"
