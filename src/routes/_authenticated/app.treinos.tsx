@@ -27,10 +27,12 @@ function TreinosPage() {
   const { data, isLoading } = useDashboard();
   const custom = useCustomWorkouts();
   const { data: programData, isLoading: programLoading } = useProgram();
-  const mine = custom.data?.workouts ?? [];
+  const hasPersonalizedProgram = !!programData?.program?.active;
+  const mine = (custom.data?.workouts ?? []).filter(
+    (workout) => !hasPersonalizedProgram || !workout.name.startsWith("AI · ") || !workout.notes?.startsWith("Dia do ASCEND AI Program"),
+  );
   const today = splitOfDay();
   const t = useT();
-  const hasPersonalizedProgram = !!programData?.program?.active;
 
 
   return (
