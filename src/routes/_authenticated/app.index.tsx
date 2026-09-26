@@ -385,7 +385,7 @@ function Dashboard({ data }: { data: DashboardData }) {
       <section className="card overflow-hidden">
         <div className="flex items-center gap-4 p-5">
             <span className="animate-exercise text-3xl">
-              <Glyph value={todayProgramDay ? todayProgramDay.exercises[0]?.emoji : hasPersonalizedProgram ? "recovery" : split.emoji} size={30} />
+              <Glyph value={todayProgramDay ? todayProgramDay.exercises[0]?.emoji : hasPersonalizedProgram ? "mobility" : split.emoji} size={30} />
             </span>
           <div className="min-w-0 flex-1">
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
