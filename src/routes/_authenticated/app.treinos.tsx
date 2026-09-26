@@ -3,6 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { useDashboard } from "@/hooks/use-dashboard";
 import { useCustomWorkouts } from "@/hooks/use-custom";
+import { useProgram } from "@/hooks/use-program";
 import { estimateMinutes } from "@/lib/custom";
 import { SPLITS, splitOfDay } from "@/lib/ascend";
 import { AiProgramSection } from "@/components/program-ai";
@@ -25,9 +26,11 @@ export const Route = createFileRoute("/_authenticated/app/treinos")({
 function TreinosPage() {
   const { data, isLoading } = useDashboard();
   const custom = useCustomWorkouts();
+  const { data: programData, isLoading: programLoading } = useProgram();
   const mine = custom.data?.workouts ?? [];
   const today = splitOfDay();
   const t = useT();
+  const hasPersonalizedProgram = !!programData?.program?.active;
 
 
   return (
@@ -43,7 +46,7 @@ function TreinosPage() {
 
       <WorkoutSheetButton />
 
-      <section className="space-y-3">
+      {!programLoading && !hasPersonalizedProgram && <section className="space-y-3">
         {SPLITS.map((s) => (
           <Link
             key={s.id}
@@ -72,7 +75,7 @@ function TreinosPage() {
             <span className="rounded-full bg-elevated px-4 py-2 text-xs font-bold">{t("Iniciar")}</span>
           </Link>
         ))}
-      </section>
+      </section>}
 
       <section className="space-y-3">
         <div className="flex items-center justify-between">
