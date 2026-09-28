@@ -3,6 +3,7 @@
 import type { CustomExercise, Proposal } from "@/lib/custom";
 
 import { aiChat } from "@/lib/ai-provider.server";
+import { jsonrepair } from "jsonrepair";
 
 const schema = {
   name: "propose_workout",
@@ -43,6 +44,26 @@ const schema = {
   },
 } as const;
 
+function parseProposal(raw: unknown): Partial<Proposal> | null {
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) return raw as Partial<Proposal>;
+  if (typeof raw !== "string" || !raw.trim()) return null;
+
+  const unfenced = raw.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
+  const start = unfenced.indexOf("{");
+  const end = unfenced.lastIndexOf("}");
+  const candidate = start >= 0 && end > start ? unfenced.slice(start, end + 1) : unfenced;
+
+  try {
+    return JSON.parse(candidate) as Partial<Proposal>;
+  } catch {
+    try {
+      return JSON.parse(jsonrepair(candidate)) as Partial<Proposal>;
+    } catch {
+      return null;
+    }
+  }
+}
+
 export async function proposeWorkout(input: {
   request: string;
   workout: { name: string; focus: string; emoji: string; difficulty: string; notes: string | null; exercises: CustomExercise[] };
@@ -59,6 +80,7 @@ export async function proposeWorkout(input: {
         content:
           "Você é o Coach IA do ASCEND. Receberá o treino atual do atleta e um pedido de ajuste. " +
           "Devolva SEMPRE a versão completa do treino proposto pela função propose_workout, em português do Brasil. " +
+          "Se a função não estiver disponível, responda somente com o objeto JSON dos argumentos dela. " +
           "Respeite o pedido, mantenha coerência de volume, descanso e progressão, e use 'hold' (segundos) " +
           "apenas em exercícios isométricos. Nunca invente equipamentos que o atleta disse não ter.\n\nATLETA:\n" +
           input.athlete,
@@ -70,11 +92,16 @@ export async function proposeWorkout(input: {
     ],
     tools: [{ type: "function", function: schema }],
     tool_choice: { type: "function", function: { name: "propose_workout" } },
-  })) as { choices?: { message?: { tool_calls?: { function?: { arguments?: string } }[] } }[] };
-  const raw = json.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+  })) as {
+    choices?: { message?: { content?: unknown; tool_calls?: { function?: { arguments?: string } }[] } }[];
+  };
+  const raw =
+    json.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments ??
+    json.choices?.[0]?.message?.content;
   if (!raw) throw new Error("O coach não conseguiu montar a proposta. Tente reformular o pedido.");
 
-  const parsed = JSON.parse(raw) as Partial<Proposal>;
+  const parsed = parseProposal(raw);
+  if (!parsed) throw new Error("A resposta do Coach veio incompleta. Tente gerar novamente.");
   const exercises = (parsed.exercises ?? []).slice(0, 20).map((e) => ({
     name: String(e.name ?? "").slice(0, 80) || "Exercício",
     emoji: String(e.emoji ?? "🤸").slice(0, 4),

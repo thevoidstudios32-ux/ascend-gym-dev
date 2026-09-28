@@ -13,6 +13,7 @@
 - [x] Manter a personalização disponível quando os modelos principais estiverem temporariamente sobrecarregados
 - [x] Permitir definir o descanso entre séries nas preferências do Coach IA
 - [x] Aplicar a reserva de IA a todas as funções quando o provedor principal estiver sobrecarregado
+- [x] Aceitar a resposta estruturada da reserva ao personalizar um treino individual
 
 ## Treinos personalizados
 - [x] Ocultar PPL básico e cópias dos dias de IA quando houver programa personalizado ativo, sem apagar dados ou histórico
