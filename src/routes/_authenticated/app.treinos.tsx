@@ -28,12 +28,10 @@ function TreinosPage() {
   const custom = useCustomWorkouts();
   const { data: programData, isLoading: programLoading } = useProgram();
   const hasPersonalizedProgram = !!programData?.program?.active;
-  const basicPplNames = new Set(["Push - Peito & Tríceps Focus", "Pull - Costas & Bíceps", "Legs"]);
   const mine = (custom.data?.workouts ?? []).filter(
-    (workout) => !hasPersonalizedProgram || (
-      !(workout.name.startsWith("AI · ") && workout.notes?.startsWith("Dia do ASCEND AI Program")) &&
-      !basicPplNames.has(workout.name)
-    ),
+    (workout) =>
+      !hasPersonalizedProgram ||
+      !(workout.name.startsWith("AI · ") && workout.notes?.startsWith("Dia do ASCEND AI Program")),
   );
   const today = splitOfDay();
   const t = useT();
