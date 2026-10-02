@@ -16,9 +16,9 @@ export type PdfExercise = {
 export type PdfWorkout = { title: string; focus: string; weekday?: string; minutes: number; exercises: PdfExercise[] };
 export type PdfProgram = {
   athlete: string;
-  goal?: string;
-  level?: string;
-  version?: number;
+  goal?: string | undefined;
+  level?: string | undefined;
+  version?: number | undefined;
   duration?: string;
   days: PdfWorkout[];
 };
@@ -137,7 +137,7 @@ export async function generateWorkoutPdf(data: PdfProgram, onProgress?: (stage: 
   if (data.level) metric(doc, M, goalY + 24, 85, "NÍVEL", data.level);
   if (data.version) metric(doc, 108, goalY + 24, 80, "PROGRAMA", `v${data.version}`);
   text(doc, `GENERATED ${date}`, M, 269, 8, MUTED, "bold");
-  if (symbol) { doc.saveGraphicsState(); doc.setGState(new doc.GState({ opacity: .12 })); mark(doc, symbol, 131, 23, 45, 245 / 205); doc.restoreGraphicsState(); }
+  if (symbol) { doc.saveGraphicsState(); doc.setGState(doc.GState({ opacity: .12 })); mark(doc, symbol, 131, 23, 45, 245 / 205); doc.restoreGraphicsState(); }
 
   // Overview
   newPage(doc, wordmark, "01 / VISÃO GERAL");
