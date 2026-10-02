@@ -17,3 +17,6 @@
 
 ## Treinos personalizados
 - [x] Ocultar PPL básico e cópias dos dias de IA quando houver programa personalizado ativo, sem apagar dados ou histórico
+
+## Exportação de treinos
+- [x] Criar PDF A4 personalizado com identidade oficial ASCEND, prévia, paginação e dados reais de treinos
