@@ -17,6 +17,8 @@ export const Route = createFileRoute("/_authenticated/app/treinos")({
       { name: "description", content: "Push, Pull, Legs e Full Body com séries, cargas e descanso." },
       { property: "og:title", content: "Treinos · ASCEND" },
       { property: "og:description", content: "Divisões Push/Pull/Legs e Full Body." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
     ],
   }),

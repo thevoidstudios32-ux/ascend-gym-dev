@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Generate branded workout PDFs in the browser from the live program/custom workout hooks, keeping exports current without a second data source.
