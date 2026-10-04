@@ -20,3 +20,8 @@
 
 ## Exportação de treinos
 - [x] Criar PDF A4 personalizado com identidade oficial ASCEND, prévia, paginação e dados reais de treinos
+
+## Landing page
+- [ ] Substituir a página inicial pela experiência visual do arquivo SUBIR.html
+- [ ] Direcionar chamadas de entrada, descoberta e início para o cadastro de novos usuários
+- [ ] Validar a nova página em desktop e celular
