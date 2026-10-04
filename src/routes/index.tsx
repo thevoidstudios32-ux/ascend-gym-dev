@@ -1,297 +1,288 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Dumbbell, Flame, LineChart, MessageSquareText, Smartphone, Trophy } from "lucide-react";
-import { useEffect, useRef } from "react";
+import {
+  ArrowDown,
+  ArrowRight,
+  BarChart3,
+  BrainCircuit,
+  Check,
+  ChevronRight,
+  CircleUserRound,
+  Clock3,
+  Dumbbell,
+  Flame,
+  Heart,
+  Medal,
+  MessageCircle,
+  ShieldCheck,
+  Sparkles,
+  Trophy,
+  Users,
+  Utensils,
+  Zap,
+} from "lucide-react";
 import { AscendSymbol, AscendWordmark } from "@/components/brand";
-
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "ASCEND · App de treino com Coach IA em português" },
+      { title: "ASCEND · Treino, progresso e Coach IA" },
       {
         name: "description",
         content:
-          "Registre treinos, acompanhe recordes e peso, e fale com um coach de IA que conhece a sua evolução. Funciona no celular e no computador.",
+          "Treino, progresso, nutrição, comunidade e um Coach IA em um único sistema. Transforme esforço em evolução visível.",
       },
-      { property: "og:title", content: "ASCEND · App de treino com Coach IA" },
+      { property: "og:title", content: "ASCEND · Cada repetição vira evidência" },
       {
         property: "og:description",
-        content: "Treinos, recordes, evolução de peso e coach de IA em português.",
+        content: "Um sistema completo para treinar, medir sua evolução e ir além.",
       },
-      { property: "og:url", content: "/" },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [{ rel: "canonical", href: "/" }],
-    scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@graph": [
-            {
-              "@type": "Organization",
-              "@id": "https://ascendgym.dev/#organization",
-              name: "ASCEND",
-              url: "https://ascendgym.dev",
-              description:
-                "Plataforma de treino com Coach IA em português: registro de treinos, recordes, nutrição e evolução.",
-            },
-            {
-              "@type": "WebSite",
-              "@id": "https://ascendgym.dev/#website",
-              name: "ASCEND",
-              url: "https://ascendgym.dev",
-              inLanguage: "pt-BR",
-              publisher: { "@id": "https://ascendgym.dev/#organization" },
-              description:
-                "Registre treinos, acompanhe recordes e peso, e fale com um coach de IA que conhece a sua evolução.",
-            },
-          ],
-        }),
-      },
-    ],
   }),
-
   component: Landing,
 });
 
-const FEATURES = [
-  {
-    icon: Flame,
-    title: "Sequência e XP",
-    text: "Cada treino registrado soma XP, sobe de nível e mantém sua streak viva.",
-  },
-  {
-    icon: Trophy,
-    title: "Recordes reais",
-    text: "Cadastre suas cargas máximas e veja o 1RM estimado evoluir.",
-  },
-  {
-    icon: LineChart,
-    title: "Evolução de peso",
-    text: "Registre o peso e acompanhe o gráfico junto com a meta de calorias.",
-  },
-  {
-    icon: MessageSquareText,
-    title: "Coach IA",
-    text: "Um treinador que lê seus dados e responde com séries, cargas e ajustes.",
-  },
-  {
-    icon: Dumbbell,
-    title: "Plano semanal",
-    text: "Divisão de treinos pronta, com duração e foco muscular por dia.",
-  },
-  {
-    icon: Smartphone,
-    title: "Celular e site",
-    text: "Mesma conta na nuvem: comece no computador, continue no celular.",
-  },
+const signupSearch = { mode: "signup" as const };
+
+const systemItems = [
+  { number: "01", icon: Dumbbell, title: "Treinamento", text: "Programas, séries e cargas registrados em segundos." },
+  { number: "02", icon: BarChart3, title: "Progresso", text: "Cada número vira tendência, comparação e direção." },
+  { number: "03", icon: Utensils, title: "Nutrição", text: "Seu combustível medido junto ao trabalho que ele sustenta." },
+  { number: "04", icon: Users, title: "Comunidade", text: "Um círculo de atletas que mantém você no ritmo." },
+  { number: "05", icon: BrainCircuit, title: "Coach IA", text: "Lê seu histórico e ajusta o próximo passo." },
 ];
 
-const ENERGY_PARTICLES = [
-  "energy-particle-1",
-  "energy-particle-2",
-  "energy-particle-3",
-  "energy-particle-4",
-  "energy-particle-5",
-  "energy-particle-6",
-  "energy-particle-7",
-  "energy-particle-8",
-  "energy-particle-9",
-  "energy-particle-10",
-  "energy-particle-11",
-  "energy-particle-12",
+const workoutRows = [
+  ["Supino reto", "100×8 · 105×6 · 110×5", "112,5 kg", "+2,5 kg"],
+  ["Supino inclinado", "32×10 · 34×10 · 34×9", "34 kg", "+2 kg"],
+  ["Paralelas com peso", "20×8 · 20×8 · 22,5×7", "+22,5 kg", "NOVO PR"],
+  ["Crucifixo no cabo", "18×12 · 18×12 · 20×10", "20 kg", "estável"],
 ];
 
-function EnergyField() {
-  const fieldRef = useRef<HTMLDivElement>(null);
+const feed = [
+  { initial: "K", name: "kai.lifts", action: "Novo recorde pessoal", detail: "Terra · 220 kg × 3", likes: "312" },
+  { initial: "N", name: "noor.trains", action: "Pull · Força", detail: "6 exercícios · 21 séries", likes: "148" },
+  { initial: "T", name: "teo.ascende", action: "Conquista desbloqueada", detail: "100 treinos registrados", likes: "521" },
+];
 
-  useEffect(() => {
-    const field = fieldRef.current;
-    if (!field || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    let frame = 0;
-    let targetX = 0;
-    let targetY = 0;
-    let currentX = 0;
-    let currentY = 0;
-    let scrollY = window.scrollY;
-
-    const render = () => {
-      currentX += (targetX - currentX) * 0.035;
-      currentY += (targetY - currentY) * 0.035;
-      field.style.setProperty("--energy-pointer-x", `${currentX.toFixed(2)}px`);
-      field.style.setProperty("--energy-pointer-y", `${currentY.toFixed(2)}px`);
-      field.style.setProperty("--energy-scroll", `${Math.min(scrollY * 0.018, 24).toFixed(2)}px`);
-      frame = window.requestAnimationFrame(render);
-    };
-
-    const onPointerMove = (event: PointerEvent) => {
-      targetX = (event.clientX / window.innerWidth - 0.5) * 10;
-      targetY = (event.clientY / window.innerHeight - 0.5) * 8;
-    };
-    const onScroll = () => {
-      scrollY = window.scrollY;
-    };
-
-    window.addEventListener("pointermove", onPointerMove, { passive: true });
-    window.addEventListener("scroll", onScroll, { passive: true });
-    frame = window.requestAnimationFrame(render);
-
-    return () => {
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("scroll", onScroll);
-      window.cancelAnimationFrame(frame);
-    };
-  }, []);
-
+function SignupLink({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <div ref={fieldRef} className="energy-field" aria-hidden="true">
-      <div className="energy-depth energy-depth-far">
-        <div className="energy-glow energy-glow-wide" />
-      </div>
-      <div className="energy-depth energy-depth-near">
-        <div className="energy-glow energy-glow-core" />
-      </div>
-      <div className="energy-particles">
-        {ENERGY_PARTICLES.map((particle) => (
-          <span key={particle} className={`energy-particle ${particle}`} />
-        ))}
-      </div>
-      <div className="energy-grain" />
-      <div className="energy-vignette" />
+    <Link to="/auth" search={signupSearch} className={className}>
+      {children}
+    </Link>
+  );
+}
+
+function SectionLabel({ number, children }: { number: string; children: React.ReactNode }) {
+  return (
+    <div className="landing-kicker">
+      <span>{number}</span>
+      <span>{children}</span>
     </div>
   );
 }
 
 function Landing() {
   return (
-    <div className="relative isolate min-h-screen overflow-hidden bg-ember">
-      <EnergyField />
-      <header className="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-5 py-6">
-        <AscendWordmark className="h-5 sm:h-6 md:h-7" />
+    <div className="landing-page">
+      <div className="landing-grain" aria-hidden="true" />
 
-        <nav className="flex items-center gap-2">
-          <Link
-            to="/auth"
-            className="rounded-full px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Entrar
-          </Link>
-          <Link
-            to="/auth"
-            search={{ mode: "signup" }}
-            className="rounded-full bg-primary px-5 py-2 text-sm font-bold text-primary-foreground shadow-glow"
-          >
-            Criar conta
-          </Link>
+      <header className="landing-header">
+        <nav className="landing-nav" aria-label="Navegação principal">
+          <a href="#top" aria-label="ASCEND — início" className="landing-brand">
+            <AscendSymbol className="h-6" />
+            <AscendWordmark className="h-3" />
+          </a>
+          <div className="landing-nav-links">
+            <a href="#product">Produto</a>
+            <a href="#training">Treinos</a>
+            <a href="#coach">Coach IA</a>
+            <a href="#community">Comunidade</a>
+          </div>
+          <div className="flex items-center gap-2">
+            <SignupLink className="landing-login">Entrar</SignupLink>
+            <SignupLink className="landing-button landing-button-small">
+              Conheça o ASCEND <ArrowRight className="size-4" />
+            </SignupLink>
+          </div>
         </nav>
       </header>
 
-      <main className="relative z-10">
-        <section className="mx-auto max-w-6xl px-5 pb-20 pt-10 md:pt-20">
-          <div className="grid items-center gap-12 md:grid-cols-[1.1fr_0.9fr]">
-            <div>
-              <span className="inline-flex items-center gap-2 rounded-full ember-border bg-surface px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-primary">
-                <Flame className="size-3.5" /> Academia · IA · Evolução
-              </span>
-              <h1 className="text-display mt-6 text-6xl md:text-8xl">
-                TREINE COM
-                <br />
-                <span className="text-primary">DADOS</span>, NÃO COM ACHISMO
-              </h1>
-              <p className="mt-6 max-w-xl text-lg text-muted-foreground">
-                O ASCEND registra cada treino, guarda seus recordes e coloca um coach de IA para
-                ajustar carga, volume e dieta com base na sua evolução real.
-              </p>
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Link
-                  to="/auth"
-                  search={{ mode: "signup" }}
-                  className="rounded-full bg-primary px-8 py-3.5 font-bold text-primary-foreground shadow-glow transition-transform hover:scale-[1.02]"
-                >
-                  Começar agora
-                </Link>
-                <Link
-                  to="/auth"
-                  className="rounded-full border border-border bg-surface px-8 py-3.5 font-bold text-foreground"
-                >
-                  Já tenho conta
-                </Link>
-              </div>
-            </div>
+      <main>
+        <section id="top" className="landing-hero">
+          <div className="landing-hero-orbit landing-hero-orbit-one" aria-hidden="true" />
+          <div className="landing-hero-orbit landing-hero-orbit-two" aria-hidden="true" />
+          <div className="landing-float-card landing-float-left" aria-hidden="true">
+            <span>SUPINO</span><strong>112,5 kg</strong><small>NOVO RECORDE</small>
+          </div>
+          <div className="landing-float-card landing-float-right" aria-hidden="true">
+            <span>SEQUÊNCIA</span><strong>48 dias</strong><small>NO RITMO</small>
+          </div>
 
-            <div className="panel mx-auto w-full max-w-sm p-5 shadow-panel">
-              <div className="rounded-2xl bg-elevated p-5">
-                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                  Nível atual
-                </p>
-                <p className="text-display mt-1 text-5xl">
-                  ATLETA <span className="text-primary">25</span>
-                </p>
-                <div className="mt-4 h-2 rounded-full bg-muted">
-                  <div className="h-2 w-[70%] rounded-full bg-primary" />
-                </div>
-                <p className="mt-2 text-xs text-muted-foreground">2.450 / 3.500 XP</p>
-              </div>
-              <div className="mt-3 grid grid-cols-3 gap-3">
-                {[
-                  ["45", "dias streak"],
-                  ["105kg", "supino"],
-                  ["28", "treinos"],
-                ].map(([v, l]) => (
-                  <div key={l} className="rounded-xl bg-elevated p-3 text-center">
-                    <p className="text-lg font-extrabold">{v}</p>
-                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{l}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-3 rounded-2xl ember-border bg-surface p-4">
-                <p className="text-xs font-bold uppercase tracking-widest text-primary">Coach IA</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  “Hoje sobe 2,5 kg no supino e mantém 8 repetições. Descanso de 90s.”
-                </p>
-              </div>
+          <div className="landing-hero-content">
+            <div className="landing-announcement"><span>Novo</span> seu treino agora aprende com você</div>
+            <p className="landing-overline">Este não é apenas mais um aplicativo de academia.</p>
+            <h1>
+              CADA REPETIÇÃO
+              <span>VIRA EVIDÊNCIA.</span>
+            </h1>
+            <p className="landing-hero-copy">
+              Treino, progresso, nutrição, comunidade e um Coach IA — um sistema que transforma
+              seu esforço em evolução visível.
+            </p>
+            <div className="landing-hero-actions">
+              <SignupLink className="landing-button landing-button-primary">
+                Comece a subir <ArrowRight className="size-4" />
+              </SignupLink>
+              <SignupLink className="landing-button landing-button-secondary">
+                Explore o ASCEND
+              </SignupLink>
             </div>
+          </div>
+
+          <div className="landing-hero-bottom">
+            <span><i /> 12.408 sessões registradas hoje</span>
+            <a href="#system">Descobrir <ArrowDown className="size-4" /></a>
+            <span>iOS · Android · Web</span>
           </div>
         </section>
 
-        <section className="border-y border-border bg-surface/40 py-20">
-          <div className="mx-auto max-w-6xl px-5">
-            <h2 className="text-display text-4xl md:text-5xl">O QUE VOCÊ TEM DENTRO</h2>
-            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {FEATURES.map((f) => (
-                <div key={f.title} className="panel p-6">
-                  <f.icon className="size-6 text-primary" />
-                  <h3 className="mt-4 text-lg font-bold">{f.title}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">{f.text}</p>
+        <section id="system" className="landing-section landing-system">
+          <div className="landing-section-intro">
+            <SectionLabel number="01">O sistema ASCEND</SectionLabel>
+            <h2>UM SISTEMA.<br /><span>SUA EVOLUÇÃO INTEIRA.</span></h2>
+            <p>Cinco áreas que antes viviam separadas. No ASCEND, cada registro torna todo o sistema mais inteligente.</p>
+          </div>
+          <div className="landing-system-grid">
+            {systemItems.map((item) => (
+              <SignupLink key={item.number} className="landing-system-card">
+                <span className="landing-card-number">{item.number}</span>
+                <item.icon className="size-6" />
+                <h3>{item.title}</h3>
+                <p>{item.text}</p>
+                <ArrowRight className="landing-card-arrow size-5" />
+              </SignupLink>
+            ))}
+          </div>
+        </section>
+
+        <section id="product" className="landing-section landing-product">
+          <div className="landing-section-intro landing-section-intro-centered">
+            <SectionLabel number="02">A interface</SectionLabel>
+            <h2>CONSTRUÍDO COMO<br /><span>UM INSTRUMENTO.</span></h2>
+            <p>Cada tela responde a uma pergunta: estou melhorando? Densa onde importa, silenciosa no resto.</p>
+          </div>
+          <SignupLink className="landing-dashboard" aria-label="Criar conta e conhecer o painel ASCEND">
+            <aside className="landing-dashboard-side">
+              <AscendSymbol className="h-8" />
+              {[BarChart3, Dumbbell, BrainCircuit, Users, Trophy].map((Icon, index) => (
+                <span key={index} className={index === 0 ? "is-active" : ""}><Icon className="size-5" /></span>
+              ))}
+              <CircleUserRound className="mt-auto size-6" />
+            </aside>
+            <div className="landing-dashboard-main">
+              <div className="landing-dashboard-top"><div><small>SEMANA 38 · BLOCO 3 DE 4</small><h3>Boa noite, atleta.</h3></div><span>Sequência de 48 dias <Flame className="size-4" /></span></div>
+              <div className="landing-stat-row">
+                <div><small>PRONTIDÃO</small><strong>92</strong><span>Excelente</span></div>
+                <div><small>VOLUME · 4 SEMANAS</small><strong>+12,4%</strong><span>Subindo</span></div>
+                <div><small>SONO</small><strong>7h40</strong><span>Recuperado</span></div>
+              </div>
+              <div className="landing-dashboard-grid">
+                <div className="landing-chart-card"><small>FORÇA · 1RM ESTIMADO</small><strong>112,5 <em>kg</em></strong><div className="landing-chart"><i /><i /><i /><i /><i /><i /><i /><i /></div><span>+8,5% nas últimas 12 semanas</span></div>
+                <div className="landing-session-card"><small>TREINO DE HOJE</small><h4>Push · Hipertrofia</h4><p>4 exercícios · 15 séries</p><span>Supino reto <b>4 × 6</b></span><span>Supino inclinado <b>3 × 10</b></span><span>Paralelas <b>3 × 8</b></span></div>
+              </div>
+            </div>
+          </SignupLink>
+        </section>
+
+        <section id="training" className="landing-section landing-training">
+          <div className="landing-split-heading">
+            <div><SectionLabel number="03">Treino inteligente</SectionLabel><h2>TREINE COM<br /><span>PROPÓSITO.</span></h2></div>
+            <p>O ASCEND transforma cada sessão em um sistema mensurável. Carga, repetições, volume e recordes deixam de ser achismo.</p>
+          </div>
+          <SignupLink className="landing-workout-panel">
+            <div className="landing-panel-head"><div><span>Push A · Hipertrofia</span><small>Semana 38 · Sessão 47</small></div><strong><Clock3 className="size-4" /> 01:02:01</strong></div>
+            <div className="landing-workout-table">
+              <div className="landing-workout-row landing-workout-labels"><span>EXERCÍCIO</span><span>SÉRIES · KG × REPS</span><span>MELHOR</span><span>EVOLUÇÃO</span></div>
+              {workoutRows.map(([exercise, sets, top, progress], index) => (
+                <div className="landing-workout-row" key={exercise}>
+                  <span><i>{String(index + 1).padStart(2, "0")}</i><b>{exercise}</b></span><span>{sets}</span><span>{top}</span><span className={index === 2 ? "is-pr" : ""}>{progress}</span>
                 </div>
               ))}
             </div>
+            <div className="landing-panel-footer"><span>11 de 15 séries concluídas</span><div><i /></div><strong>+8.420 kg de volume</strong></div>
+          </SignupLink>
+        </section>
+
+        <section id="coach" className="landing-section landing-coach">
+          <div className="landing-coach-copy">
+            <SectionLabel number="04">Coach IA</SectionLabel>
+            <h2>SEU COACH.<br /><span>SEMPRE EVOLUINDO.</span></h2>
+            <p>Ele lê cada série, noite de sono e refeição — então mostra, em linguagem direta, o que fazer a seguir.</p>
+            <SignupLink className="landing-text-link">Conhecer meu Coach IA <ArrowRight className="size-4" /></SignupLink>
+          </div>
+          <SignupLink className="landing-coach-panel">
+            <div className="landing-coach-head"><span><AscendSymbol className="h-6" /> ASCEND COACH</span><i>AO VIVO</i></div>
+            <div className="landing-coach-analysis"><small>ANALISANDO</small><p>12 semanas · 47 sessões · 1.318 séries</p><div className="landing-scan-line" /></div>
+            <div className="landing-coach-message"><BrainCircuit className="size-5" /><p>Seu volume de peito subiu 14%, mas a recuperação caiu. Hoje, mantenha 110 kg e preserve duas repetições na reserva.</p></div>
+            <div className="landing-coach-metrics"><span>RECUPERAÇÃO <b>92%</b></span><span>CONFIANÇA <b>96%</b></span></div>
+            <div className="landing-coach-input">Pergunte sobre treino, recuperação ou nutrição… <ArrowRight className="size-4" /></div>
+          </SignupLink>
+        </section>
+
+        <section id="progress" className="landing-section landing-progress">
+          <div className="landing-split-heading">
+            <div><SectionLabel number="05">Progresso</SectionLabel><h2>VEJA O ESFORÇO<br /><span>VIRAR RESULTADO.</span></h2></div>
+            <p>Sem métricas de vaidade. Só as linhas que importam, avançando junto com você.</p>
+          </div>
+          <SignupLink className="landing-progress-panel">
+            <div className="landing-progress-summary"><small>FORÇA · 1RM ESTIMADO</small><strong>122,5 <em>kg</em></strong><span>+27,6%</span></div>
+            <div className="landing-progress-chart" aria-hidden="true"><div className="landing-chart-grid" /><svg viewBox="0 0 800 230" preserveAspectRatio="none"><path className="landing-chart-area" d="M0 205 C100 196,120 175,205 180 S320 125,405 140 S520 92,595 110 S690 38,800 45 L800 230 L0 230Z"/><path className="landing-chart-line" d="M0 205 C100 196,120 175,205 180 S320 125,405 140 S520 92,595 110 S690 38,800 45"/></svg></div>
+            <div className="landing-progress-stats"><span><small>RECORDES NO BLOCO</small><b>8</b></span><span><small>VOLUME SEMANAL</small><b>14,2 t</b></span><span><small>CONSISTÊNCIA</small><b>96%</b></span><span><small>SEQUÊNCIA</small><b>48 dias</b></span></div>
+          </SignupLink>
+        </section>
+
+        <section id="community" className="landing-section landing-community">
+          <div className="landing-community-copy">
+            <SectionLabel number="06">Gym Bros</SectionLabel>
+            <h2>PROGRESSO É<br /><span>CONTAGIANTE.</span></h2>
+            <p>Uma comunidade construída em torno do trabalho, não da pose. Siga quem impulsiona você e deixe que vejam sua subida.</p>
+            <div className="landing-community-points"><span><Users className="size-5" /><b>Círculos</b> Treine com pessoas, não plateias.</span><span><ShieldCheck className="size-5" /><b>Respeito</b> Conquistado pelo trabalho.</span><span><Medal className="size-5" /><b>Conquistas</b> Esforço comprovado por dados.</span></div>
+          </div>
+          <SignupLink className="landing-feed">
+            <div className="landing-feed-top"><span>SEU CÍRCULO</span><span>AO VIVO <i /></span></div>
+            {feed.map((post) => <article key={post.name} className="landing-feed-post"><div className="landing-avatar">{post.initial}</div><div><strong>{post.name}</strong><small>{post.action}</small><p>{post.detail}</p></div><span><Heart className="size-4" /> {post.likes}</span></article>)}
+            <div className="landing-feed-action">Entrar na comunidade <ChevronRight className="size-4" /></div>
+          </SignupLink>
+        </section>
+
+        <section id="achievements" className="landing-section landing-achievements">
+          <div className="landing-section-intro landing-section-intro-centered"><SectionLabel number="07">Conquistas</SectionLabel><h2>CONQUISTADAS.<br /><span>NUNCA COMPRADAS.</span></h2><p>Cada emblema nasce de dados reais de treino. Alguns são quase impossíveis de alcançar.</p></div>
+          <div className="landing-badges">
+            {[{ icon: ShieldCheck, tier: "IDENTIDADE", title: "Atleta verificado", rate: "12,4%" },{ icon: Flame, tier: "LIMITADO", title: "Early Ascender", rate: "3,1%" },{ icon: Trophy, tier: "LENDÁRIO", title: "Fundador", rate: "0,4%" },{ icon: Sparkles, tier: "MÍTICO", title: "The Void", rate: "0,1%" }].map((badge) => (
+              <SignupLink className="landing-badge" key={badge.title}><span>{badge.tier}</span><badge.icon className="size-9" /><h3>{badge.title}</h3><small>{badge.rate} dos atletas</small></SignupLink>
+            ))}
           </div>
         </section>
 
-        <section className="mx-auto max-w-4xl px-5 py-24 text-center">
-          <h2 className="text-display text-5xl md:text-6xl">PRONTO PARA SUBIR DE NÍVEL?</h2>
-          <p className="mt-4 text-muted-foreground">
-            Crie sua conta grátis e registre o primeiro treino em menos de um minuto.
-          </p>
-          <Link
-            to="/auth"
-            search={{ mode: "signup" }}
-            className="mt-8 inline-block rounded-full bg-primary px-10 py-4 font-bold text-primary-foreground shadow-glow"
-          >
-            Criar minha conta
-          </Link>
+        <section className="landing-final">
+          <AscendSymbol className="h-14" />
+          <p>A próxima versão de você está esperando.</p>
+          <h2>PRONTO PARA<br /><span>SUBIR?</span></h2>
+          <p>Comece grátis. Sem cartão. Seu primeiro programa fica pronto em menos de um minuto.</p>
+          <SignupLink className="landing-button landing-button-primary landing-button-large">Criar minha conta <ArrowRight className="size-5" /></SignupLink>
+          <span>iOS · Android · Web</span>
         </section>
       </main>
 
-      <footer className="relative z-10 flex flex-col items-center gap-3 border-t border-border px-5 py-10 text-center text-xs text-muted-foreground">
-        <AscendSymbol className="h-6 sm:h-7" />
-        ASCEND · Gym AI · feito para quem treina de verdade
+      <footer className="landing-footer">
+        <div><AscendSymbol className="h-7" /><AscendWordmark className="h-3" /></div>
+        <p>Treino. Progresso. Nutrição. Comunidade.</p>
+        <SignupLink>Entrar no ASCEND <ArrowRight className="size-4" /></SignupLink>
+        <small>© 2026 ASCEND · FEITO PARA QUEM RECUSA FICAR IGUAL.</small>
       </footer>
-
     </div>
   );
 }
