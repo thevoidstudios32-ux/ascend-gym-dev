@@ -4,10 +4,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MuscleMap } from "@/components/muscle-map";
-import { generateAssessmentProgram } from "@/lib/assessment.functions";
+import { generateAssessmentProgram, acceptAssessmentProgram } from "@/lib/assessment.functions";
 import { assessmentSchema, ASSESSMENT_EQUIPMENT, ASSESSMENT_GOALS, type TrainingAssessment } from "@/lib/training-assessment";
 import { WEEKDAYS, type ProgramProposal } from "@/lib/program";
-import { useApplyProgram } from "@/hooks/use-program";
 
 const equipmentOptions = ["Máquina", "Barra", "Halteres", "Cabo", "Peso corporal", "Barra fixa", "Paralelas"];
 const days = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
@@ -20,7 +19,7 @@ export function TrainingOnboarding({ initial, onDone, onCancel }: { initial?: un
   const [proposal, setProposal] = useState<ProgramProposal | null>(null);
   const generate = useServerFn(generateAssessmentProgram);
   const qc = useQueryClient();
-  const apply = useApplyProgram();
+  const accept = useServerFn(acceptAssessmentProgram);
   const set = (key: string, value: unknown) => setForm(f => ({ ...f, [key]: value }));
   const list = (key: string) => Array.isArray(form[key]) ? form[key] as string[] : [];
   const toggle = (key: string, value: string) => set(key, list(key).includes(value) ? list(key).filter(v => v !== value) : [...list(key), value]);
@@ -39,10 +38,10 @@ export function TrainingOnboarding({ initial, onDone, onCancel }: { initial?: un
   const choices = (key: string, values: readonly string[]) => <div className="mt-2 flex flex-wrap gap-2">{values.map(v => <Button key={v} type="button" variant={form[key] === v ? "default" : "secondary"} aria-pressed={form[key] === v} onClick={() => set(key, v)}>{v}</Button>)}</div>;
   const field = "mt-2 w-full rounded-lg border border-border bg-elevated p-3 text-foreground";
   if (proposal) return <section className="space-y-5">
-    <h1 className="text-display text-3xl">ALTERAÇÃO PROPOSTA</h1><p className="text-sm text-muted-foreground">Sua avaliação foi salva. O programa atual só será substituído se você aceitar.</p>
+    <h1 className="text-display text-3xl">ALTERAÇÃO PROPOSTA</h1><p className="text-sm text-muted-foreground">Sua avaliação e seu programa atual só serão substituídos se você aceitar.</p>
     <p>{proposal.summary}</p>{proposal.days.map(d => <div key={d.key} className="border-b border-border py-3"><h2 className="font-bold">{d.weekday} · {d.title}</h2>{d.exercises.map(e => <p key={e.name} className="text-sm text-muted-foreground">{e.name} — {e.sets}x{e.reps}</p>)}</div>)}
     {error && <p role="alert" className="text-destructive">{error}</p>}
-    <div className="flex flex-wrap gap-2"><Button disabled={apply.isPending} onClick={async () => { try { await apply.mutateAsync({ reason: "Reavaliação inicial aceita", program: proposal }); complete(); } catch(e) { setError(e instanceof Error ? e.message : "Não foi possível salvar."); } }}><Check /> ACEITAR ALTERAÇÃO</Button><Button variant="secondary" disabled={apply.isPending} onClick={complete}>RECUSAR</Button></div>
+    <div className="flex flex-wrap gap-2"><Button disabled={pending} onClick={async () => { setPending(true); try { await accept({ data: { assessment: assessmentSchema.parse(form), confirmed: true } }); complete(); } catch(e) { setError(e instanceof Error ? e.message : "Não foi possível salvar."); } finally { setPending(false); } }}><Check /> ACEITAR ALTERAÇÃO</Button><Button variant="secondary" disabled={pending} onClick={complete}>RECUSAR</Button></div>
   </section>;
   return <section className="animate-rise space-y-6 pb-6">
     <header><p className="text-xs font-bold uppercase text-primary">Avaliação inicial · {step + 1}/4</p><h1 className="mt-2 text-display text-4xl">SEU PROGRAMA ASCEND</h1><p className="mt-2 text-sm text-muted-foreground">Um programa criado para o seu perfil, seus objetivos e sua rotina.</p></header>
