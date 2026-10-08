@@ -211,7 +211,7 @@ export async function proposeProgram(input: ProposeInput): Promise<ProgramPropos
           "Use esta estrutura compacta: {name,goal,split_label,summary,changes,days}. " +
           "Cada item de days deve ter somente {weekday,title,focus,intensity,minutes,exercises}; " +
           "cada exercício deve ter somente {name,muscle,sets,reps,rest}. " +
-          "Regras: escolha a divisão pelo objetivo e experiência, nunca atribua PPL fixo. Use apenas available_weekdays quando informados e exatamente days_per_week dias. Respeite a duração por sessão; respeite equipamentos " +
+          "Regras: escolha a divisão pelo objetivo e experiência, nunca atribua PPL fixo. Use apenas available_weekdays quando informados e exatamente days_per_week dias, exceto quando o pedido mudar explicitamente a frequência semanal. Para pedidos sobre hoje, altere somente a sessão correspondente e devolva os demais dias intactos. Respeite a duração por sessão; respeite equipamentos " +
            "use o descanso entre séries indicado nas preferências como padrão em todos os exercícios, " +
            "ajustando-o apenas quando a intensidade do exercício exigir; " +
           "disponíveis e restrições/lesões (nunca prescreva o que o atleta não pode fazer); distribua o volume " +

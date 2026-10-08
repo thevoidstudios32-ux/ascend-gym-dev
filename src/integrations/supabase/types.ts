@@ -1515,6 +1515,10 @@ export type Database = {
     Functions: {
       complete_workout: { Args: { _payload: Json }; Returns: Json }
       remove_workout: { Args: { _date: string }; Returns: Json }
+      save_training_assessment: {
+        Args: { _assessment: Json; _program: Json; _replace?: boolean }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user" | "super_admin"

@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assessmentSchema, buildAssessmentProgram } from "@/lib/training-assessment";
+import { z } from "zod";
 
 export const generateAssessmentProgram = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -13,23 +14,25 @@ export const generateAssessmentProgram = createServerFn({ method: "POST" })
     ]);
     if (current.error || prefs.error) throw new Error("Não foi possível carregar seu programa. Tente novamente.");
     const proposal = buildAssessmentProgram(data, prefs.data?.default_rest_seconds ?? 90);
-    const { error: preferenceError } = await supabase.from("training_preferences").upsert({
-      user_id: userId, goal: data.goal, experience: data.experience, days_per_week: data.days_per_week,
-      available_weekdays: data.available_weekdays, minutes_per_session: data.minutes_per_session,
-      equipment: data.equipment, priority_muscles: data.priority_muscles, split_preference: null,
-    }, { onConflict: "user_id" });
-    if (preferenceError) throw new Error(preferenceError.message);
     if (!current.data) {
-      const { summary: _summary, changes: _changes, ...program } = proposal;
-      const { error } = await supabase.from("ai_programs").insert({ ...program, days: program.days as never, user_id: userId, active: true });
+      const { error } = await supabase.rpc("save_training_assessment", {
+        _assessment: data, _program: proposal, _replace: false,
+      });
       if (error) throw new Error(error.message);
     }
-    const { error } = await supabase.from("profiles").update({
-      gender: data.gender === "nao_informado" ? null : data.gender,
-      height_cm: data.height_cm, weight_kg: data.weight_kg, goal: data.goal,
-      experience: data.experience, days_per_week: data.days_per_week, equipment: data.equipment,
-      training_assessment: data as never, onboarded: true, updated_at: new Date().toISOString(),
-    }).eq("id", userId);
-    if (error) throw new Error(error.message);
     return { proposal, hadProgram: Boolean(current.data) };
+  });
+
+export const acceptAssessmentProgram = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ assessment: assessmentSchema, confirmed: z.literal(true) }).parse(input))
+  .handler(async ({ context, data }) => {
+    const prefs = await context.supabase.from("training_preferences").select("default_rest_seconds").eq("user_id", context.userId).maybeSingle();
+    if (prefs.error) throw new Error(prefs.error.message);
+    const proposal = buildAssessmentProgram(data.assessment, prefs.data?.default_rest_seconds ?? 90);
+    const { error } = await context.supabase.rpc("save_training_assessment", {
+      _assessment: data.assessment, _program: proposal, _replace: true,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });
