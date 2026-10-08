@@ -136,24 +136,24 @@ export function groupFromMuscle(muscle: string): MuscleGroup | null {
 /** Sugestões inteligentes para substituir um exercício. */
 export function substitutesFor(
   name: string,
-  opts: { muscle?: string; favorites?: string[]; equipment?: string[] } = {},
+  opts: { muscle?: string; favorites?: string[]; equipment?: string[]; disliked?: string[] } = {},
 ) {
   const base = findExercise(name);
   const group = base?.group ?? (opts.muscle ? groupFromMuscle(opts.muscle) : null);
   const favorites = new Set(opts.favorites ?? []);
   const available = opts.equipment && opts.equipment.length ? new Set(opts.equipment) : null;
 
-  return EXERCISE_CATALOG.filter((e) => e.name !== base?.name)
+  return EXERCISE_CATALOG.filter((e) => e.name !== base?.name && !(opts.disliked ?? []).some(n=>n.toLowerCase()===e.name.toLowerCase()))
     .map((e) => {
       const sameGroup = group ? e.group === group : false;
       const shared = base ? e.muscles.filter((m) => base.muscles.includes(m)).length : 0;
       const fav = favorites.has(e.name);
-      const usable = !available || available.has(e.equipment);
+      const usable = !available || available.has("Academia completa") || (e.equipment === "Peso corporal" && e.name !== "Barra fixa" && e.name !== "Paralelas" && e.name !== "Mergulho no banco") || available.has(e.equipment) && !(e.name === "Barra fixa" && !available.has("Barra fixa")) && !(e.name === "Paralelas" && !available.has("Paralelas"));
       const score =
         (sameGroup ? 100 : 0) + shared * 20 + (fav ? 500 : 0) + (usable ? 30 : -60);
       return { exercise: e, score, favorite: fav, available: usable, sameGroup };
     })
-    .filter((r) => r.sameGroup || r.favorite)
+    .filter((r) => r.sameGroup && r.available)
     .sort((a, b) => b.score - a.score);
 }
 
