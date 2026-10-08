@@ -1002,6 +1002,7 @@ export type Database = {
           login_count: number
           name: string
           onboarded: boolean
+          training_assessment: Json | null
           training_since: string | null
           updated_at: string
           username: string | null
@@ -1035,6 +1036,7 @@ export type Database = {
           login_count?: number
           name?: string
           onboarded?: boolean
+          training_assessment?: Json | null
           training_since?: string | null
           updated_at?: string
           username?: string | null
@@ -1068,6 +1070,7 @@ export type Database = {
           login_count?: number
           name?: string
           onboarded?: boolean
+          training_assessment?: Json | null
           training_since?: string | null
           updated_at?: string
           username?: string | null
@@ -1259,6 +1262,7 @@ export type Database = {
       }
       training_preferences: {
         Row: {
+          available_weekdays: string[]
           created_at: string
           days_per_week: number
           default_rest_seconds: number
@@ -1276,6 +1280,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          available_weekdays?: string[]
           created_at?: string
           days_per_week?: number
           default_rest_seconds?: number
@@ -1293,6 +1298,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          available_weekdays?: string[]
           created_at?: string
           days_per_week?: number
           default_rest_seconds?: number
