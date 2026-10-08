@@ -1,5 +1,10 @@
 # Translation completion roadmap
 
+## Mídia real e fichas no Coach
+- [ ] Adicionar vídeos/GIFs reais verificados aos cards e detalhes
+- [ ] Reutilizar fichas com anatomia e instruções nas propostas, sem chamadas adicionais de IA
+- [ ] Validar mídia, propostas e testes existentes
+
 ## Fichas inteligentes de exercícios
 - [x] Estruturar catálogo, mídia e anatomia reutilizável (16 demonstrações fotográficas; demais exercícios sem mídia inventada)
 - [x] Integrar cards, detalhes, séries e comparação de histórico
