@@ -46,6 +46,8 @@ function targets(ex: CatalogExercise, muscle: string) {
 /** Initial program uses the existing catalog; AI remains an opt-in proposal workflow. */
 export function buildAssessmentProgram(a: TrainingAssessment, rest = 90): ProgramProposal {
   const strength = a.goal === "Força";
+  const conditioning = a.goal === "Emagrecimento" || a.goal === "Performance/condicionamento";
+  const sessionRest = Math.min(rest, conditioning ? 60 : strength ? 180 : 120);
   const rank = { Iniciante: 0, Intermediário: 1, Avançado: 2 };
   const level = a.experience === "iniciante" ? 0 : a.experience === "intermediário" ? 1 : 2;
   const catalog = [...EXERCISE_CATALOG, ...extra].filter(e => {
@@ -53,12 +55,12 @@ export function buildAssessmentProgram(a: TrainingAssessment, rest = 90): Progra
     if (e.name === "Barra fixa") return a.equipment.includes("Barra fixa");
     if (e.name === "Paralelas") return a.equipment.includes("Paralelas");
     if (e.name === "Mergulho no banco") return a.equipment_mode !== "Apenas peso corporal";
-    return a.equipment.includes(e.equipment) && (a.goal !== "Calistenia" || e.equipment === "Peso corporal");
+    return (a.equipment.includes(e.equipment) || e.equipment === "Peso corporal") && (a.goal !== "Calistenia" || e.equipment === "Peso corporal");
   });
   const full = a.days_per_week <= 3;
   const weekdays = WEEKDAYS.filter(w => a.available_weekdays.includes(w));
   const sets = level === 0 ? 2 : 3;
-  const count = Math.max(3, Math.min(8, Math.floor(a.minutes_per_session * 60 / (sets * (45 + rest) + 60))));
+  const count = Math.max(3, Math.min(8, Math.floor(a.minutes_per_session * 60 / (sets * (45 + sessionRest) + 60))));
   const days = weekdays.map((weekday, i) => {
     const upper = i % 2 === 0;
     const groups: CatalogExercise["group"][] = full
@@ -82,10 +84,10 @@ export function buildAssessmentProgram(a: TrainingAssessment, rest = 90): Progra
       focus: full ? "Corpo inteiro" : upper ? "Superiores" : "Inferiores e core",
       muscles: [...new Set(chosen.map(e => e.group))],
       intensity: (level === 0 || (i > 0 && WEEKDAYS.indexOf(weekday) - WEEKDAYS.indexOf(weekdays[i - 1] ?? "SEG") === 1 && full) ? "leve" : "moderado") as "leve" | "moderado",
-      minutes: Math.min(a.minutes_per_session, Math.max(10, Math.ceil(chosen.length * (sets * (45 + rest) + 60) / 60))),
+      minutes: Math.min(a.minutes_per_session, Math.max(10, Math.ceil(chosen.length * (sets * (45 + sessionRest) + 60) / 60))),
       exercises: chosen.map(e => ({ name: e.name, emoji: e.emoji, muscle: e.muscles[0] ?? e.group, sets,
-        reps: e.name.includes("Prancha") ? "20-40s" : strength && e.equipment !== "Peso corporal" ? "5-8" : "10-15",
-        rest, purpose: e.tip })),
+        reps: e.name.includes("Prancha") ? "20-40s" : strength && e.equipment !== "Peso corporal" ? "5-8" : conditioning ? "12-20" : "10-15",
+        rest: sessionRest, purpose: e.tip })),
     };
   });
   return { name: "Seu programa ASCEND", goal: a.goal, split_label: full ? "Corpo inteiro adaptativo" : "Superiores / Inferiores adaptativo",

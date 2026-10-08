@@ -32,7 +32,7 @@ export function MuscleMap({ value, onChange }: { value: string[]; onChange: (val
       <span className="text-sm font-bold text-primary">{value.length}/5</span>
     </div>
     <svg viewBox="0 0 240 370" className="mx-auto h-[370px] max-w-full" aria-label={`Modelo muscular — ${view === "front" ? "frente" : "costas"}`}>
-      <g className="fill-elevated stroke-border" strokeWidth="2">
+      <g className="pointer-events-none fill-elevated stroke-border" strokeWidth="2">
         <ellipse cx="120" cy="39" rx="21" ry="27" />
         <path d="M107 64 L105 74 Q70 72 63 94 L51 146 41 195 44 212 54 216 65 195 79 153 86 127 96 170 85 195 83 246 95 277 93 310 99 341 91 349 91 357 116 357 117 324 119 279 120 229 121 279 123 324 124 357 149 357 149 349 141 341 147 310 145 277 157 246 155 195 144 170 154 127 161 153 175 195 186 216 196 212 199 195 189 146 177 94 Q170 72 135 74 L133 64Z" />
       </g>
