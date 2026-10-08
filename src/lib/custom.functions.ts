@@ -154,7 +154,9 @@ export const proposeWorkoutChange = createServerFn({ method: "POST" })
       .eq("id", userId)
       .maybeSingle();
 
+    const { data: preferences } = await supabase.from("training_preferences").select("exercise_memory,disliked_exercises,restrictions").eq("user_id",userId).maybeSingle();
     const athlete = [
+      `Memória do atleta: ${JSON.stringify(preferences ?? {})}. Não prescreva exercícios indesejados ou que causam dor. Não diagnostique dor; recomende avaliação profissional.`,
       `Nome: ${profile?.name ?? "Atleta"}`,
       `Sexo: ${profile?.gender ?? "não informado"}`,
       `Objetivo: ${profile?.goal ?? "-"} | Experiência: ${profile?.experience ?? "-"}`,

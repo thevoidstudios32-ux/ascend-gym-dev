@@ -10,6 +10,7 @@ const setSchema = z.object({
   set_index: z.number().int().min(1).max(20),
   reps: z.number().int().min(1).max(100),
   weight_kg: z.number().min(0).max(600),
+  rir: z.number().int().min(0).max(10).nullable().default(null),
 });
 
 /* ------------------------- leitura geral dos extras ------------------------- */
@@ -72,7 +73,7 @@ export const finishWorkout = createServerFn({ method: "POST" })
 
     // Toda a conclusão do treino (XP, séries, PRs, selos e post) acontece em
     // uma única transação no banco: atômica, idempotente e imune ao frontend.
-    const { data: result, error } = await supabase.rpc("complete_workout", {
+    const { data: result, error } = await supabase.rpc("complete_workout_with_rir", {
       _payload: {
         date: data.date,
         title: data.title,
