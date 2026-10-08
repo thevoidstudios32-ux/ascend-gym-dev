@@ -38,12 +38,13 @@ const programSchema = z.object({
 
 const preferencesSchema = z.object({
   days_per_week: z.number().int().min(1).max(7),
+  available_weekdays: z.array(z.enum(["SEG", "TER", "QUA", "QUI", "SEX", "SÁB", "DOM"])).max(7).optional(),
   minutes_per_session: z.number().int().min(15).max(180),
   default_rest_seconds: z.number().int().min(15).max(600),
   goal: z.string().min(2).max(40),
   experience: z.string().min(2).max(30),
   equipment: z.array(z.string().max(40)).max(20).default([]),
-  priority_muscles: z.array(z.string().max(30)).max(10).default([]),
+  priority_muscles: z.array(z.string().max(30)).max(5).default([]),
   liked_exercises: z.array(z.string().max(60)).max(20).default([]),
   disliked_exercises: z.array(z.string().max(60)).max(20).default([]),
   split_preference: z.string().max(60).nullable().default(null),
@@ -309,6 +310,8 @@ export const startProgramDay = createServerFn({ method: "POST" })
       .select("id")
       .eq("user_id", userId)
       .eq("name", payload.name)
+      .like("notes", "Dia do ASCEND AI Program%")
+      .limit(1)
       .maybeSingle();
 
     if (existing) {

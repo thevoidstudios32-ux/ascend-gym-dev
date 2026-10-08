@@ -153,7 +153,7 @@ function sanitizeDay(raw: any, index: number, defaultRestSeconds = 90): ProgramD
     purpose: str(e?.purpose, 200),
   }));
 
-  const weekday = WEEKDAYS.includes(raw?.weekday) ? raw.weekday : WEEKDAYS[index % 7]!;
+  const weekday = WEEKDAYS.includes(raw?.weekday) ? raw.weekday : (WEEKDAYS[index % 7] ?? "SEG");
   const intensity = ["pesado", "moderado", "leve", "recovery"].includes(raw?.intensity)
     ? raw.intensity
     : "moderado";
@@ -211,14 +211,14 @@ export async function proposeProgram(input: ProposeInput): Promise<ProgramPropos
           "Use esta estrutura compacta: {name,goal,split_label,summary,changes,days}. " +
           "Cada item de days deve ter somente {weekday,title,focus,intensity,minutes,exercises}; " +
           "cada exercício deve ter somente {name,muscle,sets,reps,rest}. " +
-          "Regras: respeite o número de dias por semana e a duração por sessão; respeite equipamentos " +
+          "Regras: escolha a divisão pelo objetivo e experiência, nunca atribua PPL fixo. Use apenas available_weekdays quando informados e exatamente days_per_week dias. Respeite a duração por sessão; respeite equipamentos " +
            "use o descanso entre séries indicado nas preferências como padrão em todos os exercícios, " +
            "ajustando-o apenas quando a intensidade do exercício exigir; " +
           "disponíveis e restrições/lesões (nunca prescreva o que o atleta não pode fazer); distribua o volume " +
           "de forma equilibrada priorizando os músculos que o atleta escolheu; considere a RECUPERAÇÃO " +
           "(não coloque dois dias pesados seguidos para o mesmo grupo, inclua dias leves/recovery quando " +
           "a frequência for alta); evite exercícios que o atleta não gosta e favoreça os que ele gosta. " +
-           "Use exatamente 4 exercícios por dia e mantenha todos os textos muito curtos. " +
+           "Dimensione 3 a 8 exercícios pelo tempo disponível, contando execução e descanso. Mantenha os textos curtos. No campo changes, detalhe Remover/Adicionar com nome, séries e repetições. " +
           "Se houver contexto do Shape Tracker, use apenas como preferência estética de prioridade muscular — " +
           "nunca faça diagnóstico, avaliação médica ou julgamento corporal. Nunca invente dados do atleta.\n\n" +
           "ATLETA:\n" + input.athlete,
@@ -244,14 +244,20 @@ export async function proposeProgram(input: ProposeInput): Promise<ProgramPropos
   const days = list(parsed.days)
     .slice(0, 7)
     .map((day, index) => sanitizeDay(day, index, input.preferences.default_rest_seconds));
-  if (!days.length) throw new Error("A proposta veio vazia. Tente reformular o pedido.");
+  if (!days.length || days.some(d => !d.exercises.length)) throw new Error("A proposta veio incompleta. Tente novamente.");
+  const requestedDays = input.request.match(/(?:treinar|treino|consigo treinar)\s+(\d)\s+dias/i);
+  const expectedCount = requestedDays ? Number(requestedDays[1]) : input.preferences.days_per_week;
+  if (days.length !== expectedCount) throw new Error("A proposta não respeitou a quantidade de dias disponível. Gere novamente.");
+  const available = input.preferences.available_weekdays ?? [];
+  if (!requestedDays && available.length && days.some(d => !available.includes(d.weekday))) throw new Error("A proposta não respeitou seus dias disponíveis. Gere novamente.");
+  if (new Set(days.map(d => d.weekday)).size !== days.length) throw new Error("A proposta repetiu dias de treino. Gere novamente.");
 
   return {
     name: str(parsed.name, 60, "ASCEND AI Program"),
     goal: str(parsed.goal, 40, input.preferences.goal),
     split_label: str(parsed.split_label, 60, "Personalizado"),
-    days_per_week: num(parsed.days_per_week, 1, 7, days.length),
-    priorities: list(parsed.priorities).slice(0, 8).map((p: unknown) => str(p, 30)).filter(Boolean),
+    days_per_week: days.length,
+    priorities: list(parsed.priorities ?? input.preferences.priority_muscles).slice(0, 5).map((p: unknown) => str(p, 30)).filter(Boolean),
     week_focus: parsed.week_focus ? str(parsed.week_focus, 200) : null,
     notes: parsed.notes ? str(parsed.notes, 600) : null,
     days,

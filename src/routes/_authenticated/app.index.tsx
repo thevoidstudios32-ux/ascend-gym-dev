@@ -1,7 +1,5 @@
 import { AscendIcon, Glyph } from "@/components/ascend-icon";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useMutation } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { UserAvatar } from "@/components/user-avatar";
@@ -11,18 +9,14 @@ import { TitleSelector } from "@/components/title-selector";
 import { useTitles } from "@/hooks/use-titles";
 import { Apple, Bot, Camera, Dumbbell, Flame, Play, Timer, Trophy, Zap } from "lucide-react";
 import { CountUp, LoadingPage, ProgressBar, StatCard } from "@/components/ui-kit";
-import { useDashboard, useExtras, useRefreshDashboard } from "@/hooks/use-dashboard";
+import { useDashboard, useExtras } from "@/hooks/use-dashboard";
 import { useProgram, useStartProgramDay } from "@/hooks/use-program";
 import { WEEKDAYS } from "@/lib/program";
-import { saveProfile } from "@/lib/ascend.functions";
 import { useT } from "@/lib/i18n";
 import {
   computeStreak,
-  EXPERIENCES,
-  GOALS,
   levelFromXp,
   monthGrid,
-  splitOfDay,
   titleFromLevel,
   todayISO,
   totalVolume,
@@ -36,6 +30,8 @@ export const Route = createFileRoute("/_authenticated/app/")({
       { name: "description", content: "Seu nível, sequência de treinos e calendário do mês." },
       { property: "og:title", content: "Meu painel · ASCEND" },
       { property: "og:description", content: "Seu nível, sequência e calendário de treinos." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -45,7 +41,6 @@ export const Route = createFileRoute("/_authenticated/app/")({
 function HomePage() {
   const t = useT();
   const { data, isLoading, error } = useDashboard();
-  const refresh = useRefreshDashboard();
 
   if (isLoading) return <LoadingPage />;
   if (error)
@@ -53,177 +48,7 @@ function HomePage() {
 
   if (!data?.profile) return <p className="py-20 text-center">{t("Perfil não encontrado.")}</p>;
 
-  if (!data.profile.onboarded)
-    return <Onboarding onDone={refresh} profileName={data.profile.name} />;
-
   return <Dashboard data={data} />;
-}
-
-function Onboarding({ onDone, profileName }: { onDone: () => void; profileName: string }) {
-  const t = useT();
-  const save = useServerFn(saveProfile);
-  const [form, setForm] = useState({
-    name: profileName === "Atleta" ? "" : profileName,
-    gender: "",
-    goal: "",
-    experience: "",
-    age: "",
-    height_cm: "",
-    weight_kg: "",
-    days_per_week: "",
-  });
-
-  const isComplete =
-    form.name.trim().length > 0 &&
-    form.gender.length > 0 &&
-    form.goal.length > 0 &&
-    form.experience.length > 0 &&
-    Number(form.age) >= 10 &&
-    Number(form.height_cm) >= 100 &&
-    Number(form.weight_kg) >= 30 &&
-    Number(form.days_per_week) >= 1;
-
-  const mutation = useMutation({
-    mutationFn: () =>
-      save({
-        data: {
-          name: form.name.trim() || "Atleta",
-          gender: form.gender as "feminino" | "masculino",
-          goal: form.goal,
-          experience: form.experience,
-          age: Number(form.age) || null,
-          height_cm: Number(form.height_cm) || null,
-          weight_kg: Number(form.weight_kg) || null,
-          days_per_week: Number(form.days_per_week),
-        },
-      }),
-    onSuccess: () => {
-      toast.success(t("Perfil pronto! Bora treinar"));
-      onDone();
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const field =
-    "w-full rounded-xl bg-elevated px-4 py-3 text-sm outline-none ring-ring focus:ring-2";
-
-  return (
-    <div className="panel animate-rise p-6">
-      <h1 className="text-display text-4xl">{t("VAMOS TE CONHECER")}</h1>
-      <p className="mt-2 text-sm text-muted-foreground">
-        {t("Esses dados personalizam seu plano, suas metas e o Coach IA.")}
-      </p>
-      <div className="mt-6 space-y-3">
-        <input
-          className={field}
-          placeholder={t("Como podemos te chamar?")}
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-        />
-        <div className="grid grid-cols-2 gap-3">
-          <select
-            aria-label={t("Sexo")}
-            required
-            className={field}
-            value={form.gender}
-            onChange={(e) => setForm({ ...form, gender: e.target.value })}
-          >
-            <option value="" disabled>{t("Sexo")}</option>
-            <option value="feminino">{t("Feminino")}</option>
-            <option value="masculino">{t("Masculino")}</option>
-          </select>
-          <select
-            aria-label={t("Objetivo")}
-            required
-            className={field}
-            value={form.goal}
-            onChange={(e) => setForm({ ...form, goal: e.target.value })}
-          >
-            <option value="" disabled>{t("Objetivo")}</option>
-            {GOALS.map((g) => (
-              <option key={g} value={g}>
-                {t(g)}
-              </option>
-            ))}
-          </select>
-          <select
-            aria-label={t("Experiência")}
-            required
-            className={field}
-            value={form.experience}
-            onChange={(e) => setForm({ ...form, experience: e.target.value })}
-          >
-            <option value="" disabled>{t("Experiência")}</option>
-            {EXPERIENCES.map((g) => (
-              <option key={g} value={g}>
-                {t(g)}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="grid grid-cols-3 gap-3">
-          <input
-            className={field}
-            type="number"
-            min={10}
-            max={100}
-            required
-            placeholder={t("Idade")}
-            value={form.age}
-            onChange={(e) => setForm({ ...form, age: e.target.value })}
-          />
-          <input
-            className={field}
-            type="number"
-            min={100}
-            max={250}
-            required
-            placeholder={t("Altura (cm)")}
-            value={form.height_cm}
-            onChange={(e) => setForm({ ...form, height_cm: e.target.value })}
-          />
-          <input
-            className={field}
-            type="number"
-            min={30}
-            max={300}
-            step="0.1"
-            required
-            placeholder={t("Peso (kg)")}
-            value={form.weight_kg}
-            onChange={(e) => setForm({ ...form, weight_kg: e.target.value })}
-          />
-        </div>
-        <div>
-          <p className="mb-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-            {t("Dias de treino por semana")}
-          </p>
-          <div className="flex gap-2">
-            {[1, 2, 3, 4, 5, 6, 7].map((d) => (
-              <button
-                key={d}
-                onClick={() => setForm({ ...form, days_per_week: String(d) })}
-                className={`press h-10 flex-1 rounded-xl text-sm font-bold ${
-                  Number(form.days_per_week) === d
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-elevated text-muted-foreground"
-                }`}
-              >
-                {d}
-              </button>
-            ))}
-          </div>
-        </div>
-        <button
-          onClick={() => mutation.mutate()}
-          disabled={mutation.isPending || !isComplete}
-          className="press w-full rounded-full bg-primary py-3.5 font-bold text-primary-foreground shadow-glow disabled:opacity-60"
-        >
-          {mutation.isPending ? t("Salvando…") : t("Começar")}
-        </button>
-      </div>
-    </div>
-  );
 }
 
 type DashboardData = NonNullable<ReturnType<typeof useDashboard>["data"]>;
@@ -240,7 +65,8 @@ function Dashboard({ data }: { data: DashboardData }) {
   const { data: extras } = useExtras();
   const { data: titles } = useTitles();
   const [titlesOpen, setTitlesOpen] = useState(false);
-  const profile = data.profile!;
+  const profile = data.profile;
+  if (!profile) throw new Error("Perfil não encontrado.");
   const level = levelFromXp(profile.xp);
   const shown = displayTitle(level.level, profile.xp, profile.id ?? null, titles?.equipped ?? null);
   const title = shown.progression;
@@ -250,7 +76,6 @@ function Dashboard({ data }: { data: DashboardData }) {
   const cells = useMemo(() => monthGrid(now.getFullYear(), now.getMonth()), [now]);
   const today = todayISO();
   const doneSet = new Set(dates);
-  const split = splitOfDay();
   const doneToday = doneSet.has(today);
   const { data: programData } = useProgram();
   const startDay = useStartProgramDay();
@@ -385,7 +210,7 @@ function Dashboard({ data }: { data: DashboardData }) {
       <section className="card overflow-hidden">
         <div className="flex items-center gap-4 p-5">
             <span className="animate-exercise text-3xl">
-              <Glyph value={todayProgramDay ? todayProgramDay.exercises[0]?.emoji : hasPersonalizedProgram ? "mobility" : split.emoji} size={30} />
+              <Glyph value={todayProgramDay ? todayProgramDay.exercises[0]?.emoji : "mobility"} size={30} />
             </span>
           <div className="min-w-0 flex-1">
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
@@ -393,7 +218,7 @@ function Dashboard({ data }: { data: DashboardData }) {
               {hasPersonalizedProgram ? t(" · programa IA") : ""}
             </p>
             <p className="truncate text-lg font-bold">
-              {todayProgramDay ? todayProgramDay.title : hasPersonalizedProgram ? "Dia de descanso" : split.name}
+              {todayProgramDay ? todayProgramDay.title : hasPersonalizedProgram ? "Dia de descanso" : "Crie seu programa"}
             </p>
             <p className="truncate text-xs text-muted-foreground">
               {todayProgramDay
@@ -404,11 +229,7 @@ function Dashboard({ data }: { data: DashboardData }) {
                   })
                 : hasPersonalizedProgram
                   ? "Seu programa personalizado não tem treino marcado para hoje."
-                  : t("{focus} · {min} min · {n} exercícios", {
-                    focus: split.focus,
-                    min: split.minutes,
-                    n: split.exercises.length,
-                  })}
+: "Complete sua avaliação para montar seu programa."}
             </p>
           </div>
         </div>
@@ -434,12 +255,11 @@ function Dashboard({ data }: { data: DashboardData }) {
           </Link>
         ) : (
           <Link
-            to="/app/treino/$split"
-            params={{ split: split.id }}
+            to="/app/treinos"
             className="press flex items-center justify-center gap-2 bg-primary py-4 text-base font-extrabold uppercase tracking-wide text-primary-foreground"
           >
             <Play className="size-5 fill-current" />
-            {doneToday ? t("Treinar de novo") : t("Iniciar treino")}
+            Criar meu programa
           </Link>
         )}
       </section>

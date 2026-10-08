@@ -80,6 +80,7 @@ export type ProgramVersion = {
 
 export type TrainingPreferences = {
   days_per_week: number;
+  available_weekdays?: string[];
   minutes_per_session: number;
   default_rest_seconds: number;
   goal: string;
@@ -148,11 +149,12 @@ export const SPLIT_PREFERENCES = [
 ] as const;
 
 export const GOAL_OPTIONS = [
-  "hipertrofia",
-  "força",
-  "emagrecer",
-  "condicionamento",
-  "manutenção",
+  "Hipertrofia",
+  "Força",
+  "Emagrecimento",
+  "Recomposição corporal",
+  "Performance/condicionamento",
+  "Calistenia",
 ] as const;
 
 export const EXPERIENCE_OPTIONS = ["iniciante", "intermediário", "avançado"] as const;
@@ -210,7 +212,10 @@ export function defaultPreferences(): TrainingPreferences {
 
 /** Sugestões rápidas mostradas no AI Coach da aba Treinos. */
 export const COACH_SUGGESTIONS = [
-  "Quero treinar 7 dias por semana",
+  "Tenho só 40 minutos hoje",
+  "Quero treinar em casa",
+  "Quero mais calistenia",
+  "Quero aumentar o volume de peito",
   "Quero priorizar ombros",
   "Quero mais costas",
   "Mudar minha divisão para PPL + Upper/Lower",

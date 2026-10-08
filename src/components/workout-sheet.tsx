@@ -6,7 +6,6 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { useProgram } from "@/hooks/use-program";
 import { useCustomWorkouts } from "@/hooks/use-custom";
 import { useDashboard } from "@/hooks/use-dashboard";
-import { SPLITS } from "@/lib/ascend";
 import { estimateMinutes } from "@/lib/custom";
 import { dayMinutes, WEEKDAYS } from "@/lib/program";
 import type { PdfProgram, PdfWorkout } from "@/lib/workout-pdf";
@@ -45,13 +44,6 @@ export function WorkoutSheetButton() {
       exercises: w.exercises.map(e => ({
         name: e.name, muscle: e.muscle, sets: e.sets, reps: e.reps,
         rest: e.rest, notes: e.tip, hold: e.hold,
-      })),
-    })));
-    if (!days.length) days.push(...SPLITS.map(s => ({
-      title: s.name, focus: s.focus, minutes: s.minutes,
-      exercises: s.exercises.map(e => ({
-        name: e.name, muscle: e.muscle, sets: e.sets, reps: e.reps,
-        rest: e.rest, notes: e.tip,
       })),
     })));
     return {
@@ -101,7 +93,7 @@ export function WorkoutSheetButton() {
 
   return (
     <>
-      <Button type="button" onClick={() => setOpen(true)} disabled={loading} className="press w-full py-6 font-bold">
+      <Button type="button" onClick={() => setOpen(true)} disabled={loading || (!program?.program && !custom.data?.workouts.length)} className="press w-full py-6 font-bold">
         <FileDown /> Exportar programa em PDF
       </Button>
       <Dialog open={open} onOpenChange={(next) => { if (!next) close(); else setOpen(true); }}>

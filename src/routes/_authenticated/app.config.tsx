@@ -1,3 +1,7 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { TrainingOnboarding } from "@/components/training-onboarding";
+import { useDashboard } from "@/hooks/use-dashboard";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { Check, Globe, LogOut, User } from "lucide-react";
@@ -13,6 +17,8 @@ export const Route = createFileRoute("/_authenticated/app/config")({
       { name: "description", content: "Idioma e preferências do seu app ASCEND." },
       { property: "og:title", content: "Configurações · ASCEND" },
       { property: "og:description", content: "Idioma e preferências do seu app ASCEND." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -25,6 +31,8 @@ const LANGS: { id: Lang; flag: string; name: string; native: string }[] = [
 ];
 
 function SettingsPage() {
+  const [assessment, setAssessment] = useState(false);
+  const dashboard = useDashboard();
   const { lang, setLang, t } = useI18n();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -41,9 +49,16 @@ function SettingsPage() {
     navigate({ to: "/auth", replace: true });
   }
 
+  if (assessment) return <TrainingOnboarding initial={dashboard.data?.profile?.training_assessment} onDone={() => setAssessment(false)} onCancel={() => setAssessment(false)} />;
+
   return (
     <div className="animate-rise space-y-4">
       <PageHeader title={t("Configurações")} subtitle={t("Ajuste o app do seu jeito")} />
+
+      <section className="border-b border-border pb-5">
+        <h2 className="font-bold">Programa de treino</h2>
+        <Button variant="secondary" className="mt-3" onClick={() => setAssessment(true)}>Refazer avaliação inicial</Button>
+      </section>
 
       <section className="panel p-5">
         <div className="flex items-center gap-2">
@@ -57,7 +72,9 @@ function SettingsPage() {
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {LANGS.map((l) => {
             const active = lang === l.id;
-            return (
+            if (assessment) return <TrainingOnboarding initial={dashboard.data?.profile?.training_assessment} onDone={() => setAssessment(false)} onCancel={() => setAssessment(false)} />;
+
+  return (
               <button
                 key={l.id}
                 onClick={() => pick(l.id)}
