@@ -14,3 +14,5 @@
 - Keep initial training assessment validation and catalog-based program generation in a shared client-safe module; reuse ai_programs and training_preferences so training, exports, and Coach share one source.
 - Gate new-user assessment in the app layout without changing the managed auth layout; existing onboarded accounts keep their programs and navigation.
 - Persist accepted assessments, preferences, and program versions in one authenticated database transaction; rejected proposals never change saved data.
+- Resolve exercise technical sheets from the shared catalog and reuse the anatomical SVG for onboarding and read-only highlights; real media stays in asset pointers, unavailable media is never fabricated.
+- Preserve atomic workout completion through the RIR-aware wrapper; athlete memory lives in training_preferences and is passed to all training Coach contexts.

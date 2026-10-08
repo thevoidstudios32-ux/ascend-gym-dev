@@ -281,7 +281,7 @@ function daysAgoISO(n: number) {
 export async function buildProgramContext(supabase: any, userId: string) {
   const since30 = daysAgoISO(30);
 
-  const [profileRes, workoutsRes, setsRes, feedbackRes, photosRes] = await Promise.all([
+  const [profileRes, workoutsRes, setsRes, feedbackRes, photosRes, preferencesRes] = await Promise.all([
     supabase
       .from("profiles")
       .select("name,gender,goal,experience,age,weight_kg,height_cm,days_per_week,equipment,injuries,xp")
@@ -295,7 +295,7 @@ export async function buildProgramContext(supabase: any, userId: string) {
       .limit(40),
     supabase
       .from("exercise_sets")
-      .select("exercise,reps,weight_kg,date")
+      .select("exercise,reps,weight_kg,date,rir")
       .eq("user_id", userId)
       .order("date", { ascending: false })
       .limit(100),
@@ -311,11 +311,12 @@ export async function buildProgramContext(supabase: any, userId: string) {
       .eq("user_id", userId)
       .order("date", { ascending: false })
       .limit(4),
+    supabase.from("training_preferences").select("exercise_memory,disliked_exercises,restrictions").eq("user_id",userId).maybeSingle(),
   ]);
 
   const profile = profileRes.data ?? null;
   const workouts = (workoutsRes.data ?? []) as { date: string; title: string; duration_min: number }[];
-  const sets = (setsRes.data ?? []) as { exercise: string; reps: number; weight_kg: number }[];
+  const sets = (setsRes.data ?? []) as { exercise: string; reps: number; weight_kg: number; rir: number | null; date: string }[];
   const feedback = (feedbackRes.data ?? []) as {
     day_key: string | null;
     rating: string;
@@ -356,6 +357,8 @@ export async function buildProgramContext(supabase: any, userId: string) {
     `Meta de treinos por semana: ${profile?.days_per_week ?? "?"}`,
     profile?.equipment?.length ? `Equipamentos: ${profile.equipment.join(", ")}` : "",
     profile?.injuries ? `Lesões/limitações: ${profile.injuries}` : "",
+    `Memória do atleta: ${JSON.stringify(preferencesRes.data ?? {})}. Exclua exercícios indesejados ou que causam desconforto. Dor não é preferência estética: não diagnostique, recomende avaliação profissional.`,
+    `Performance recente: ${sets.slice(0,20).map(s=>`${s.date} ${s.exercise}: ${s.weight_kg}kg x${s.reps}, RIR ${s.rir ?? "não informado"}`).join("; ")}`,
     `Sequência atual: ${streak} dias | Treinos nos últimos 30 dias: ${last30.length}`,
     avgMinutes ? `Duração média das sessões: ${avgMinutes} min` : "",
     `Treinos recentes: ${workouts.slice(0, 6).map((w) => `${w.date} ${w.title}`).join("; ") || "nenhum"}`,

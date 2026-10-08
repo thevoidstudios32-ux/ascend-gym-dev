@@ -41,7 +41,7 @@ function SessionPage() {
     : null;
   const split: Split = customWorkout
     ? customToSplit(customWorkout)
-    : (SPLITS.find((s) => s.id === splitId) ?? SPLITS[0] ?? { id: "unknown", name: "Treino", focus: "", emoji: "", minutes: 0, exercises: [] });
+    : (SPLITS.find((s) => s.id === splitId) ?? SPLITS[0] ?? { id: "full", name: "Treino", focus: "", emoji: "", minutes: 0, exercises: [] });
   const workoutKind = customWorkout ? `custom:${customWorkout.id}` : split.id;
   const navigate = useNavigate();
   const { data } = useDashboard();

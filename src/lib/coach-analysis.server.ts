@@ -36,7 +36,7 @@ export async function collectCoachData(supabase: Sb, userId: string) {
   const since7 = daysAgoISO(6);
   const since14 = daysAgoISO(13);
 
-  const [profileRes, workoutsRes, recordsRes, setsRes] = await Promise.all([
+  const [profileRes, workoutsRes, recordsRes, setsRes, preferencesRes] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
     supabase
       .from("workouts")
@@ -52,10 +52,11 @@ export async function collectCoachData(supabase: Sb, userId: string) {
       .limit(40),
     supabase
       .from("exercise_sets")
-      .select("exercise,reps,weight_kg,date")
+      .select("exercise,reps,weight_kg,date,rir")
       .eq("user_id", userId)
       .order("date", { ascending: false })
       .limit(400),
+    supabase.from("training_preferences").select("exercise_memory,disliked_exercises,restrictions").eq("user_id",userId).maybeSingle(),
   ]);
 
   const profile = profileRes.data ?? null;
@@ -76,6 +77,7 @@ export async function collectCoachData(supabase: Sb, userId: string) {
     reps: number;
     weight_kg: number;
     date: string;
+    rir: number | null;
   }[];
 
   const last7 = workouts.filter((w) => w.date >= since7);
@@ -101,7 +103,7 @@ export async function collectCoachData(supabase: Sb, userId: string) {
     hasEnoughData: workouts.length >= 3 || records.length >= 2,
   };
 
-  return { profile, workouts, records, sets, last7, prev7, last30, prs7, insights };
+  return { profile, preferences: preferencesRes.data ?? {}, workouts, records, sets, last7, prev7, last30, prs7, insights };
 }
 
 export function buildContextSummary(data: Awaited<ReturnType<typeof collectCoachData>>) {
@@ -148,6 +150,8 @@ export function buildContextSummary(data: Awaited<ReturnType<typeof collectCoach
     `Meta de treinos por semana: ${profile?.days_per_week ?? "?"}`,
     profile?.equipment?.length ? `Equipamentos disponíveis: ${profile.equipment.join(", ")}` : "",
     profile?.injuries ? `Lesões/limitações: ${profile.injuries}` : "",
+    `Memória e restrições: ${JSON.stringify(data.preferences)}. Não recomende exercícios indesejados ou dolorosos. Não diagnostique; recomende avaliação profissional em caso de dor persistente.`,
+    `Séries recentes: ${sets.slice(0,20).map(s=>`${s.date} ${s.exercise} ${s.weight_kg}kg x${s.reps} RIR ${s.rir ?? "não informado"}`).join("; ")}`,
     `Nível ${level.level} (${level.name}), ${profile?.xp ?? 0} XP total`,
     `Sequência atual: ${insights.streak ?? 0} dias`,
     `Treinos nos últimos 7 dias: ${last7.length} | nos 7 anteriores: ${prev7.length} | nos últimos 30 dias: ${last30.length}`,

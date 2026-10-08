@@ -23,7 +23,8 @@ export function getExerciseInfo(name: string, muscle='', tip=''): ExerciseInfo {
  const e=findExercise(name); const id=exerciseId(e?.name ?? name);
  const primary=anatomyMuscle(e?.muscles[0] ?? muscle);
  const secondary=[...new Set((e?.muscles.slice(1) ?? []).map(anatomyMuscle))].filter(m=>m!==primary);
- return { id, name, muscleGroup: e?.muscles[0] ?? (muscle || 'Não informado'), primaryMuscles: [primary], secondaryMuscles: secondary,
+ const squat = /agachamento|leg-press|hack-squat/.test(id);
+ return { id, name, muscleGroup: e?.muscles[0] ?? (muscle || 'Não informado'), primaryMuscles: squat ? ['Quadríceps','Glúteos'] : [primary], secondaryMuscles: squat ? ['Posterior de coxa','Abdômen'] : secondary,
  equipment: e?.equipment ?? 'Não informado', difficulty:e?.difficulty ?? 'Não informado',
  description:e ? `Trabalha ${e.muscles.join(', ').toLowerCase()}. ${e.tip}` : tip || 'Confira a execução com um profissional antes de iniciar.',
  instructions: instructions[id] ?? (e ? [e.tip, 'Ajuste a carga para manter o controle durante toda a amplitude confortável.', 'Interrompa a execução se houver dor.'] : ['Peça orientação para ajustar a posição e a execução deste movimento.']),
