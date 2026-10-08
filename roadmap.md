@@ -1,10 +1,10 @@
 # Translation completion roadmap
 
 ## Avaliação e programa ASCEND
-- [ ] Criar avaliação obrigatória com disponibilidade, equipamentos e mapa muscular
-- [ ] Salvar avaliação e gerar programa adaptativo sem atribuir PPL padrão
-- [ ] Integrar reavaliação e propostas explícitas da IA, preservando funções existentes
-- [ ] Validar fluxo, persistência e ausência de PPL inicial
+- [x] Criar avaliação obrigatória com disponibilidade, equipamentos e mapa muscular
+- [x] Salvar avaliação e gerar programa adaptativo sem atribuir PPL padrão
+- [x] Integrar reavaliação e propostas explícitas da IA, preservando funções existentes
+- [x] Validar geração de 1–7 dias, mapa muscular e proposta/recusa no navegador; gravação atômica implementada, sem substituir conta real durante os testes
 
 - [x] Sync selected language with the signed-in profile
 - [ ] Translate nutrition, shape, progress, coach, community, profile, and notices

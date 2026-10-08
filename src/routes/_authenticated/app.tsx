@@ -152,7 +152,7 @@ function AppLayout() {
       </aside>
 
       <main className="mx-auto w-full max-w-3xl px-4 pb-28 pt-6 md:pb-12">
-        {dashboard.isPending ? <p className="py-12 text-muted-foreground">Carregando perfil…</p> : dashboard.error ? <p role="alert" className="text-destructive">Não foi possível carregar seu perfil. Atualize a página.</p> : dashboard.data?.profile && !dashboard.data.profile.onboarded ? <TrainingOnboarding onDone={() => { void dashboard.refetch(); }} /> : <Outlet />}
+        {dashboard.isPending ? <p className="py-12 text-muted-foreground">Carregando perfil…</p> : dashboard.error || !dashboard.data?.profile ? <p role="alert" className="text-destructive">Não foi possível carregar seu perfil. Atualize a página.</p> : !dashboard.data.profile.onboarded ? <TrainingOnboarding onDone={() => { void dashboard.refetch(); }} /> : <Outlet />}
       </main>
 
       <TitleUnlockOverlay />
