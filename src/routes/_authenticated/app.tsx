@@ -26,6 +26,8 @@ import { getSocialBadge } from "@/lib/social.functions";
 import { useAdminStatus, useLoginTracking } from "@/hooks/use-admin";
 import { AscendSymbol, AscendWordmark } from "@/components/brand";
 import { useT } from "@/lib/i18n";
+import { useDashboard } from "@/hooks/use-dashboard";
+import { TrainingOnboarding } from "@/components/training-onboarding";
 
 
 export const Route = createFileRoute("/_authenticated/app")({
@@ -64,6 +66,7 @@ function AppLayout() {
   const { data: adminStatus } = useAdminStatus();
   const isAdmin = adminStatus?.isAdmin === true;
   useLoginTracking();
+  const dashboard = useDashboard();
 
   async function signOut() {
     await queryClient.cancelQueries();
@@ -149,7 +152,7 @@ function AppLayout() {
       </aside>
 
       <main className="mx-auto w-full max-w-3xl px-4 pb-28 pt-6 md:pb-12">
-        <Outlet />
+        {dashboard.isPending ? <p className="py-12 text-muted-foreground">Carregando perfil…</p> : dashboard.error ? <p role="alert" className="text-destructive">Não foi possível carregar seu perfil. Atualize a página.</p> : dashboard.data?.profile && !dashboard.data.profile.onboarded ? <TrainingOnboarding onDone={() => { void dashboard.refetch(); }} /> : <Outlet />}
       </main>
 
       <TitleUnlockOverlay />

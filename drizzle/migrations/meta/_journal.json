@@ -78,6 +78,13 @@
       "when": 1790030683759,
       "tag": "0010_add_default_rest_seconds_to_training_preferences",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791418313266,
+      "tag": "0011_training_assessment_availability",
+      "breakpoints": true
     }
   ]
 }
