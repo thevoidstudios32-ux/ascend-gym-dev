@@ -8,6 +8,7 @@ import { WEEKDAYS } from "@/lib/program";
 import { computeStreak, todayISO } from "@/lib/ascend";
 import { aiChat, type AiMessage } from "@/lib/ai-provider.server";
 import { jsonrepair } from "jsonrepair";
+import { coachExerciseReferences } from '@/lib/exercise-coach-context';
 
 const exerciseSchema = {
   type: "object",
@@ -221,7 +222,7 @@ export async function proposeProgram(input: ProposeInput): Promise<ProgramPropos
            "Dimensione 3 a 8 exercícios pelo tempo disponível, contando execução e descanso. Mantenha os textos curtos. No campo changes, detalhe Remover/Adicionar com nome, séries e repetições. " +
           "Se houver contexto do Shape Tracker, use apenas como preferência estética de prioridade muscular — " +
           "nunca faça diagnóstico, avaliação médica ou julgamento corporal. Nunca invente dados do atleta.\n\n" +
-          "ATLETA:\n" + input.athlete,
+          "ATLETA:\n" + input.athlete + '\n\n' + coachExerciseReferences(input.current?.days.flatMap(d => d.exercises.map(e => e.name)) ?? [], input.request),
       },
       {
         role: "user",

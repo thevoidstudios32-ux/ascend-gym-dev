@@ -4,6 +4,7 @@ import type { CustomExercise, Proposal } from "@/lib/custom";
 
 import { aiChat } from "@/lib/ai-provider.server";
 import { jsonrepair } from "jsonrepair";
+import { coachExerciseReferences } from '@/lib/exercise-coach-context';
 
 const schema = {
   name: "propose_workout",
@@ -83,7 +84,7 @@ export async function proposeWorkout(input: {
           "Se a função não estiver disponível, responda somente com o objeto JSON dos argumentos dela. " +
           "Respeite o pedido, mantenha coerência de volume, descanso e progressão, e use 'hold' (segundos) " +
           "apenas em exercícios isométricos. Nunca invente equipamentos que o atleta disse não ter.\n\nATLETA:\n" +
-          input.athlete,
+          input.athlete + '\n\n' + coachExerciseReferences(input.workout.exercises.map(e => e.name), input.request),
       },
       {
         role: "user",

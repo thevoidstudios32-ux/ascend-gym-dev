@@ -5,6 +5,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { TrainingOnboarding } from "@/components/training-onboarding";
+import { CoachExerciseReference } from './coach-exercise-reference';
 import { useDashboard } from "@/hooks/use-dashboard";
 import {
   ArrowDown,
@@ -587,9 +588,7 @@ function ProposalView({
                 {INTENSITY_LABEL[d.intensity]}
               </span>
             </div>
-            <p className="mt-1 text-[11px] text-muted-foreground">
-              {d.exercises.map((e) => e.name).join(" · ") || d.focus}
-            </p>
+            <div className="mt-2">{d.exercises.map((e, i) => <CoachExerciseReference key={`${e.name}-${i}`} name={e.name} muscle={e.muscle} sets={e.sets} reps={e.reps} rest={e.rest} />)}{!d.exercises.length && <p className="text-xs text-muted-foreground">{d.focus}</p>}</div>
           </div>
         ))}
       </div>
