@@ -20,7 +20,9 @@ const instructions: Record<string,string[]> = {
  'puxada-alta': ['Ajuste o apoio das coxas e segure a barra.', 'Mantenha o peito aberto e o tronco estável.', 'Puxe a barra à frente em direção à parte alta do peito.', 'Retorne lentamente, sem soltar a tensão de forma brusca.'],
 };
 export function getExerciseInfo(name: string, muscle='', tip=''): ExerciseInfo {
- const e=findExercise(name); const id=exerciseId(e?.name ?? name);
+ const candidate=findExercise(name);
+ const e=candidate && exerciseId(candidate.name)===exerciseId(name) ? candidate : undefined;
+ const id=exerciseId(e?.name ?? name);
  const primary=anatomyMuscle(e?.muscles[0] ?? muscle);
  const secondary=[...new Set((e?.muscles.slice(1) ?? []).map(anatomyMuscle))].filter(m=>m!==primary);
  const squat = /agachamento|leg-press|hack-squat/.test(id);

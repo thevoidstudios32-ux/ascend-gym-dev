@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Check, ArrowLeftRight, AlertTriangle, Brain } from 'lucide-react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useServerFn } from '@tanstack/react-start';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -9,14 +9,17 @@ import { ExerciseMedia } from './exercise-media';
 import { MuscleMap } from './muscle-map';
 import { SetTracker } from './set-tracker';
 import { getExerciseInfo, type ExerciseInfo, type SetEntry } from '@/lib/exercise-detail';
-import { saveExerciseMemory } from '@/lib/exercises.functions';
+import { saveExerciseMemory, getExerciseHistory } from '@/lib/exercises.functions';
 export function ExerciseInstructions({steps}:{steps:string[]}) { return <ol className="space-y-3">{steps.map((s,i)=><li key={s} className="flex gap-3 text-sm leading-relaxed"><span className="grid size-6 shrink-0 place-items-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{i+1}</span>{s}</li>)}</ol>; }
 export function CoachTips({tips}:{tips:string[]}) {return <ul className="space-y-2">{tips.map(t=><li key={t} className="flex gap-2 text-sm text-muted-foreground"><Check className="mt-0.5 size-4 shrink-0 text-primary" />{t}</li>)}</ul>;}
 export function ExerciseDetail({exercise,prescription,entries,history,suggested,onClose,onChange,onComplete,onSwap}:{exercise:ExerciseInfo;prescription:{sets:number;reps:string;rest:number};entries:SetEntry[];history:{weight_kg:number;reps:number;rir?:number|null;date:string;workout_id?:string|null;set_index:number}[];suggested:number|null;onClose:()=>void;onChange:(i:number,patch:Partial<SetEntry>)=>void;onComplete:(i:number)=>void;onSwap:()=>void}) {
  const [related,setRelated]=useState<ExerciseInfo|null>(null); const [note,setNote]=useState('');const [kind,setKind]=useState<'dislike'|'machines'|'balance'|'discomfort'>('dislike');
  const info=related??exercise;const fn=useServerFn(saveExerciseMemory);const qc=useQueryClient();
  const save=useMutation({mutationFn:()=>fn({data:{exercise:exercise.name,kind,note}}),onSuccess:()=>{toast.success('Memória do atleta salva.');qc.invalidateQueries({queryKey:['gym-setup']});qc.invalidateQueries({queryKey:['ai-program']});},onError:(e:Error)=>toast.error(e.message)});
- const first=history[0];const previous=first?history.filter(s=>first.workout_id?s.workout_id===first.workout_id:s.date===first.date).sort((a,b)=>a.set_index-b.set_index):[];
+ const historyFn=useServerFn(getExerciseHistory);
+ const historyQuery=useQuery({queryKey:['exercise-history',exercise.name],queryFn:()=>historyFn({data:{exercise:exercise.name}})});
+ const rows=historyQuery.data ?? history;
+ const first=rows[0];const previous=first?rows.filter(s=>first.workout_id?s.workout_id===first.workout_id:s.date===first.date).sort((a,b)=>a.set_index-b.set_index):[];
  return <Dialog open onOpenChange={open=>{if(!open)onClose();}}><DialogContent className="max-h-[92dvh] w-[calc(100%-1rem)] max-w-5xl overflow-y-auto rounded-lg border-border bg-background p-0 sm:max-w-5xl">
  <header className="border-b border-border p-5 pr-12"><p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-primary">ASCEND · FICHA TÉCNICA</p><DialogTitle className="text-display text-3xl leading-tight">{info.name}</DialogTitle><p className="mt-2 text-xs text-muted-foreground">{info.muscleGroup} · {info.equipment} · {info.difficulty}</p><DialogDescription className="mt-3 text-sm leading-relaxed">{info.description}</DialogDescription></header>
  <div className="grid gap-6 p-5 md:grid-cols-[1.4fr_1fr]"><div className="space-y-6"><section><h3 className="mb-3 text-xs font-bold uppercase tracking-widest">Demonstração do movimento</h3><ExerciseMedia key={info.id} exercise={info} /></section><section><h3 className="mb-4 text-xs font-bold uppercase tracking-widest">Instruções</h3><ExerciseInstructions steps={info.instructions}/></section><section><h3 className="mb-3 text-xs font-bold uppercase tracking-widest">Dicas do Coach</h3><CoachTips tips={info.tips}/></section></div>

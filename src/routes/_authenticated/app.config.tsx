@@ -25,9 +25,9 @@ export const Route = createFileRoute("/_authenticated/app/config")({
   component: SettingsPage,
 });
 
-const LANGS: { id: Lang; flag: string; name: string; native: string }[] = [
-  { id: "pt", flag: "🇧🇷", name: "Português", native: "Português (Brasil)" },
-  { id: "en", flag: "🇺🇸", name: "Inglês", native: "English (US)" },
+const LANGS: { id: Lang; name: string; native: string }[] = [
+  { id: "pt", name: "Português", native: "Português (Brasil)" },
+  { id: "en", name: "Inglês", native: "English (US)" },
 ];
 
 function SettingsPage() {
@@ -72,9 +72,7 @@ function SettingsPage() {
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {LANGS.map((l) => {
             const active = lang === l.id;
-            if (assessment) return <TrainingOnboarding initial={dashboard.data?.profile?.training_assessment} onDone={() => setAssessment(false)} onCancel={() => setAssessment(false)} />;
-
-  return (
+            return (
               <button
                 key={l.id}
                 onClick={() => pick(l.id)}
@@ -85,7 +83,7 @@ function SettingsPage() {
                     : "border-border bg-elevated hover:border-primary/40"
                 }`}
               >
-                <span className="text-2xl leading-none">{l.flag}</span>
+                <Globe className="size-5 text-primary" />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-bold">{t(l.name)}</span>
                   <span className="block truncate text-xs text-muted-foreground">{l.native}</span>

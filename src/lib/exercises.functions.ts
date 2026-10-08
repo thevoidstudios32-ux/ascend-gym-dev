@@ -41,6 +41,15 @@ export const saveExerciseMemory = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const getExerciseHistory = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ exercise: z.string().min(1).max(80) }).parse(input))
+  .handler(async ({context,data}) => {
+    const { data: rows, error } = await context.supabase.from("exercise_sets").select("weight_kg,reps,rir,date,workout_id,set_index").eq("user_id",context.userId).eq("exercise",data.exercise).order("date",{ascending:false}).order("set_index").limit(100);
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
 export const toggleFavoriteExercise = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => z.object({ exercise: z.string().min(1).max(80) }).parse(data))
