@@ -92,6 +92,13 @@
       "when": 1791421752404,
       "tag": "0012_atomic_training_assessment",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1791422944763,
+      "tag": "0013_exercise_rir_and_athlete_memory",
+      "breakpoints": true
     }
   ]
 }

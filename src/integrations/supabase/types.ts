@@ -738,6 +738,7 @@ export type Database = {
           exercise: string
           id: string
           reps: number
+          rir: number | null
           set_index: number
           user_id: string
           weight_kg: number
@@ -749,6 +750,7 @@ export type Database = {
           exercise: string
           id?: string
           reps?: number
+          rir?: number | null
           set_index?: number
           user_id: string
           weight_kg?: number
@@ -760,6 +762,7 @@ export type Database = {
           exercise?: string
           id?: string
           reps?: number
+          rir?: number | null
           set_index?: number
           user_id?: string
           weight_kg?: number
@@ -1268,6 +1271,7 @@ export type Database = {
           default_rest_seconds: number
           disliked_exercises: string[]
           equipment: string[]
+          exercise_memory: Json
           experience: string
           goal: string
           liked_exercises: string[]
@@ -1286,6 +1290,7 @@ export type Database = {
           default_rest_seconds?: number
           disliked_exercises?: string[]
           equipment?: string[]
+          exercise_memory?: Json
           experience?: string
           goal?: string
           liked_exercises?: string[]
@@ -1304,6 +1309,7 @@ export type Database = {
           default_rest_seconds?: number
           disliked_exercises?: string[]
           equipment?: string[]
+          exercise_memory?: Json
           experience?: string
           goal?: string
           liked_exercises?: string[]
@@ -1514,6 +1520,7 @@ export type Database = {
     }
     Functions: {
       complete_workout: { Args: { _payload: Json }; Returns: Json }
+      complete_workout_with_rir: { Args: { _payload: Json }; Returns: Json }
       remove_workout: { Args: { _date: string }; Returns: Json }
       save_training_assessment: {
         Args: { _assessment: Json; _program: Json; _replace?: boolean }
