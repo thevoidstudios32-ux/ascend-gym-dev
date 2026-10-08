@@ -1,10 +1,10 @@
 # Translation completion roadmap
 
 ## Fichas inteligentes de exercícios
-- [ ] Estruturar catálogo, mídia e anatomia reutilizável
-- [ ] Integrar cards, detalhes, séries e comparação de histórico
-- [ ] Persistir RIR e memória do atleta com substituições compatíveis
-- [ ] Validar telas e controles sem alterar dados reais
+- [x] Estruturar catálogo, mídia e anatomia reutilizável (16 demonstrações fotográficas; demais exercícios sem mídia inventada)
+- [x] Integrar cards, detalhes, séries e comparação de histórico
+- [x] Persistir RIR e memória do atleta com substituições compatíveis; manter conclusão transacional
+- [x] Validar desktop/celular, anatomia e filtros com 8 testes; não concluir treino nem gravar preferências na conta real durante a verificação
 
 ## Avaliação e programa ASCEND
 - [x] Criar avaliação obrigatória com disponibilidade, equipamentos e mapa muscular

@@ -181,6 +181,9 @@ function SessionPage() {
 
   const clock = `${String(Math.floor(elapsed / 60)).padStart(2, "0")}:${String(elapsed % 60).padStart(2, "0")}`;
 
+  if (isUuid(splitId) && custom.isPending) return <p className="py-12 text-muted-foreground">Carregando treino…</p>;
+  if (isUuid(splitId) && !customWorkout) return <p role="alert" className="py-12 text-muted-foreground">Este treino não está disponível. Volte para a lista de treinos.</p>;
+
   return (
     <div className="animate-rise space-y-4 pb-24">
       <button

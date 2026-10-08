@@ -48,7 +48,9 @@ export function ExerciseSwapSheet({
   const gymEquipment = setup?.equipment ?? [];
 
   const results = useMemo(() => {
-    const base = substitutesFor(current, { muscle, favorites, equipment: gymEquipment, disliked: setup?.disliked ?? [] });
+    const memories = setup?.memory && typeof setup.memory === "object" && !Array.isArray(setup.memory) ? Object.values(setup.memory) : [];
+    const preferMachines = memories.some(m=>m && typeof m === "object" && !Array.isArray(m) && m['kind'] === "machines");
+    const base = substitutesFor(current, { muscle, favorites, equipment: gymEquipment, disliked: setup?.disliked ?? [], preferMachines });
     const term = q.trim().toLowerCase();
     return base.filter((r) => {
       if (group && r.exercise.group !== group) return false;
@@ -56,7 +58,7 @@ export function ExerciseSwapSheet({
       if (term && !r.exercise.name.toLowerCase().includes(term)) return false;
       return true;
     });
-  }, [current, muscle, favorites, gymEquipment, setup?.disliked, q, group, equip]);
+  }, [current, muscle, favorites, gymEquipment, setup?.disliked, setup?.memory, q, group, equip]);
 
   const favToggle = useServerFn(toggleFavoriteExercise);
   const favMutation = useMutation({

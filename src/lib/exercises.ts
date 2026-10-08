@@ -136,7 +136,7 @@ export function groupFromMuscle(muscle: string): MuscleGroup | null {
 /** Sugestões inteligentes para substituir um exercício. */
 export function substitutesFor(
   name: string,
-  opts: { muscle?: string; favorites?: string[]; equipment?: string[]; disliked?: string[] } = {},
+  opts: { muscle?: string; favorites?: string[]; equipment?: string[]; disliked?: string[]; preferMachines?: boolean } = {},
 ) {
   const base = findExercise(name);
   const group = base?.group ?? (opts.muscle ? groupFromMuscle(opts.muscle) : null);
@@ -150,7 +150,7 @@ export function substitutesFor(
       const fav = favorites.has(e.name);
       const usable = !available || available.has("Academia completa") || (e.equipment === "Peso corporal" && e.name !== "Barra fixa" && e.name !== "Paralelas" && e.name !== "Mergulho no banco") || available.has(e.equipment) && !(e.name === "Barra fixa" && !available.has("Barra fixa")) && !(e.name === "Paralelas" && !available.has("Paralelas"));
       const score =
-        (sameGroup ? 100 : 0) + shared * 20 + (fav ? 500 : 0) + (usable ? 30 : -60);
+        (sameGroup ? 100 : 0) + shared * 20 + (fav ? 500 : 0) + (usable ? 30 : -60) + (opts.preferMachines && e.equipment === "Máquina" ? 80 : 0);
       return { exercise: e, score, favorite: fav, available: usable, sameGroup };
     })
     .filter((r) => r.sameGroup && r.available)
