@@ -36,7 +36,7 @@ export const saveProfile = createServerFn({ method: "POST" })
     z
       .object({
         name: z.string().min(1).max(40),
-        gender: z.enum(["feminino", "masculino"]),
+        gender: z.enum(["feminino", "masculino"]).nullable().optional(),
         goal: z.string().min(1).max(40),
         experience: z.string().min(1).max(40),
         age: z.number().int().min(10).max(100).nullable(),
@@ -47,9 +47,10 @@ export const saveProfile = createServerFn({ method: "POST" })
       .parse(data),
   )
   .handler(async ({ context, data }) => {
+    const { gender, ...fields } = data;
     const { error } = await context.supabase
       .from("profiles")
-      .update({ ...data, onboarded: true, updated_at: new Date().toISOString() })
+      .update({ ...fields, ...(gender !== undefined ? { gender } : {}), updated_at: new Date().toISOString() })
       .eq("id", context.userId);
     if (error) throw new Error(error.message);
     if (data.weight_kg) {
