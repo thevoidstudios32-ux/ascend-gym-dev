@@ -38,7 +38,7 @@ const programSchema = z.object({
 
 const preferencesSchema = z.object({
   days_per_week: z.number().int().min(1).max(7),
-  available_weekdays: z.array(z.enum(["SEG", "TER", "QUA", "QUI", "SEX", "SÁB", "DOM"])).max(7).optional(),
+  available_weekdays: z.array(z.enum(["SEG", "TER", "QUA", "QUI", "SEX", "SÁB", "DOM"])).max(7).default([]),
   minutes_per_session: z.number().int().min(15).max(180),
   default_rest_seconds: z.number().int().min(15).max(600),
   goal: z.string().min(2).max(40),
@@ -50,6 +50,10 @@ const preferencesSchema = z.object({
   split_preference: z.string().max(60).nullable().default(null),
   restrictions: z.string().max(400).nullable().default(null),
   notes: z.string().max(400).nullable().default(null),
+}).superRefine((data, ctx) => {
+  if (data.available_weekdays.length && (data.available_weekdays.length !== data.days_per_week || new Set(data.available_weekdays).size !== data.days_per_week)) {
+    ctx.addIssue({ code: "custom", path: ["available_weekdays"], message: "Selecione exatamente a quantidade de dias informada." });
+  }
 });
 
 /** Preferências + programa ativo + versões + recomendações + insights reais. */
