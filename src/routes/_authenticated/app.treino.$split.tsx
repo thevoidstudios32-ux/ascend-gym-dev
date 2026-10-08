@@ -1,10 +1,13 @@
-import { AscendIcon, Glyph } from "@/components/ascend-icon";
+import { Glyph } from "@/components/ascend-icon";
 import { createFileRoute, useNavigate, useParams } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { ChevronLeft, MoreVertical, Pause, Play, RotateCcw } from "lucide-react";
+import { ChevronLeft, Pause, Play, RotateCcw } from "lucide-react";
+import { ExerciseCard } from "@/components/exercise-card";
+import { ExerciseDetail } from "@/components/exercise-detail";
+import { getExerciseInfo, type SetEntry } from "@/lib/exercise-detail";
 import { ExerciseSwapSheet } from "@/components/exercise-swap";
 import { StoryComposer, type StoryDraft } from "@/components/stories";
 import { useDashboard, useExtras, useRefreshDashboard } from "@/hooks/use-dashboard";
@@ -20,13 +23,15 @@ export const Route = createFileRoute("/_authenticated/app/treino/$split")({
       { name: "description", content: "Cronômetro, séries, cargas e progressão em tempo real." },
       { property: "og:title", content: "Sessão de treino · ASCEND" },
       { property: "og:description", content: "Execute seu treino com cronômetro e registro de cargas." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
     ],
   }),
   component: SessionPage,
 });
 
-type Entry = { exercise: string; set_index: number; reps: number; weight_kg: number; done: boolean };
+type Entry = SetEntry;
 
 function SessionPage() {
   const { split: splitId } = useParams({ from: "/_authenticated/app/treino/$split" });
@@ -36,7 +41,7 @@ function SessionPage() {
     : null;
   const split: Split = customWorkout
     ? customToSplit(customWorkout)
-    : (SPLITS.find((s) => s.id === splitId) ?? SPLITS[0]!);
+    : (SPLITS.find((s) => s.id === splitId) ?? SPLITS[0] ?? { id: "unknown", name: "Treino", focus: "", emoji: "", minutes: 0, exercises: [] });
   const workoutKind = customWorkout ? `custom:${customWorkout.id}` : split.id;
   const navigate = useNavigate();
   const { data } = useDashboard();
@@ -46,6 +51,7 @@ function SessionPage() {
 
   const [exercises, setExercises] = useState(() => split.exercises.map((e) => ({ ...e })));
 
+  const [detail, setDetail] = useState<string | null>(null);
   const [swapping, setSwapping] = useState<string | null>(null);
   const [share, setShare] = useState<StoryDraft | null>(null);
   const [shareCard, setShareCard] = useState<{ volume: number; sets: number } | null>(null);
@@ -59,6 +65,7 @@ function SessionPage() {
         set_index: i + 1,
         reps: Number(ex.reps.split("-")[0]?.replace(/\D/g, "")) || 10,
         weight_kg: 0,
+         rir: null,
         done: false,
       })),
     ),
@@ -77,6 +84,7 @@ function SessionPage() {
           set_index: i + 1,
           reps: Number(ex.reps.split("-")[0]?.replace(/\D/g, "")) || 10,
           weight_kg: 0,
+         rir: null,
           done: false,
         })),
       ),
@@ -132,7 +140,7 @@ function SessionPage() {
           calories,
           sets: entries
             .filter((e) => e.done)
-            .map(({ exercise, set_index, reps, weight_kg }) => ({ exercise, set_index, reps, weight_kg })),
+            .map(({ exercise, set_index, reps, weight_kg, rir }) => ({ exercise, set_index, reps, weight_kg, rir })),
         },
       }),
     onSuccess: (res) => {
@@ -168,7 +176,7 @@ function SessionPage() {
       ),
     );
     setSwapping(null);
-    toast.success(`✓ Exercício substituído por ${next.name}`);
+    toast.success(`Exercício substituído por ${next.name}`);
   }
 
   const clock = `${String(Math.floor(elapsed / 60)).padStart(2, "0")}:${String(elapsed % 60).padStart(2, "0")}`;
@@ -211,74 +219,19 @@ function SessionPage() {
         </div>
       )}
 
-      {exercises.map((ex) => {
-        const prev = last.get(ex.name) ?? null;
+      <div className="grid gap-3 sm:grid-cols-2">{exercises.map(ex => {
+        const prev = last.get(ex.name);
         const target = Number(ex.reps.split("-").pop()?.replace(/\D/g, "")) || 10;
         const sug = suggestLoad(prev?.weight ?? null, prev?.reps ?? null, target);
-        return (
-          <section key={ex.name} className="panel p-4">
-            <div className="flex items-center gap-3">
-              <span className="animate-exercise"><Glyph value={ex.emoji} size={24} /></span>
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-bold">{ex.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {ex.muscle} · {ex.sets}x{ex.reps} · descanso {ex.rest}s
-                </p>
-              </div>
-              <button
-                onClick={() => setSwapping(ex.name)}
-                className="press rounded-full bg-elevated p-2"
-                aria-label={`Mais opções de ${ex.name}`}
-              >
-                <MoreVertical className="size-4" />
-              </button>
-            </div>
-            <p className="mt-2 flex items-start gap-1.5 text-xs text-muted-foreground"><AscendIcon name="spark" size={13} className="mt-0.5" />{ex.tip}</p>
-            {sug && (
-              <p className="mt-1 text-xs font-semibold text-primary">
-                Sugestão: {sug.weight} kg — {sug.note}
-              </p>
-            )}
-            <div className="mt-3 space-y-2">
-              {entries.map((e, i) =>
-                e.exercise !== ex.name ? null : (
-                  <div key={i} className="flex items-center gap-2 rounded-xl bg-elevated p-2">
-                    <span className="w-8 text-center text-xs font-bold text-muted-foreground">
-                      {e.set_index}ª
-                    </span>
-                    <input
-                      type="number"
-                      value={e.weight_kg || ""}
-                      onChange={(ev) => update(i, { weight_kg: Number(ev.target.value) })}
-                      placeholder="kg"
-                      className="w-16 rounded-lg bg-surface px-2 py-1.5 text-center text-sm outline-none ring-ring focus:ring-2"
-                    />
-                    <span className="text-xs text-muted-foreground">kg ×</span>
-                    <input
-                      type="number"
-                      value={e.reps || ""}
-                      onChange={(ev) => update(i, { reps: Number(ev.target.value) })}
-                      className="w-14 rounded-lg bg-surface px-2 py-1.5 text-center text-sm outline-none ring-ring focus:ring-2"
-                    />
-                    <span className="text-xs text-muted-foreground">reps</span>
-                    <button
-                      onClick={() => {
-                        update(i, { done: !e.done });
-                        if (!e.done) setRest(ex.rest);
-                      }}
-                      className={`press ml-auto rounded-full px-3 py-1.5 text-xs font-bold ${
-                        e.done ? "bg-primary text-primary-foreground" : "bg-surface text-muted-foreground"
-                      }`}
-                    >
-                      {e.done ? "✓" : "OK"}
-                    </button>
-                  </div>
-                ),
-              )}
-            </div>
-          </section>
-        );
-      })}
+        return <ExerciseCard key={ex.name} exercise={getExerciseInfo(ex.name,ex.muscle,ex.tip)} prescription={ex} entries={entries.filter(e=>e.exercise===ex.name)} suggested={sug?.weight ?? null} onOpen={()=>setDetail(ex.name)} />;
+      })}</div>
+      {detail && (()=>{
+        const ex=exercises.find(e=>e.name===detail); if(!ex) return null;
+        const indexed=entries.map((e,i)=>({e,i})).filter(x=>x.e.exercise===detail);
+        const prev=last.get(detail);const target=Number(ex.reps.split("-").pop()?.replace(/\D/g,"")) || 10;
+        const sug=suggestLoad(prev?.weight??null,prev?.reps??null,target);
+        return <ExerciseDetail key={detail} exercise={getExerciseInfo(ex.name,ex.muscle,ex.tip)} prescription={ex} entries={indexed.map(x=>x.e)} history={(extras?.sets??[]).filter(s=>s.exercise===detail).map(s=>({...s,weight_kg:Number(s.weight_kg)}))} suggested={sug?.weight??null} onClose={()=>setDetail(null)} onChange={(i,patch)=>{const item=indexed[i];if(item)update(item.i,patch);}} onComplete={i=>{const item=indexed[i];if(!item)return;update(item.i,{done:!item.e.done});if(!item.e.done)setRest(ex.rest);}} onSwap={()=>{setDetail(null);setSwapping(ex.name);}} />;
+      })()}
 
       <div className="fixed inset-x-0 bottom-16 z-40 px-4 md:bottom-4">
         <div className="mx-auto max-w-3xl">
