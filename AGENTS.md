@@ -16,3 +16,4 @@
 - Persist accepted assessments, preferences, and program versions in one authenticated database transaction; rejected proposals never change saved data.
 - Resolve exercise technical sheets from the shared catalog and reuse the anatomical SVG for onboarding and read-only highlights; real media stays in asset pointers, unavailable media is never fabricated.
 - Preserve atomic workout completion through the RIR-aware wrapper; athlete memory lives in training_preferences and is passed to all training Coach contexts.
+- Enrich personalization prompts and read-only proposal sheets from the shared exercise catalog locally; never add AI calls for anatomy, instructions, or demonstrations.

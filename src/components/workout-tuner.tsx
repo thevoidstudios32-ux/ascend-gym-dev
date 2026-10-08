@@ -8,6 +8,7 @@ import { useCustomAction, useCustomWorkouts } from "@/hooks/use-custom";
 import { applyWorkoutChange, proposeWorkoutChange } from "@/lib/custom.functions";
 import { estimateMinutes, type Proposal } from "@/lib/custom";
 import { SPLITS } from "@/lib/ascend";
+import { CoachExerciseReference } from './coach-exercise-reference';
 
 const QUICK = [
   "Deixe mais focado em calistenia",
@@ -179,12 +180,8 @@ export function WorkoutTuner({ workoutId }: { workoutId?: string }) {
 
           <ul className="space-y-1.5">
             {proposal.exercises.map((e, i) => (
-              <li key={`${e.name}-${i}`} className="flex items-center gap-2 rounded-xl bg-surface p-2.5">
-                <Glyph value={e.emoji} size={16} />
-                <span className="min-w-0 flex-1 truncate text-xs font-bold">{e.name}</span>
-                <span className="shrink-0 text-[11px] text-muted-foreground">
-                  {e.sets}x{e.hold ? `${e.hold}s` : e.reps} · {e.rest}s
-                </span>
+              <li key={`${e.name}-${i}`}>
+                <CoachExerciseReference name={e.name} muscle={e.muscle} tip={e.tip} sets={e.sets} reps={e.hold ? `${e.hold}s` : e.reps} rest={e.rest} />
               </li>
             ))}
           </ul>

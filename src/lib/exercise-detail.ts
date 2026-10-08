@@ -1,7 +1,8 @@
 import { findExercise, EXERCISE_CATALOG } from './exercises';
 import { EXERCISE_IMAGES } from './exercise-media';
+import { EXERCISE_MOTION } from './exercise-motion';
 export const exerciseId = (name: string) => name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-export type ExerciseInfo = { id: string; name: string; muscleGroup: string; primaryMuscles: string[]; secondaryMuscles: string[]; equipment: string; difficulty: string; description: string; instructions: string[]; tips: string[]; images: string[]; videoUrl?: string; gifUrl?: string; alternatives: string[] };
+export type ExerciseInfo = { id: string; name: string; muscleGroup: string; primaryMuscles: string[]; secondaryMuscles: string[]; equipment: string; difficulty: string; description: string; instructions: string[]; tips: string[]; images: string[]; videoUrl?: string; webmUrl?: string; gifUrl?: string; mediaCredit?: { author: string; sourceUrl: string; license: string; licenseUrl: string }; alternatives: string[] };
 export function anatomyMuscle(m: string): string {
  const s=m.toLowerCase();
  if (/peit|peitor/.test(s)) return 'Peitoral'; if (/delto|ombro/.test(s)) return 'Ombros';
@@ -30,7 +31,7 @@ export function getExerciseInfo(name: string, muscle='', tip=''): ExerciseInfo {
  equipment: e?.equipment ?? 'Não informado', difficulty:e?.difficulty ?? 'Não informado',
  description:e ? `Trabalha ${e.muscles.join(', ').toLowerCase()}. ${e.tip}` : tip || 'Confira a execução com um profissional antes de iniciar.',
  instructions: instructions[id] ?? (e ? [e.tip, 'Ajuste a carga para manter o controle durante toda a amplitude confortável.', 'Interrompa a execução se houver dor.'] : ['Peça orientação para ajustar a posição e a execução deste movimento.']),
- tips: [e?.tip ?? tip, 'Não aumente a carga sacrificando a execução.'].filter(Boolean), images:EXERCISE_IMAGES[id] ?? [],
+ tips: [e?.tip ?? tip, 'Não aumente a carga sacrificando a execução.'].filter(Boolean), images:e ? EXERCISE_IMAGES[id] ?? [] : [], ...(e ? EXERCISE_MOTION[id] : {}),
  alternatives:EXERCISE_CATALOG.filter(x=>x.name!==e?.name && x.group===e?.group).slice(0,4).map(x=>x.name) };
 }
 export type SetEntry = { exercise: string; set_index: number; reps: number; weight_kg: number; rir: number | null; done: boolean };
