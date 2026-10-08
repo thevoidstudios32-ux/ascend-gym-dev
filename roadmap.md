@@ -1,5 +1,11 @@
 # Translation completion roadmap
 
+## Fichas inteligentes de exercícios
+- [ ] Estruturar catálogo, mídia e anatomia reutilizável
+- [ ] Integrar cards, detalhes, séries e comparação de histórico
+- [ ] Persistir RIR e memória do atleta com substituições compatíveis
+- [ ] Validar telas e controles sem alterar dados reais
+
 ## Avaliação e programa ASCEND
 - [x] Criar avaliação obrigatória com disponibilidade, equipamentos e mapa muscular
 - [x] Salvar avaliação e gerar programa adaptativo sem atribuir PPL padrão
