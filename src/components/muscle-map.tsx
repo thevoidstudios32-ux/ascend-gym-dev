@@ -23,25 +23,25 @@ const back: Region[] = [
   { name: "Posterior de coxa", paths: ["M88 222 L116 224 113 260 97 268 87 251Z", "M152 222 L124 224 127 260 143 268 153 251Z"] },
   { name: "Panturrilhas", paths: front[6]?.paths ?? [] },
 ];
-export function MuscleMap({ value, onChange }: { value: string[]; onChange: (value: string[]) => void }) {
+export function MuscleMap({ value = [], onChange, primaryMuscles = [], secondaryMuscles = [], compact = false }: { value?: string[]; onChange?: (value: string[]) => void; primaryMuscles?: string[]; secondaryMuscles?: string[]; compact?: boolean }) {
   const [view, setView] = useState<"front" | "back">("front");
-  const toggle = (name: string) => onChange(value.includes(name) ? value.filter(v => v !== name) : value.length < 5 ? [...value, name] : value);
+  const toggle = (name: string) => onChange?.(value.includes(name) ? value.filter(v => v !== name) : value.length < 5 ? [...value, name] : value);
   return <div className="space-y-4">
     <div className="flex items-center justify-between gap-2">
       <div className="flex gap-2">{(["front", "back"] as const).map(v => <Button key={v} type="button" variant={view === v ? "default" : "secondary"} aria-pressed={view === v} onClick={() => setView(v)}>{v === "front" ? "Vista frontal" : "Vista posterior"}</Button>)}</div>
-      <span className="text-sm font-bold text-primary">{value.length}/5</span>
+      {onChange && <span className="text-sm font-bold text-primary">{value.length}/5</span>}
     </div>
-    <svg viewBox="0 0 240 370" className="mx-auto h-[370px] max-w-full" aria-label={`Modelo muscular — ${view === "front" ? "frente" : "costas"}`}>
+    <svg viewBox="0 0 240 370" className={`mx-auto max-w-full ${compact ? "h-64" : "h-[370px]"}`} aria-label={`Modelo muscular — ${view === "front" ? "frente" : "costas"}`}>
       <g className="pointer-events-none fill-elevated stroke-border" strokeWidth="2">
         <ellipse cx="120" cy="39" rx="21" ry="27" />
         <path d="M107 64 L105 74 Q70 72 63 94 L51 146 41 195 44 212 54 216 65 195 79 153 86 127 96 170 85 195 83 246 95 277 93 310 99 341 91 349 91 357 116 357 117 324 119 279 120 229 121 279 123 324 124 357 149 357 149 349 141 341 147 310 145 277 157 246 155 195 144 170 154 127 161 153 175 195 186 216 196 212 199 195 189 146 177 94 Q170 72 135 74 L133 64Z" />
       </g>
-      {(view === "front" ? front : back).map(r => <g key={r.name} role="button" tabIndex={0} aria-label={r.name} aria-pressed={value.includes(r.name)} aria-disabled={!value.includes(r.name) && value.length >= 5}
+      {(view === "front" ? front : back).map(r => <g key={r.name} role={onChange ? "button" : "img"} tabIndex={onChange ? 0 : undefined} aria-label={`${r.name}${primaryMuscles.includes(r.name) ? " — primário" : secondaryMuscles.includes(r.name) ? " — secundário" : ""}`} aria-pressed={onChange ? value.includes(r.name) : undefined} aria-disabled={onChange ? !value.includes(r.name) && value.length >= 5 : undefined}
         onClick={() => toggle(r.name)} onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(r.name); } }}
-        className={`cursor-pointer stroke-background transition-colors focus:outline-none ${value.includes(r.name) ? "fill-primary" : "fill-muted-foreground/40 hover:fill-primary/60 focus:fill-primary/60"}`} strokeWidth="2">
+        className={`stroke-background transition-colors focus:outline-none ${onChange ? "cursor-pointer" : ""} ${value.includes(r.name) || primaryMuscles.includes(r.name) ? "fill-primary" : secondaryMuscles.includes(r.name) ? "fill-warning" : onChange ? "fill-muted-foreground/40 hover:fill-primary/60 focus:fill-primary/60" : "fill-muted-foreground/20"}`} strokeWidth="2">
         <title>{r.name}</title>{r.paths.map((d, i) => <path key={i} d={d} />)}
       </g>)}
     </svg>
-    <div className="flex flex-wrap gap-2">{ASSESSMENT_MUSCLES.map(m => <Button key={m} type="button" size="sm" variant={value.includes(m) ? "default" : "secondary"} aria-pressed={value.includes(m)} disabled={value.length >= 5 && !value.includes(m)} onClick={() => toggle(m)}>{m}</Button>)}</div>
+    {onChange ? <div className="flex flex-wrap gap-2">{ASSESSMENT_MUSCLES.map(m => <Button key={m} type="button" size="sm" variant={value.includes(m) ? "default" : "secondary"} aria-pressed={value.includes(m)} disabled={value.length >= 5 && !value.includes(m)} onClick={() => toggle(m)}>{m}</Button>)}</div> : <div className="flex flex-wrap justify-center gap-4 text-xs text-muted-foreground"><span className="flex items-center gap-2"><i className="size-2 rounded-full bg-primary" />Primário</span><span className="flex items-center gap-2"><i className="size-2 rounded-full bg-warning" />Secundário</span></div>}
   </div>;
 }
