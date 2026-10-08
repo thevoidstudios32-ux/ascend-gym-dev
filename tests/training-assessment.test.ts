@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { assessmentSchema, buildAssessmentProgram, type TrainingAssessment } from "./training-assessment";
-import { WEEKDAYS } from "./program";
+import { assessmentSchema, buildAssessmentProgram, type TrainingAssessment } from "../src/lib/training-assessment";
+import { WEEKDAYS } from "../src/lib/program";
 
 const base: TrainingAssessment = {
   gender: "nao_informado", height_cm: 175, weight_kg: 75, goal: "Hipertrofia",
