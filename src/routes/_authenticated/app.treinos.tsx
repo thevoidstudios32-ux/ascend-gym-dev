@@ -13,9 +13,9 @@ export const Route = createFileRoute("/_authenticated/app/treinos")({
   head: () => ({
     meta: [
       { title: "Treinos · ASCEND" },
-      { name: "description", content: "Push, Pull, Legs e Full Body com séries, cargas e descanso." },
+      { name: "description", content: "Programa personalizado para seu perfil, rotina e objetivos." },
       { property: "og:title", content: "Treinos · ASCEND" },
-      { property: "og:description", content: "Divisões Push/Pull/Legs e Full Body." },
+      { property: "og:description", content: "Seu programa ASCEND, treinos personalizados e histórico." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },

@@ -3,6 +3,9 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { TrainingOnboarding } from "@/components/training-onboarding";
+import { useDashboard } from "@/hooks/use-dashboard";
 import {
   ArrowDown,
   ArrowUp,
@@ -118,10 +121,11 @@ export function PreferencesForm({
   const toggle = (key: "equipment" | "priority_muscles", value: string) =>
     setForm((f) => ({
       ...f,
-      [key]: f[key].includes(value) ? f[key].filter((v) => v !== value) : [...f[key], value],
+      [key]: f[key].includes(value) ? f[key].filter((v) => v !== value) : key === "priority_muscles" && f[key].length >= 5 ? f[key] : [...f[key], value],
     }));
 
   const submit = async () => {
+    if (form.available_weekdays?.length && (new Set(form.available_weekdays).size !== form.days_per_week)) { toast.error("Selecione exatamente a quantidade de dias informada."); return; }
     try {
       await save.mutateAsync(form);
       toast.success("Preferências salvas.");
@@ -160,6 +164,8 @@ export function PreferencesForm({
           />
         </label>
       </div>
+
+      <div><p className="text-xs font-bold text-muted-foreground">Dias disponíveis</p><div className="mt-2 flex flex-wrap gap-2">{WEEKDAYS.map(w => <Button key={w} type="button" size="sm" variant={form.available_weekdays?.includes(w) ? "default" : "secondary"} aria-pressed={form.available_weekdays?.includes(w) ?? false} onClick={() => setForm(f => ({ ...f, available_weekdays: f.available_weekdays?.includes(w) ? f.available_weekdays.filter(d => d !== w) : [...(f.available_weekdays ?? []), w] }))}>{w}</Button>)}</div></div>
 
       <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground">
         Descanso entre séries (segundos)
@@ -537,23 +543,28 @@ function ProposalView({
   onKeep,
   pending,
   hadProgram,
+  current,
 }: {
   proposal: ProgramProposal;
   onApply: () => void;
   onKeep: () => void;
   pending: boolean;
   hadProgram: boolean;
+  current: Program | null;
 }) {
+  const before = (current?.days ?? []).flatMap(d => d.exercises.map(e => `${d.weekday}: ${e.name} — ${e.sets}x${e.reps}, descanso ${e.rest}s`));
+  const after = proposal.days.flatMap(d => d.exercises.map(e => `${d.weekday}: ${e.name} — ${e.sets}x${e.reps}, descanso ${e.rest}s`));
+  const changes = [...before.filter(e => !after.includes(e)).map(e => `Remover: ${e}`), ...after.filter(e => !before.includes(e)).map(e => `Adicionar: ${e}`)];
   return (
     <div className="space-y-4">
       <div className="rounded-2xl border border-primary/30 bg-primary/10 p-4">
-        <p className="text-xs font-black uppercase tracking-wider text-primary">Proposta do Coach</p>
+        <p className="text-xs font-black uppercase tracking-wider text-primary">ALTERAÇÃO PROPOSTA</p>
         <p className="mt-1 text-sm font-medium">{proposal.summary}</p>
       </div>
 
-      {proposal.changes.length > 0 && (
+      {changes.length > 0 && (
         <ul className="space-y-1.5">
-          {proposal.changes.map((c, i) => (
+          {changes.map((c, i) => (
             <li key={i} className="flex gap-2 text-sm text-muted-foreground">
               <span aria-hidden>•</span>
               <span>{c}</span>
@@ -589,7 +600,7 @@ function ProposalView({
           onClick={onKeep}
           className="press flex-1 rounded-2xl bg-elevated p-3.5 text-sm font-bold"
         >
-          Manter programa atual
+          RECUSAR
         </button>
         <button
           type="button"
@@ -598,7 +609,7 @@ function ProposalView({
           className="press flex flex-1 items-center justify-center gap-1.5 rounded-2xl bg-primary p-3.5 text-sm font-extrabold text-primary-foreground shadow-glow disabled:opacity-60"
         >
           {pending ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
-          {hadProgram ? "Aplicar ajuste" : "Criar programa"}
+          {hadProgram ? "ACEITAR ALTERAÇÃO" : "Criar programa"}
         </button>
       </div>
     </div>
@@ -615,6 +626,7 @@ export function CoachProgramSheet({
   const [request, setRequest] = useState(initialRequest ?? "");
   const [result, setResult] = useState<{ proposal: ProgramProposal; hadProgram: boolean } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { data: currentData } = useProgram();
   const propose = useProposeProgram();
   const apply = useApplyProgram();
 
@@ -712,6 +724,7 @@ export function CoachProgramSheet({
 
         {result && (
           <ProposalView
+            current={currentData?.program ?? null}
             proposal={result.proposal}
             hadProgram={result.hadProgram}
             pending={apply.isPending}
@@ -785,11 +798,12 @@ function CoachInsightsArea({
 
 export function AiProgramSection() {
   const { data, isLoading } = useProgram();
-  const [sheet, setSheet] = useState<null | "coach" | "prefs" | "editor">(null);
+  const [sheet, setSheet] = useState<null | "coach" | "prefs" | "editor" | "assessment">(null);
   const [seed, setSeed] = useState<string | undefined>(undefined);
   const startDay = useStartProgramDay();
   const navigate = useNavigate();
 
+  const dashboard = useDashboard();
   const program = data?.program ?? null;
   const volume = useMemo(() => programMuscleVolume(program?.days ?? []).slice(0, 5), [program]);
 
@@ -807,12 +821,14 @@ export function AiProgramSection() {
     }
   };
 
+  if (!isLoading && !program) return <TrainingOnboarding initial={dashboard.data?.profile?.training_assessment} onDone={() => setSheet(null)} />;
+
   return (
     <>
       <section className="panel space-y-4 p-4 sm:p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h2 className="text-xs font-black tracking-[0.18em] text-muted-foreground">ASCEND AI PROGRAM</h2>
+            <h2 className="text-xs font-black tracking-[0.18em] text-muted-foreground">SEU PROGRAMA ASCEND</h2>
             <p className="mt-1 truncate text-lg font-black">
               {program ? program.name : "Seu programa personalizado"}
             </p>
@@ -905,9 +921,12 @@ export function AiProgramSection() {
 
       {sheet === "prefs" && (
         <Sheet title="Preferências de treino" onClose={() => setSheet(null)}>
+          <Button variant="secondary" className="mb-4 w-full" onClick={() => setSheet("assessment")}>Refazer avaliação inicial</Button>
           <PreferencesForm initial={data?.preferences ?? null} onDone={() => setSheet(null)} />
         </Sheet>
       )}
+
+      {sheet === "assessment" && <Sheet title="Refazer avaliação inicial" onClose={() => setSheet(null)}><TrainingOnboarding initial={dashboard.data?.profile?.training_assessment} onDone={() => setSheet(null)} onCancel={() => setSheet(null)} /></Sheet>}
 
       {sheet === "editor" && program && (
         <Sheet title="Editar programa" onClose={() => setSheet(null)}>
