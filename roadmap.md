@@ -1,6 +1,7 @@
 # Translation completion roadmap
 
 ## Ampliar demonstrações reais
+- [ ] Pesquisar novamente fontes verificadas para os exercícios ainda sem movimento e conectar apenas correspondências reais licenciadas, sem geração por IA
 - [x] Localizar 16 novas gravações reais licenciadas com correspondência de movimento/equipamento, sem geração por IA
 - [x] Conectar vídeos, GIFs e capas derivados da gravação aos cards e fichas pelo catálogo compartilhado (22 exercícios com movimento no total)
 - [x] Validar reprodução dos 16 vídeos, GIFs compacto/detalhado, 12 testes aprovados e build OK; fontes registradas em MOTION_SOURCES.json
