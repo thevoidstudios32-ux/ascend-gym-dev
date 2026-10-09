@@ -1,9 +1,10 @@
 # Translation completion roadmap
 
 ## Ampliar demonstrações reais
-- [ ] Localizar vídeos reais licenciados para os exercícios restantes, sem geração por IA
-- [ ] Conectar vídeos e GIFs derivados da gravação aos cards e fichas pelo catálogo compartilhado
-- [ ] Validar correspondência, reprodução e registrar exercícios sem fonte adequada
+- [x] Localizar 16 novas gravações reais licenciadas com correspondência de movimento/equipamento, sem geração por IA
+- [x] Conectar vídeos, GIFs e capas derivados da gravação aos cards e fichas pelo catálogo compartilhado (22 exercícios com movimento no total)
+- [x] Validar reprodução dos 16 vídeos, GIFs compacto/detalhado, 12 testes aprovados e build OK; fontes registradas em MOTION_SOURCES.json
+- [ ] Cobrir exercícios restantes — bloqueado pela ausência de gravações licenciadas com correspondência verificada; preservar fotos/estado indisponível em vez de usar variantes incorretas
 
 ## Mídia real e fichas no Coach
 - [x] Adicionar vídeos/GIFs reais verificados aos cards e detalhes (6 exercícios, licença CC BY-SA 4.0; demais mantêm fotos disponíveis)
