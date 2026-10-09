@@ -1,5 +1,10 @@
 # Translation completion roadmap
 
+## Ampliar demonstrações reais
+- [ ] Localizar vídeos reais licenciados para os exercícios restantes, sem geração por IA
+- [ ] Conectar vídeos e GIFs derivados da gravação aos cards e fichas pelo catálogo compartilhado
+- [ ] Validar correspondência, reprodução e registrar exercícios sem fonte adequada
+
 ## Mídia real e fichas no Coach
 - [x] Adicionar vídeos/GIFs reais verificados aos cards e detalhes (6 exercícios, licença CC BY-SA 4.0; demais mantêm fotos disponíveis)
 - [x] Reutilizar fichas com anatomia e instruções nas propostas, sem chamadas adicionais de IA
