@@ -1,3 +1,4 @@
+import { ADDITIONAL_EXERCISE_MOTION } from './exercise-motion-additional';
 import webm5 from "@/assets/exercises/desenvolvimento-com-halteres.webm.asset.json";
 import webm4 from "@/assets/exercises/leg-press.webm.asset.json";
 import webm3 from "@/assets/exercises/elevacao-lateral.webm.asset.json";
@@ -16,7 +17,8 @@ import video4 from "@/assets/exercises/leg-press.mp4.asset.json";
 import gif4 from "@/assets/exercises/leg-press.gif.asset.json";
 import video5 from "@/assets/exercises/desenvolvimento-com-halteres.mp4.asset.json";
 import gif5 from "@/assets/exercises/desenvolvimento-com-halteres.gif.asset.json";
-export const EXERCISE_MOTION: Record<string, { videoUrl: string; webmUrl: string; gifUrl: string; mediaCredit: { author: string; sourceUrl: string; license: string; licenseUrl: string } }> = {
+export const EXERCISE_MOTION: Record<string, { videoUrl: string; webmUrl: string; gifUrl: string; posterUrl?: string; mediaCredit: { author: string; sourceUrl: string; license: string; licenseUrl: string } }> = {
+  ...ADDITIONAL_EXERCISE_MOTION,
   "supino-reto": { videoUrl: video0.url, webmUrl: webm0.url, gifUrl: gif0.url, mediaCredit: { author: "Goulart · wger", sourceUrl: "https://wger.de/en/exercise/73/view/", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/" } },
   "supino-inclinado-com-halteres": { videoUrl: video1.url, webmUrl: webm1.url, gifUrl: gif1.url, mediaCredit: { author: "Goulart · wger", sourceUrl: "https://wger.de/en/exercise/537/view/", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/" } },
   "rosca-direta": { videoUrl: video2.url, webmUrl: webm2.url, gifUrl: gif2.url, mediaCredit: { author: "Goulart · wger", sourceUrl: "https://wger.de/en/exercise/91/view/", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/" } },
