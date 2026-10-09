@@ -2,7 +2,7 @@ import { findExercise, EXERCISE_CATALOG } from './exercises';
 import { EXERCISE_IMAGES } from './exercise-media';
 import { EXERCISE_MOTION } from './exercise-motion';
 export const exerciseId = (name: string) => name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-export type ExerciseInfo = { id: string; name: string; muscleGroup: string; primaryMuscles: string[]; secondaryMuscles: string[]; equipment: string; difficulty: string; description: string; instructions: string[]; tips: string[]; images: string[]; videoUrl?: string; webmUrl?: string; gifUrl?: string; mediaCredit?: { author: string; sourceUrl: string; license: string; licenseUrl: string }; alternatives: string[] };
+export type ExerciseInfo = { id: string; name: string; muscleGroup: string; primaryMuscles: string[]; secondaryMuscles: string[]; equipment: string; difficulty: string; description: string; instructions: string[]; tips: string[]; images: string[]; videoUrl?: string; webmUrl?: string; gifUrl?: string; posterUrl?: string; mediaCredit?: { author: string; sourceUrl: string; license: string; licenseUrl: string }; alternatives: string[] };
 export function anatomyMuscle(m: string): string {
  const s=m.toLowerCase();
  if (/peit|peitor/.test(s)) return 'Peitoral'; if (/delto|ombro/.test(s)) return 'Ombros';
