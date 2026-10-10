@@ -1,3 +1,10 @@
+import { REVIEWED_EXERCISE_MOTION } from "./exercise-motion-reviewed";
+import poster0 from "@/assets/exercises/supino-reto-poster.jpg.asset.json";
+import poster1 from "@/assets/exercises/supino-inclinado-com-halteres-poster.jpg.asset.json";
+import poster2 from "@/assets/exercises/rosca-direta-poster.jpg.asset.json";
+import poster3 from "@/assets/exercises/elevacao-lateral-poster.jpg.asset.json";
+import poster4 from "@/assets/exercises/leg-press-poster.jpg.asset.json";
+import poster5 from "@/assets/exercises/desenvolvimento-com-halteres-poster.jpg.asset.json";
 import { ADDITIONAL_EXERCISE_MOTION } from './exercise-motion-additional';
 import webm5 from "@/assets/exercises/desenvolvimento-com-halteres.webm.asset.json";
 import webm4 from "@/assets/exercises/leg-press.webm.asset.json";
@@ -17,12 +24,13 @@ import video4 from "@/assets/exercises/leg-press.mp4.asset.json";
 import gif4 from "@/assets/exercises/leg-press.gif.asset.json";
 import video5 from "@/assets/exercises/desenvolvimento-com-halteres.mp4.asset.json";
 import gif5 from "@/assets/exercises/desenvolvimento-com-halteres.gif.asset.json";
-export const EXERCISE_MOTION: Record<string, { videoUrl: string; webmUrl: string; gifUrl: string; posterUrl?: string; mediaCredit: { author: string; sourceUrl: string; license: string; licenseUrl: string } }> = {
+export const EXERCISE_MOTION: Record<string, { videoUrl?: string; webmUrl?: string; gifUrl: string; posterUrl?: string; mediaCredit: { author: string; sourceUrl: string; license: string; licenseUrl: string } }> = {
   ...ADDITIONAL_EXERCISE_MOTION,
-  "supino-reto": { videoUrl: video0.url, webmUrl: webm0.url, gifUrl: gif0.url, mediaCredit: { author: "Goulart · wger", sourceUrl: "https://wger.de/en/exercise/73/view/", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/" } },
-  "supino-inclinado-com-halteres": { videoUrl: video1.url, webmUrl: webm1.url, gifUrl: gif1.url, mediaCredit: { author: "Goulart · wger", sourceUrl: "https://wger.de/en/exercise/537/view/", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/" } },
-  "rosca-direta": { videoUrl: video2.url, webmUrl: webm2.url, gifUrl: gif2.url, mediaCredit: { author: "Goulart · wger", sourceUrl: "https://wger.de/en/exercise/91/view/", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/" } },
-  "elevacao-lateral": { videoUrl: video3.url, webmUrl: webm3.url, gifUrl: gif3.url, mediaCredit: { author: "Goulart · wger", sourceUrl: "https://wger.de/en/exercise/348/view/", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/" } },
-  "leg-press": { videoUrl: video4.url, webmUrl: webm4.url, gifUrl: gif4.url, mediaCredit: { author: "Goulart · wger", sourceUrl: "https://wger.de/en/exercise/371/view/", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/" } },
-  "desenvolvimento-com-halteres": { videoUrl: video5.url, webmUrl: webm5.url, gifUrl: gif5.url, mediaCredit: { author: "Goulart · wger", sourceUrl: "https://wger.de/en/exercise/567/view/", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/" } },
+  ...REVIEWED_EXERCISE_MOTION,
+  "supino-reto": { videoUrl: video0.url, webmUrl: webm0.url, gifUrl: gif0.url, posterUrl: poster0.url, mediaCredit: { author: "Goulart · wger", sourceUrl: "https://wger.de/en/exercise/73/view/", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/" } },
+  "supino-inclinado-com-halteres": { videoUrl: video1.url, webmUrl: webm1.url, gifUrl: gif1.url, posterUrl: poster1.url, mediaCredit: { author: "Goulart · wger", sourceUrl: "https://wger.de/en/exercise/537/view/", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/" } },
+  "rosca-direta": { videoUrl: video2.url, webmUrl: webm2.url, gifUrl: gif2.url, posterUrl: poster2.url, mediaCredit: { author: "Goulart · wger", sourceUrl: "https://wger.de/en/exercise/91/view/", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/" } },
+  "elevacao-lateral": { videoUrl: video3.url, webmUrl: webm3.url, gifUrl: gif3.url, posterUrl: poster3.url, mediaCredit: { author: "Goulart · wger", sourceUrl: "https://wger.de/en/exercise/348/view/", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/" } },
+  "leg-press": { videoUrl: video4.url, webmUrl: webm4.url, gifUrl: gif4.url, posterUrl: poster4.url, mediaCredit: { author: "Goulart · wger", sourceUrl: "https://wger.de/en/exercise/371/view/", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/" } },
+  "desenvolvimento-com-halteres": { videoUrl: video5.url, webmUrl: webm5.url, gifUrl: gif5.url, posterUrl: poster5.url, mediaCredit: { author: "Goulart · wger", sourceUrl: "https://wger.de/en/exercise/567/view/", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/" } },
 };
