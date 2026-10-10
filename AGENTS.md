@@ -18,3 +18,4 @@
 - Preserve atomic workout completion through the RIR-aware wrapper; athlete memory lives in training_preferences and is passed to all training Coach contexts.
 - Enrich personalization prompts and read-only proposal sheets from the shared exercise catalog locally; never add AI calls for anatomy, instructions, or demonstrations.
 - Keep reviewed motion assets in the shared exercise-motion registry with recording-derived posters; both compact cards and full sheets consume it to avoid duplicate media sources.
+- Allow photographic GIF-only demonstrations in the motion registry and reset media state on exercise changes; do not fabricate videos or carry a failed playback state into another exercise.

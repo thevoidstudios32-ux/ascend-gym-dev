@@ -126,5 +126,53 @@
     "author": "Goulart",
     "videoLicenseId": 2,
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+  },
+  "remada-curvada": {
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bent-over_row_-_exercise_demonstration_video.webm",
+    "sourceMediaUrl": "https://upload.wikimedia.org/wikipedia/commons/b/b2/Bent-over_row_-_exercise_demonstration_video.webm",
+    "author": "FitnessScape",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+    "adaptation": "Real recording resized, audio removed; animated excerpt and still extracted. No synthesis."
+  },
+  "levantamento-terra": {
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Deadlift_-_exercise_demonstration_video.webm",
+    "sourceMediaUrl": "https://upload.wikimedia.org/wikipedia/commons/6/62/Deadlift_-_exercise_demonstration_video.webm",
+    "author": "FitnessScape",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+    "adaptation": "Real recording resized, audio removed; animated excerpt and still extracted. No synthesis."
+  },
+  "desenvolvimento-militar": {
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Shoulder_press_-_exercise_demonstration_video.webm",
+    "sourceMediaUrl": "https://upload.wikimedia.org/wikipedia/commons/6/69/Shoulder_press_-_exercise_demonstration_video.webm",
+    "author": "FitnessScape",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+    "adaptation": "Real recording resized, audio removed; animated excerpt and still extracted. No synthesis."
+  },
+  "agachamento-livre": {
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Squat_-_exercise_demonstration_video.webm",
+    "sourceMediaUrl": "https://upload.wikimedia.org/wikipedia/commons/5/5c/Squat_-_exercise_demonstration_video.webm",
+    "author": "FitnessScape",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+    "adaptation": "Real recording resized, audio removed; animated excerpt and still extracted. No synthesis."
+  },
+  "agachamento": {
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Squats_01.gif",
+    "sourceMediaUrl": "https://upload.wikimedia.org/wikipedia/commons/5/52/Squats_01.gif",
+    "author": "Zimmermanns",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+    "adaptation": "Original photographic GIF reused; still extracted. No synthesis."
+  },
+  "abdominal-supra": {
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sit-ups_or_Crunch.gif",
+    "sourceMediaUrl": "https://upload.wikimedia.org/wikipedia/commons/2/29/Sit-ups_or_Crunch.gif",
+    "author": "Zimmermanns",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+    "adaptation": "Original photographic GIF reused; still extracted. No synthesis."
   }
 }
