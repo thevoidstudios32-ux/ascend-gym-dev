@@ -1,11 +1,19 @@
 import { z } from "zod";
 import { EXERCISE_CATALOG, type CatalogExercise } from "@/lib/exercises";
-import { WEEKDAYS, type ProgramProposal } from "@/lib/program";
+import { WEEKDAYS, buildPlanningWeeks, type ProgramProposal } from "@/lib/program";
 
 export const ASSESSMENT_MUSCLES = ["Peitoral", "Ombros", "Bíceps", "Tríceps", "Antebraços", "Dorsais", "Trapézio", "Lombar", "Abdômen", "Quadríceps", "Posterior de coxa", "Glúteos", "Panturrilhas"] as const;
 export const ASSESSMENT_GOALS = ["Hipertrofia", "Força", "Emagrecimento", "Recomposição corporal", "Performance/condicionamento", "Calistenia"] as const;
 export const ASSESSMENT_EQUIPMENT = ["Academia completa", "Academia básica", "Casa", "Apenas peso corporal", "Personalizado"] as const;
 export const assessmentSchema = z.object({
+  planning_weeks: z.number().int().min(1).max(12),
+  default_rest_seconds: z.number().int().min(15).max(600).default(90),
+  liked_exercises: z.array(z.string().max(80)).max(20).default([]),
+  disliked_exercises: z.array(z.string().max(80)).max(20).default([]),
+  restricted_muscles: z.array(z.enum(ASSESSMENT_MUSCLES)).max(13).default([]),
+  restrictions: z.string().max(400).default(""),
+  notes: z.string().max(400).default(""),
+  split_preference: z.enum(["Adaptativa", "Corpo inteiro", "Superiores / Inferiores"]).default("Adaptativa"),
   gender: z.enum(["masculino", "feminino", "nao_informado"]),
   height_cm: z.number().min(100).max(250),
   weight_kg: z.number().min(30).max(300),
@@ -25,14 +33,6 @@ export const assessmentSchema = z.object({
 });
 export type TrainingAssessment = z.infer<typeof assessmentSchema>;
 
-const extra: CatalogExercise[] = [
-  { name: "Remada auto-resistida", emoji: "", group: "Costas", equipment: "Peso corporal", difficulty: "Iniciante", muscles: ["Dorsais", "Bíceps"], tip: "Uma mão resiste à puxada do braço oposto, sem prender a respiração." },
-  { name: "Elevação em Y deitado", emoji: "", group: "Ombro", equipment: "Peso corporal", difficulty: "Iniciante", muscles: ["Ombros", "Trapézio"], tip: "Deitado de bruços, eleve os braços em Y sem arquear a coluna." },
-  { name: "Extensão de quadril em quatro apoios", emoji: "", group: "Glúteos", equipment: "Peso corporal", difficulty: "Iniciante", muscles: ["Glúteos", "Posterior de coxa"], tip: "Mantenha a coluna neutra e eleve a perna sem girar o quadril." },
-  { name: "Panturrilha sem carga", emoji: "", group: "Pernas", equipment: "Peso corporal", difficulty: "Iniciante", muscles: ["Panturrilhas"], tip: "Use apoio estável, suba e desça os calcanhares com controle." },
-  { name: "Bird dog", emoji: "", group: "Abdômen", equipment: "Peso corporal", difficulty: "Iniciante", muscles: ["Lombar", "Abdômen"], tip: "Em quatro apoios, estenda braço e perna opostos sem rodar o tronco." },
-  { name: "Flexão de punhos auto-resistida", emoji: "", group: "Bíceps", equipment: "Peso corporal", difficulty: "Iniciante", muscles: ["Antebraços"], tip: "A mão oposta oferece resistência leve à flexão do punho." },
-];
 const aliases: Record<string, string[]> = {
   Peitoral: ["Peito", "Peitoral"], Ombros: ["Ombro", "Deltoide"], Dorsais: ["Costas", "Dorsal"],
   Quadríceps: ["Quadríceps"], "Posterior de coxa": ["Posterior"], Panturrilhas: ["Panturrilha"],
@@ -44,20 +44,22 @@ function targets(ex: CatalogExercise, muscle: string) {
 }
 
 /** Initial program uses the existing catalog; AI remains an opt-in proposal workflow. */
-export function buildAssessmentProgram(a: TrainingAssessment, rest = 90): ProgramProposal {
+export function buildAssessmentProgram(a: TrainingAssessment, rest = a.default_rest_seconds): ProgramProposal {
+  if (a.restrictions.trim()) throw new Error("Restrições clínicas precisam de orientação profissional antes de gerar o plano. Marque os músculos e exercícios a evitar, ou revise esta informação com seu profissional.");
   const strength = a.goal === "Força";
   const conditioning = a.goal === "Emagrecimento" || a.goal === "Performance/condicionamento";
   const sessionRest = Math.min(rest, conditioning ? 60 : strength ? 180 : 120);
   const rank = { Iniciante: 0, Intermediário: 1, Avançado: 2 };
   const level = a.experience === "iniciante" ? 0 : a.experience === "intermediário" ? 1 : 2;
-  const catalog = [...EXERCISE_CATALOG, ...extra].filter(e => {
+  const catalog = EXERCISE_CATALOG.filter(e => {
+    if (a.disliked_exercises.includes(e.name) || a.restricted_muscles.some(m => targets(e, m))) return false;
     if (rank[e.difficulty] > level) return false;
     if (e.name === "Barra fixa") return a.equipment.includes("Barra fixa");
     if (e.name === "Paralelas") return a.equipment.includes("Paralelas");
     if (e.name === "Mergulho no banco") return a.equipment_mode !== "Apenas peso corporal";
     return (a.equipment.includes(e.equipment) || e.equipment === "Peso corporal") && (a.goal !== "Calistenia" || e.equipment === "Peso corporal");
   });
-  const full = a.days_per_week <= 3;
+  const full = a.split_preference === "Corpo inteiro" || (a.split_preference !== "Superiores / Inferiores" && a.days_per_week <= 3);
   const weekdays = WEEKDAYS.filter(w => a.available_weekdays.includes(w));
   const sets = level === 0 ? 2 : 3;
   const count = Math.max(3, Math.min(8, Math.floor(a.minutes_per_session * 60 / (sets * (45 + sessionRest) + 60))));
@@ -66,7 +68,7 @@ export function buildAssessmentProgram(a: TrainingAssessment, rest = 90): Progra
     const groups: CatalogExercise["group"][] = full
       ? ["Peito", "Costas", "Pernas", "Ombro", "Abdômen"]
       : upper ? ["Peito", "Costas", "Ombro", "Bíceps", "Tríceps"] : ["Pernas", "Glúteos", "Abdômen"];
-    const pool = catalog.filter(e => groups.includes(e.group));
+    const pool = catalog.filter(e => groups.includes(e.group)).sort((x, y) => Number(a.liked_exercises.includes(y.name)) - Number(a.liked_exercises.includes(x.name)));
     const chosen: CatalogExercise[] = [];
     const add = (candidates: CatalogExercise[]) => {
       const options = candidates.filter(e => !chosen.includes(e));
@@ -78,6 +80,7 @@ export function buildAssessmentProgram(a: TrainingAssessment, rest = 90): Progra
     for (const muscle of a.priority_muscles) add(pool.filter(e => targets(e, muscle)));
     for (const group of groups) add(pool.filter(e => e.group === group));
     for (const e of pool) if (chosen.length < count && !chosen.includes(e)) chosen.push(e);
+    if (!chosen.length) throw new Error("Não há exercícios compatíveis para este dia. Revise equipamentos, divisão e exclusões.");
     return {
       key: `avaliacao-${weekday.toLowerCase()}`, weekday,
       title: full ? `Corpo inteiro ${i + 1}` : `${upper ? "Superiores" : "Inferiores"} ${Math.floor(i / 2) + 1}`,
@@ -90,9 +93,27 @@ export function buildAssessmentProgram(a: TrainingAssessment, rest = 90): Progra
         rest: sessionRest, purpose: e.tip })),
     };
   });
-  return { name: "Seu programa ASCEND", goal: a.goal, split_label: full ? "Corpo inteiro adaptativo" : "Superiores / Inferiores adaptativo",
+  return { planning_model: 2, planning_weeks: a.planning_weeks, weeks: buildPlanningWeeks(days, a.planning_weeks), name: "Seu programa ASCEND", goal: a.goal, split_label: full ? "Corpo inteiro adaptativo" : "Superiores / Inferiores adaptativo",
     days_per_week: days.length, priorities: a.priority_muscles, week_focus: a.priority_muscles.join(" · ") || "Evolução equilibrada",
     notes: "Programa inicial montado a partir da avaliação. Progrida gradualmente e interrompa exercícios que causem dor.",
-    days, summary: `Programa para ${days.length} dias, com sessões de até ${a.minutes_per_session} minutos e equipamentos disponíveis.`,
+    days, summary: `Planejamento de ${a.planning_weeks} semanas para ${days.length} dias, com sessões de até ${a.minutes_per_session} minutos e equipamentos disponíveis.`,
     changes: ["Atualizar o programa com os dados da avaliação inicial."] };
+}
+/** Convert only known compatible legacy values; leave missing answers blank. */
+export function assessmentInitial(profile: Record<string, unknown> | null | undefined, prefs?: Record<string, unknown> | null): Record<string, unknown> {
+  const saved = profile?.["training_assessment"];
+  const source = { ...(profile ?? {}), ...(prefs ?? {}), ...(saved && typeof saved === "object" ? saved : {}) } as Record<string, unknown>;
+  const equipmentMap: Record<string, string[]> = { "Academia completa": ["Máquina","Barra","Halteres","Cabo","Peso corporal","Barra fixa","Paralelas"], "Máquinas": ["Máquina"], "Barra e anilhas": ["Barra"], "Peso do corpo": ["Peso corporal"] };
+  const oldEquipment = Array.isArray(source["equipment"]) ? source["equipment"] as string[] : [];
+  const equipment = [...new Set(oldEquipment.flatMap(e => equipmentMap[e] ?? (["Máquina","Barra","Halteres","Cabo","Peso corporal","Barra fixa","Paralelas"].includes(e) ? [e] : [])))];
+  const muscleMap: Record<string,string> = { Peito: "Peitoral", Costas: "Dorsais", Ombro: "Ombros", Core: "Abdômen" };
+  const priorities = Array.isArray(source["priority_muscles"]) ? (source["priority_muscles"] as string[]).map(m => muscleMap[m] ?? m).filter(m => (ASSESSMENT_MUSCLES as readonly string[]).includes(m)).slice(0,5) : [];
+  const result: Record<string, unknown> = { available_weekdays: [], ...source, equipment, priority_muscles: priorities };
+  const goal = ASSESSMENT_GOALS.find(g => g.toLowerCase() === String(source["goal"]).toLowerCase());
+  if (goal) result["goal"] = goal; else delete result["goal"];
+  if (!ASSESSMENT_EQUIPMENT.includes(source["equipment_mode"] as typeof ASSESSMENT_EQUIPMENT[number]) && equipment.length) result["equipment_mode"] = "Personalizado";
+  if (![30,45,60,75,90].includes(Number(result["minutes_per_session"]))) delete result["minutes_per_session"];
+  if (!["Adaptativa","Corpo inteiro","Superiores / Inferiores"].includes(String(result["split_preference"]))) delete result["split_preference"];
+  if (!["masculino","feminino","nao_informado"].includes(String(result["gender"]))) delete result["gender"];
+  return result;
 }

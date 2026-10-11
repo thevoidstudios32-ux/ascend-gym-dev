@@ -3,6 +3,7 @@ import { assessmentSchema, buildAssessmentProgram, type TrainingAssessment } fro
 import { WEEKDAYS } from "../src/lib/program";
 
 const base: TrainingAssessment = {
+  planning_weeks: 8, default_rest_seconds: 90, liked_exercises: [], disliked_exercises: [], restricted_muscles: [], restrictions: "", notes: "", split_preference: "Adaptativa",
   gender: "nao_informado", height_cm: 175, weight_kg: 75, goal: "Hipertrofia",
   experience: "iniciante", days_per_week: 4, available_weekdays: ["SEG", "TER", "QUI", "SEX"],
   minutes_per_session: 45, equipment_mode: "Apenas peso corporal", equipment: ["Peso corporal"],
