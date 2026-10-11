@@ -24,6 +24,9 @@ export type ProgramDay = {
 };
 
 export type Program = {
+  planning_model?: number;
+  planning_weeks?: number;
+  weeks?: PlanningWeek[];
   id: string;
   name: string;
   goal: string;
@@ -39,6 +42,9 @@ export type Program = {
 };
 
 export type ProgramProposal = {
+  planning_model?: number;
+  planning_weeks?: number;
+  weeks?: PlanningWeek[];
   name: string;
   goal: string;
   split_label: string;
@@ -111,6 +117,18 @@ export type Recommendation = {
 };
 
 export const WEEKDAYS = ["SEG", "TER", "QUA", "QUI", "SEX", "SÁB", "DOM"] as const;
+
+export type PlanningWeek = { number: number; focus: string; guidance: string; days: ProgramDay[] };
+
+/** Repeat the same movements for learning, varying effort instead of inventing loads. */
+export function buildPlanningWeeks(days: ProgramDay[], count: number): PlanningWeek[] {
+  return Array.from({ length: count }, (_, i) => {
+    const recovery = count >= 4 && (i + 1) % 4 === 0;
+    return { number: i + 1, focus: recovery ? "Recuperação" : i === 0 ? "Adaptação e técnica" : "Consolidação e progressão",
+      guidance: recovery ? "Reduza o esforço; mantenha a técnica e pelo menos 3 repetições em reserva." : i === 0 ? "Encontre cargas confortáveis; mantenha 3 repetições em reserva." : "Só aumente a carga se completar as repetições com técnica e sem desconforto; mantenha 2–3 em reserva.",
+      days: days.map(d => ({ ...d, intensity: recovery ? "recovery" : d.intensity, exercises: d.exercises.map(e => ({ ...e, sets: recovery ? Math.max(1, e.sets - 1) : e.sets })) })) };
+  });
+}
 
 export const MUSCLE_GROUPS = [
   "Peito",

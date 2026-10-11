@@ -108,6 +108,12 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
   { name: "Elevação de pernas", emoji: "🦵", group: "Abdômen", equipment: "Peso corporal", difficulty: "Intermediário", muscles: ["Abdômen inferior"], tip: "Não deixe a lombar arquear." },
   { name: "Abdominal no cabo", emoji: "🪢", group: "Abdômen", equipment: "Cabo", difficulty: "Intermediário", muscles: ["Reto abdominal"], tip: "Enrole a coluna, não puxe com os braços." },
   { name: "Prancha lateral", emoji: "📏", group: "Abdômen", equipment: "Peso corporal", difficulty: "Intermediário", muscles: ["Oblíquos"], tip: "Quadril alto e alinhado." },
+  { name: "Remada auto-resistida", emoji: "", group: "Costas", equipment: "Peso corporal", difficulty: "Iniciante", muscles: ["Dorsais", "Bíceps"], tip: "Uma mão resiste à puxada do braço oposto, sem prender a respiração." },
+  { name: "Elevação em Y deitado", emoji: "", group: "Ombro", equipment: "Peso corporal", difficulty: "Iniciante", muscles: ["Ombros", "Trapézio"], tip: "Deitado de bruços, eleve os braços em Y sem arquear a coluna." },
+  { name: "Extensão de quadril em quatro apoios", emoji: "", group: "Glúteos", equipment: "Peso corporal", difficulty: "Iniciante", muscles: ["Glúteos", "Posterior de coxa"], tip: "Mantenha a coluna neutra e eleve a perna sem girar o quadril." },
+  { name: "Panturrilha sem carga", emoji: "", group: "Pernas", equipment: "Peso corporal", difficulty: "Iniciante", muscles: ["Panturrilhas"], tip: "Use apoio estável, suba e desça os calcanhares com controle." },
+  { name: "Bird dog", emoji: "", group: "Abdômen", equipment: "Peso corporal", difficulty: "Iniciante", muscles: ["Lombar", "Abdômen"], tip: "Em quatro apoios, estenda braço e perna opostos sem rodar o tronco." },
+  { name: "Flexão de punhos auto-resistida", emoji: "", group: "Bíceps", equipment: "Peso corporal", difficulty: "Iniciante", muscles: ["Antebraços"], tip: "A mão oposta oferece resistência leve à flexão do punho." },
 ];
 
 export function findExercise(name: string) {

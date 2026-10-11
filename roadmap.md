@@ -1,5 +1,12 @@
 # Translation completion roadmap
 
+## Unificação da personalização e biblioteca
+- [ ] Unificar questionário para contas novas/antigas, converter respostas compatíveis e confirmar substituições
+- [ ] Persistir planejamento multissemanal, versão do modelo e preferências em transação sem alterar histórico
+- [ ] Respeitar catálogo, equipamentos, nível e restrições na geração; exibir semanas reais
+- [ ] Auditar mídia e posições reais, corrigir estados alternativos e registrar contagens e limitações
+- [ ] Testar geração, migração, persistência, isolamento e interface; entregar relatório objetivo
+
 ## Ampliar demonstrações reais
 - [ ] Auditar todo o catálogo, testar mídias existentes, corrigir falhas e registrar relatório com pendências verificadas
 - [ ] Pesquisar novamente fontes verificadas para os exercícios ainda sem movimento e conectar apenas correspondências reais licenciadas, sem geração por IA

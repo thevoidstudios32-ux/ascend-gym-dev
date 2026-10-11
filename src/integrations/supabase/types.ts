@@ -110,12 +110,15 @@ export type Database = {
           id: string
           name: string
           notes: string | null
+          planning_model: number
+          planning_weeks: number
           priorities: string[]
           split_label: string
           updated_at: string
           user_id: string
           version: number
           week_focus: string | null
+          weeks: Json
         }
         Insert: {
           active?: boolean
@@ -126,12 +129,15 @@ export type Database = {
           id?: string
           name?: string
           notes?: string | null
+          planning_model?: number
+          planning_weeks?: number
           priorities?: string[]
           split_label?: string
           updated_at?: string
           user_id: string
           version?: number
           week_focus?: string | null
+          weeks?: Json
         }
         Update: {
           active?: boolean
@@ -142,12 +148,15 @@ export type Database = {
           id?: string
           name?: string
           notes?: string | null
+          planning_model?: number
+          planning_weeks?: number
           priorities?: string[]
           split_label?: string
           updated_at?: string
           user_id?: string
           version?: number
           week_focus?: string | null
+          weeks?: Json
         }
         Relationships: []
       }
@@ -1277,7 +1286,9 @@ export type Database = {
           liked_exercises: string[]
           minutes_per_session: number
           notes: string | null
+          planning_weeks: number
           priority_muscles: string[]
+          restricted_muscles: string[]
           restrictions: string | null
           split_preference: string | null
           updated_at: string
@@ -1296,7 +1307,9 @@ export type Database = {
           liked_exercises?: string[]
           minutes_per_session?: number
           notes?: string | null
+          planning_weeks?: number
           priority_muscles?: string[]
+          restricted_muscles?: string[]
           restrictions?: string | null
           split_preference?: string | null
           updated_at?: string
@@ -1315,7 +1328,9 @@ export type Database = {
           liked_exercises?: string[]
           minutes_per_session?: number
           notes?: string | null
+          planning_weeks?: number
           priority_muscles?: string[]
+          restricted_muscles?: string[]
           restrictions?: string | null
           split_preference?: string | null
           updated_at?: string
@@ -1524,6 +1539,15 @@ export type Database = {
       remove_workout: { Args: { _date: string }; Returns: Json }
       save_training_assessment: {
         Args: { _assessment: Json; _program: Json; _replace?: boolean }
+        Returns: undefined
+      }
+      save_unified_assessment: {
+        Args: {
+          _assessment: Json
+          _expected_id?: string
+          _expected_version?: number
+          _program: Json
+        }
         Returns: undefined
       }
     }
