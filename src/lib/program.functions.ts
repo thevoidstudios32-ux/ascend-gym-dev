@@ -1,8 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
+import { assessmentInitial, assessmentSchema, buildAssessmentProgram } from "@/lib/training-assessment";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { buildProgramContext, programInsights, proposeProgram } from "@/lib/program.server";
-import { defaultPreferences, type Program, type ProgramVersion, type Recommendation } from "@/lib/program";
+import { defaultPreferences, buildPlanningWeeks, type PlanningWeek, type Program, type ProgramVersion, type Recommendation } from "@/lib/program";
 
 const exerciseSchema = z.object({
   name: z.string().min(1).max(80),
@@ -165,53 +166,22 @@ export const applyProgram = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-    const { data: current } = await supabase
-      .from("ai_programs")
-      .select("*")
-      .eq("user_id", userId)
-      .eq("active", true)
-      .order("updated_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    const payload = {
-      name: data.program.name,
-      goal: data.program.goal,
-      split_label: data.program.split_label,
-      days_per_week: data.program.days_per_week,
-      priorities: data.program.priorities,
-      week_focus: data.program.week_focus,
-      notes: data.program.notes,
-      days: data.program.days as never,
-    };
-
-    if (current) {
-      await supabaseAdmin.from("ai_program_versions").insert({
-        program_id: current.id,
-        user_id: userId,
-        version: current.version,
-        snapshot: current as never,
-        reason: data.reason,
-      });
-
-      const { error } = await supabase
-        .from("ai_programs")
-        .update({ ...payload, version: current.version + 1 })
-        .eq("id", current.id)
-        .eq("user_id", userId);
-      if (error) throw new Error(error.message);
-      return { id: current.id as string, created: false };
+    const current = await supabase.from("ai_programs").select("planning_weeks,planning_model").eq("user_id",userId).eq("active",true).order("updated_at",{ascending:false}).limit(1).maybeSingle();
+    if (current.error) throw new Error(current.error.message);
+    if (current.data?.planning_model === 2) {
+      const [profile,prefs] = await Promise.all([supabase.from("profiles").select("*").eq("id",userId).single(),supabase.from("training_preferences").select("*").eq("user_id",userId).maybeSingle()]);
+      const parsed = assessmentSchema.safeParse(assessmentInitial(profile.data,prefs.data));
+      if (!parsed.success) throw new Error("Atualize sua avaliação antes de alterar o programa.");
+      const allowed = new Set(buildAssessmentProgram(parsed.data).weeks?.flatMap(w => w.days.flatMap(d => d.exercises.map(e => e.name))) ?? []);
+      // The complete compatible catalog, not only the generated selection, is validated below.
+      const { compatibleAssessmentExercises } = await import("@/lib/training-assessment");
+      for (const e of compatibleAssessmentExercises(parsed.data)) allowed.add(e.name);
+      if (data.program.days.some(d => !parsed.data.available_weekdays.includes(d.weekday as typeof parsed.data.available_weekdays[number]) || d.exercises.some(e => !allowed.has(e.name)))) throw new Error("A proposta não respeita os equipamentos, nível, exclusões ou disponibilidade. Revise sua avaliação.");
     }
-
-    const { data: row, error } = await supabase
-      .from("ai_programs")
-      .insert({ ...payload, user_id: userId, active: true })
-      .select("id")
-      .single();
+    const weeks = buildPlanningWeeks(data.program.days,current.data?.planning_weeks ?? 1);
+    const { data: result,error } = await supabase.rpc("apply_program_revision",{ _program: { ...data.program,weeks }, _reason: data.reason });
     if (error) throw new Error(error.message);
-    return { id: row.id as string, created: true };
+    return result as unknown as { id: string; created: boolean };
   });
 
 /** Aceita ou recusa uma recomendação da IA. */
@@ -269,19 +239,21 @@ export const sendTrainingFeedback = createServerFn({ method: "POST" })
  */
 export const startProgramDay = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: unknown) => z.object({ dayKey: z.string().min(1).max(30) }).parse(data))
+  .inputValidator((data: unknown) => z.object({ dayKey: z.string().min(1).max(30), week: z.number().int().min(1).max(12).default(1) }).parse(data))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
 
     const { data: program } = await supabase
       .from("ai_programs")
-      .select("id,name,days")
+      .select("id,name,days,weeks,planning_weeks")
       .eq("user_id", userId)
       .eq("active", true)
       .maybeSingle();
     if (!program) throw new Error("Você ainda não tem um programa ativo.");
 
-    const days = (program.days ?? []) as unknown as {
+    const week = (program.weeks as unknown as PlanningWeek[]).find(w => w.number === data.week);
+    if (data.week > program.planning_weeks) throw new Error("Semana indisponível.");
+    const days = (week?.days ?? program.days ?? []) as unknown as {
       key: string;
       title: string;
       focus: string;
@@ -292,6 +264,7 @@ export const startProgramDay = createServerFn({ method: "POST" })
 
     const label = `AI · ${day.title}`;
     const payload = {
+      program_id: program.id, program_day_key: day.key,
       name: label.slice(0, 60),
       focus: day.focus.slice(0, 60),
       emoji: day.exercises[0]?.emoji || "🏋️",
@@ -309,30 +282,9 @@ export const startProgramDay = createServerFn({ method: "POST" })
       })) as never,
     };
 
-    const { data: existing } = await supabase
-      .from("custom_workouts")
-      .select("id")
-      .eq("user_id", userId)
-      .eq("name", payload.name)
-      .like("notes", "Dia do ASCEND AI Program%")
-      .limit(1)
-      .maybeSingle();
-
-    if (existing) {
-      const { error } = await supabase
-        .from("custom_workouts")
-        .update(payload)
-        .eq("id", existing.id)
-        .eq("user_id", userId);
-      if (error) throw new Error(error.message);
-      return { workoutId: existing.id as string };
-    }
-
-    const { data: row, error } = await supabase
-      .from("custom_workouts")
-      .insert({ ...payload, user_id: userId })
-      .select("id")
-      .single();
+    const { data: row, error } = await supabase.from("custom_workouts")
+      .upsert({ ...payload, user_id: userId }, { onConflict: "user_id,program_id,program_day_key" })
+      .select("id").single();
     if (error) throw new Error(error.message);
     return { workoutId: row.id as string };
   });

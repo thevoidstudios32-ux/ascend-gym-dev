@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { assessmentInitial } from "@/lib/training-assessment";
 import { TrainingOnboarding } from "@/components/training-onboarding";
 import { CoachExerciseReference } from './coach-exercise-reference';
 import { useDashboard } from "@/hooks/use-dashboard";
@@ -804,7 +805,10 @@ export function AiProgramSection() {
 
   const dashboard = useDashboard();
   const program = data?.program ?? null;
-  const volume = useMemo(() => programMuscleVolume(program?.days ?? []).slice(0, 5), [program]);
+  const [selectedWeek, setSelectedWeek] = useState(1);
+  const activeWeek = program?.weeks?.find(w => w.number === selectedWeek);
+  const displayedDays = activeWeek?.days ?? program?.days ?? [];
+  const volume = useMemo(() => programMuscleVolume(displayedDays).slice(0, 5), [program, selectedWeek]);
 
   const openCoach = (request?: string) => {
     setSeed(request);
@@ -813,14 +817,14 @@ export function AiProgramSection() {
 
   const start = async (dayKey: string) => {
     try {
-      const res = await startDay.mutateAsync(dayKey);
+      const res = await startDay.mutateAsync({ dayKey, week: selectedWeek });
       await navigate({ to: "/app/treino/$split", params: { split: res.workoutId } });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Não foi possível iniciar o treino.");
     }
   };
 
-  if (!isLoading && !program) return <TrainingOnboarding initial={dashboard.data?.profile?.training_assessment} onDone={() => setSheet(null)} />;
+  if (!isLoading && !program) return <TrainingOnboarding initial={assessmentInitial(dashboard.data?.profile, data?.preferences as unknown as Record<string, unknown>)} onDone={() => setSheet(null)} />;
 
   return (
     <>
@@ -839,7 +843,7 @@ export function AiProgramSection() {
           </div>
           <button
             type="button"
-            onClick={() => setSheet("prefs")}
+            onClick={() => setSheet("assessment")}
             className="press shrink-0 rounded-full bg-elevated px-3 py-2 text-[11px] font-bold"
           >
             Preferências
@@ -848,16 +852,19 @@ export function AiProgramSection() {
 
         <button
           type="button"
-          onClick={() => openCoach()}
+          onClick={() => setSheet("assessment")}
           className="press flex w-full items-center justify-center gap-2 rounded-2xl bg-primary p-4 font-extrabold text-primary-foreground shadow-glow"
         >
-          <Sparkles className="size-4" /> Personalizar meu treino com IA
+          <Sparkles className="size-4" /> Personalizar meu treino
         </button>
 
         {isLoading && <p className="text-sm text-muted-foreground">Carregando programa…</p>}
 
         {program && (
           <>
+            {program.planning_model !== 2 && <p className="text-sm text-muted-foreground">Seu programa anterior foi preservado. Complete a nova avaliação para atualizar o planejamento.</p>}
+            {Boolean(program.weeks?.length) && <div className="space-y-2"><label className="text-sm font-bold">Semana do planejamento<select aria-label="Semana do planejamento" className="ml-2 rounded-lg border border-border bg-elevated p-2" value={selectedWeek} onChange={e => setSelectedWeek(Number(e.target.value))}>{program.weeks?.map(w => <option key={w.number} value={w.number}>Semana {w.number} · {w.focus}</option>)}</select></label><p className="text-xs text-muted-foreground">{activeWeek?.guidance}</p></div>}
+            <Button variant="secondary" className="w-full" onClick={() => openCoach()}><Sparkles className="size-4" /> Ajustar com Coach IA</Button>
             {program.week_focus && (
               <p className="rounded-xl bg-elevated p-3 text-xs text-muted-foreground">
                 <span className="font-bold text-foreground">Foco da semana: </span>
@@ -866,7 +873,7 @@ export function AiProgramSection() {
             )}
 
             <div className="space-y-2">
-              {program.days.map((d) => (
+              {displayedDays.map((d) => (
                 <div key={d.key} className="flex items-center gap-3 rounded-2xl bg-elevated p-3">
                   <div className="min-w-0 flex-1">
                     <p className="flex items-center gap-2 truncate text-sm font-extrabold">
@@ -925,7 +932,7 @@ export function AiProgramSection() {
         </Sheet>
       )}
 
-      {sheet === "assessment" && <Sheet title="Refazer avaliação inicial" onClose={() => setSheet(null)}><TrainingOnboarding initial={dashboard.data?.profile?.training_assessment} onDone={() => setSheet(null)} onCancel={() => setSheet(null)} /></Sheet>}
+      {sheet === "assessment" && <Sheet title="Refazer avaliação inicial" onClose={() => setSheet(null)}><TrainingOnboarding initial={assessmentInitial(dashboard.data?.profile, data?.preferences as unknown as Record<string, unknown>)} onDone={() => setSheet(null)} onCancel={() => setSheet(null)} /></Sheet>}
 
       {sheet === "editor" && program && (
         <Sheet title="Editar programa" onClose={() => setSheet(null)}>

@@ -52,16 +52,7 @@ export function buildAssessmentProgram(a: TrainingAssessment, rest = a.default_r
   const strength = a.goal === "Força";
   const conditioning = a.goal === "Emagrecimento" || a.goal === "Performance/condicionamento";
   const sessionRest = Math.min(rest, conditioning ? 60 : strength ? 180 : 120);
-  const rank = { Iniciante: 0, Intermediário: 1, Avançado: 2 };
-  const level = a.experience === "iniciante" ? 0 : a.experience === "intermediário" ? 1 : 2;
-  const catalog = EXERCISE_CATALOG.filter(e => {
-    if (a.disliked_exercises.includes(e.name) || a.restricted_muscles.some(m => targets(e, m))) return false;
-    if (rank[e.difficulty] > level) return false;
-    if (e.name === "Barra fixa") return a.equipment.includes("Barra fixa");
-    if (e.name === "Paralelas") return a.equipment.includes("Paralelas");
-    if (e.name === "Mergulho no banco") return ["Academia completa", "Academia básica"].includes(a.equipment_mode);
-    return (a.equipment.includes(e.equipment) || e.equipment === "Peso corporal") && (a.goal !== "Calistenia" || e.equipment === "Peso corporal");
-  });
+  const catalog = compatibleAssessmentExercises(a);
   const full = a.split_preference === "Corpo inteiro" || (a.split_preference !== "Superiores / Inferiores" && a.days_per_week <= 3);
   const weekdays = WEEKDAYS.filter(w => a.available_weekdays.includes(w));
   const sets = level === 0 ? 2 : 3;
@@ -121,4 +112,17 @@ export function assessmentInitial(profile: Record<string, unknown> | null | unde
   if (!["Adaptativa","Corpo inteiro","Superiores / Inferiores"].includes(String(result["split_preference"]))) delete result["split_preference"];
   if (!["masculino","feminino","nao_informado"].includes(String(result["gender"]))) delete result["gender"];
   return result;
+}
+
+export function compatibleAssessmentExercises(a: TrainingAssessment): CatalogExercise[] {
+  const rank = { Iniciante: 0, Intermediário: 1, Avançado: 2 };
+  const level = a.experience === "iniciante" ? 0 : a.experience === "intermediário" ? 1 : 2;
+  return EXERCISE_CATALOG.filter(e => {
+    if (a.disliked_exercises.includes(e.name) || a.restricted_muscles.some(m => targets(e, m))) return false;
+    if (rank[e.difficulty] > level) return false;
+    if (e.name === "Barra fixa") return a.equipment.includes("Barra fixa");
+    if (e.name === "Paralelas") return a.equipment.includes("Paralelas");
+    if (e.name === "Mergulho no banco") return ["Academia completa", "Academia básica"].includes(a.equipment_mode);
+    return (a.equipment.includes(e.equipment) || e.equipment === "Peso corporal") && (a.goal !== "Calistenia" || e.equipment === "Peso corporal");
+  });
 }

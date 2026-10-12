@@ -25,7 +25,9 @@ export function WorkoutSheetButton() {
   useEffect(() => () => { if (previewUrl) URL.revokeObjectURL(previewUrl); }, [previewUrl]);
 
   function collect(): PdfProgram {
-    const days: PdfWorkout[] = [...(program?.program?.days ?? [])]
+    const planned = program?.program;
+    const exportDays = planned?.weeks?.length ? planned.weeks.flatMap(w => w.days.map(d => ({ ...d, title: `Semana ${w.number} · ${d.title}`, focus: `${d.focus} · ${w.focus}` }))) : planned?.days ?? [];
+    const days: PdfWorkout[] = [...exportDays]
       .sort((a, b) => {
         const ai = WEEKDAYS.indexOf(a.weekday as (typeof WEEKDAYS)[number]);
         const bi = WEEKDAYS.indexOf(b.weekday as (typeof WEEKDAYS)[number]);
@@ -51,6 +53,7 @@ export function WorkoutSheetButton() {
       goal: program?.program?.goal || data?.profile?.goal || undefined,
       level: data?.profile?.experience || undefined,
       version: program?.program?.version,
+      duration: `${planned?.planning_weeks ?? 1} semanas`,
       days,
     };
   }
