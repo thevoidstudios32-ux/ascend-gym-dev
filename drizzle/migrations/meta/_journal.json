@@ -113,6 +113,13 @@
       "when": 1791765746263,
       "tag": "0015_atomic_program_revision",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1791765784116,
+      "tag": "0016_program_day_upsert_index",
+      "breakpoints": true
     }
   ]
 }

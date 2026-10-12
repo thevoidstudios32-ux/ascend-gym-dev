@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX IF NOT EXISTS custom_program_day_upsert ON public.custom_workouts(user_id,program_id,program_day_key);
