@@ -8,30 +8,21 @@ export const generateAssessmentProgram = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => assessmentSchema.parse(input))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-    const [current, prefs] = await Promise.all([
-      supabase.from("ai_programs").select("id").eq("user_id", userId).eq("active", true).limit(1).maybeSingle(),
-      supabase.from("training_preferences").select("default_rest_seconds").eq("user_id", userId).maybeSingle(),
-    ]);
-    if (current.error || prefs.error) throw new Error("Não foi possível carregar seu programa. Tente novamente.");
-    const proposal = buildAssessmentProgram(data, prefs.data?.default_rest_seconds ?? 90);
-    if (!current.data) {
-      const { error } = await supabase.rpc("save_training_assessment", {
-        _assessment: data, _program: proposal, _replace: false,
-      });
-      if (error) throw new Error(error.message);
-    }
-    return { proposal, hadProgram: Boolean(current.data) };
+    const current = await supabase.from("ai_programs").select("id,version").eq("user_id", userId).eq("active", true).order("updated_at", { ascending: false }).limit(1).maybeSingle();
+    if (current.error) throw new Error("Não foi possível carregar seu programa. Tente novamente.");
+    const proposal = buildAssessmentProgram(data);
+    return { proposal, hadProgram: Boolean(current.data), expectedId: current.data?.id ?? null, expectedVersion: current.data?.version ?? null };
   });
 
 export const acceptAssessmentProgram = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ assessment: assessmentSchema, confirmed: z.literal(true) }).parse(input))
+  .inputValidator((input: unknown) => z.object({ assessment: assessmentSchema, confirmed: z.literal(true), expectedId: z.string().uuid().nullable(), expectedVersion: z.number().int().positive().nullable() }).parse(input))
   .handler(async ({ context, data }) => {
-    const prefs = await context.supabase.from("training_preferences").select("default_rest_seconds").eq("user_id", context.userId).maybeSingle();
-    if (prefs.error) throw new Error(prefs.error.message);
-    const proposal = buildAssessmentProgram(data.assessment, prefs.data?.default_rest_seconds ?? 90);
-    const { error } = await context.supabase.rpc("save_training_assessment", {
-      _assessment: data.assessment, _program: proposal, _replace: true,
+    const proposal = buildAssessmentProgram(data.assessment);
+    const { error } = await context.supabase.rpc("save_unified_assessment", {
+      _assessment: data.assessment, _program: proposal,
+      ...(data.expectedId ? { _expected_id: data.expectedId } : {}),
+      ...(data.expectedVersion ? { _expected_version: data.expectedVersion } : {}),
     });
     if (error) throw new Error(error.message);
     return { ok: true };

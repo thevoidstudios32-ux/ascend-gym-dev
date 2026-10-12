@@ -19,3 +19,5 @@
 - Enrich personalization prompts and read-only proposal sheets from the shared exercise catalog locally; never add AI calls for anatomy, instructions, or demonstrations.
 - Keep reviewed motion assets in the shared exercise-motion registry with recording-derived posters; both compact cards and full sheets consume it to avoid duplicate media sources.
 - Allow photographic GIF-only demonstrations in the motion registry and reset media state on exercise changes; do not fabricate videos or carry a failed playback state into another exercise.
+- Use the unified assessment for all account generations; retain partial compatible answers and persist accepted multiweek plans through authenticated transactional RPCs to preserve history and prevent stale replacements.
+- Keep weekly prescriptions inside the active program; starting a week reuses one program/day-linked custom workout and exports consume those same weeks to avoid parallel sources.

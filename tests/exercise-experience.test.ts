@@ -7,12 +7,12 @@ import { EXERCISE_CATALOG } from '../src/lib/exercises';
 import { REVIEWED_EXERCISE_MOTION } from '../src/lib/exercise-motion-reviewed';
 import { EXERCISE_MOTION } from '../src/lib/exercise-motion';
 describe('Fichas de exercícios',()=>{
- test('auditoria cobre 54 exercícios, 28 com movimento e sem IDs duplicados',()=>{
-  expect(EXERCISE_CATALOG).toHaveLength(54);
+ test('auditoria cobre 60 exercícios, 28 com movimento e sem IDs duplicados',()=>{
+  expect(EXERCISE_CATALOG).toHaveLength(60);
   expect(Object.keys(EXERCISE_MOTION)).toHaveLength(28);
   expect(Object.keys(REVIEWED_EXERCISE_MOTION)).toHaveLength(6);
   const infos=EXERCISE_CATALOG.map(e=>getExerciseInfo(e.name));
-  expect(new Set(infos.map(e=>e.id)).size).toBe(54);
+  expect(new Set(infos.map(e=>e.id)).size).toBe(60);
   for(const [id,motion] of Object.entries(EXERCISE_MOTION)){
    expect(infos.some(e=>e.id===id)).toBe(true);
    expect(motion.gifUrl).toContain('/__l5e/assets-v1/');

@@ -81,7 +81,7 @@ export function useStartProgramDay() {
   const fn = useServerFn(startProgramDay);
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (dayKey: string) => fn({ data: { dayKey } }),
+    mutationFn: (input: string | { dayKey: string; week: number }) => fn({ data: typeof input === "string" ? { dayKey: input, week: 1 } : input }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["custom-workouts"] });
     },

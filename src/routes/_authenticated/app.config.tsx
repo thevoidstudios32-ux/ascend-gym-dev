@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useProgram } from "@/hooks/use-program";
+import { assessmentInitial } from "@/lib/training-assessment";
 import { TrainingOnboarding } from "@/components/training-onboarding";
 import { useDashboard } from "@/hooks/use-dashboard";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
@@ -33,6 +35,7 @@ const LANGS: { id: Lang; name: string; native: string }[] = [
 function SettingsPage() {
   const [assessment, setAssessment] = useState(false);
   const dashboard = useDashboard();
+  const program = useProgram();
   const { lang, setLang, t } = useI18n();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -49,7 +52,7 @@ function SettingsPage() {
     navigate({ to: "/auth", replace: true });
   }
 
-  if (assessment) return <TrainingOnboarding initial={dashboard.data?.profile?.training_assessment} onDone={() => setAssessment(false)} onCancel={() => setAssessment(false)} />;
+  if (assessment) return <TrainingOnboarding initial={assessmentInitial(dashboard.data?.profile, program.data?.preferences as unknown as Record<string, unknown>)} onDone={() => setAssessment(false)} onCancel={() => setAssessment(false)} />;
 
   return (
     <div className="animate-rise space-y-4">
