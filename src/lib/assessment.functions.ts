@@ -20,7 +20,9 @@ export const acceptAssessmentProgram = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     const proposal = buildAssessmentProgram(data.assessment);
     const { error } = await context.supabase.rpc("save_unified_assessment", {
-      _assessment: data.assessment, _program: proposal, _expected_id: data.expectedId ?? undefined, _expected_version: data.expectedVersion ?? undefined,
+      _assessment: data.assessment, _program: proposal,
+      ...(data.expectedId ? { _expected_id: data.expectedId } : {}),
+      ...(data.expectedVersion ? { _expected_version: data.expectedVersion } : {}),
     });
     if (error) throw new Error(error.message);
     return { ok: true };

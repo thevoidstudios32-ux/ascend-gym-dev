@@ -53,6 +53,7 @@ export function buildAssessmentProgram(a: TrainingAssessment, rest = a.default_r
   const conditioning = a.goal === "Emagrecimento" || a.goal === "Performance/condicionamento";
   const sessionRest = Math.min(rest, conditioning ? 60 : strength ? 180 : 120);
   const catalog = compatibleAssessmentExercises(a);
+  const level = a.experience === "iniciante" ? 0 : a.experience === "intermediário" ? 1 : 2;
   const full = a.split_preference === "Corpo inteiro" || (a.split_preference !== "Superiores / Inferiores" && a.days_per_week <= 3);
   const weekdays = WEEKDAYS.filter(w => a.available_weekdays.includes(w));
   const sets = level === 0 ? 2 : 3;
