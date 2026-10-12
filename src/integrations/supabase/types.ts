@@ -681,6 +681,8 @@ export type Database = {
           id: string
           name: string
           notes: string | null
+          program_day_key: string | null
+          program_id: string | null
           updated_at: string
           user_id: string
         }
@@ -693,6 +695,8 @@ export type Database = {
           id?: string
           name: string
           notes?: string | null
+          program_day_key?: string | null
+          program_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -705,6 +709,8 @@ export type Database = {
           id?: string
           name?: string
           notes?: string | null
+          program_day_key?: string | null
+          program_id?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -1534,6 +1540,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      apply_program_revision: {
+        Args: { _program: Json; _reason: string }
+        Returns: Json
+      }
       complete_workout: { Args: { _payload: Json }; Returns: Json }
       complete_workout_with_rir: { Args: { _payload: Json }; Returns: Json }
       remove_workout: { Args: { _date: string }; Returns: Json }
