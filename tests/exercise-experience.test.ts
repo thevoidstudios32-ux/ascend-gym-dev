@@ -7,6 +7,18 @@ import { EXERCISE_CATALOG } from '../src/lib/exercises';
 import { REVIEWED_EXERCISE_MOTION } from '../src/lib/exercise-motion-reviewed';
 import { EXERCISE_MOTION } from '../src/lib/exercise-motion';
 describe('Fichas de exercícios',()=>{
+ test('todo exercício tem instruções específicas mesmo sem GIF',()=>{
+  for(const e of EXERCISE_CATALOG){
+   const info=getExerciseInfo(e.name);
+   expect(info.instructions.length).toBeGreaterThanOrEqual(3);
+   expect(info.instructions.join(' ')).not.toContain('Ajuste a carga para manter o controle durante toda a amplitude confortável.');
+  }
+ });
+ test('acentos e espaços legados resolvem apenas a correspondência exata',()=>{
+  expect(getExerciseInfo('  Supino Reto  ').videoUrl).toBe(getExerciseInfo('Supino reto').videoUrl);
+  expect(getExerciseInfo('Triceps corda').equipment).toBe('Cabo');
+  expect(getExerciseInfo('Supino reto com halteres').videoUrl).toBeUndefined();
+ });
  test('auditoria cobre 60 exercícios, 28 com movimento e sem IDs duplicados',()=>{
   expect(EXERCISE_CATALOG).toHaveLength(60);
   expect(Object.keys(EXERCISE_MOTION)).toHaveLength(28);
