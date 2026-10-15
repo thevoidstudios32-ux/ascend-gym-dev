@@ -8,6 +8,7 @@
 - [ ] Testar geração, migração, persistência, isolamento e interface; entregar relatório objetivo
 
 ## Ampliar demonstrações reais
+- [ ] Pedido atual: instruções específicas para todo o catálogo, alternativa visível sem mídia e novas fotos reais verificadas
 - [ ] Auditar todo o catálogo, testar mídias existentes, corrigir falhas e registrar relatório com pendências verificadas
 - [ ] Pesquisar novamente fontes verificadas para os exercícios ainda sem movimento e conectar apenas correspondências reais licenciadas, sem geração por IA
 - [x] Localizar 16 novas gravações reais licenciadas com correspondência de movimento/equipamento, sem geração por IA

@@ -1,4 +1,5 @@
-import { findExercise, EXERCISE_CATALOG } from './exercises';
+import { EXERCISE_CATALOG } from './exercises';
+import { EXERCISE_INSTRUCTIONS } from './exercise-instructions';
 import { EXERCISE_IMAGES } from './exercise-media';
 import { EXERCISE_MOTION } from './exercise-motion';
 export const exerciseId = (name: string) => name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -21,8 +22,7 @@ const instructions: Record<string,string[]> = {
  'puxada-alta': ['Ajuste o apoio das coxas e segure a barra.', 'Mantenha o peito aberto e o tronco estável.', 'Puxe a barra à frente em direção à parte alta do peito.', 'Retorne lentamente, sem soltar a tensão de forma brusca.'],
 };
 export function getExerciseInfo(name: string, muscle='', tip=''): ExerciseInfo {
- const candidate=findExercise(name);
- const e=candidate && exerciseId(candidate.name)===exerciseId(name) ? candidate : undefined;
+ const e=EXERCISE_CATALOG.find(candidate=>exerciseId(candidate.name)===exerciseId(name));
  const id=exerciseId(e?.name ?? name);
  const primary=anatomyMuscle(e?.muscles[0] ?? muscle);
  const secondary=[...new Set((e?.muscles.slice(1) ?? []).map(anatomyMuscle))].filter(m=>m!==primary);
@@ -30,7 +30,7 @@ export function getExerciseInfo(name: string, muscle='', tip=''): ExerciseInfo {
  return { id, name, muscleGroup: e?.muscles[0] ?? (muscle || 'Não informado'), primaryMuscles: squat ? ['Quadríceps','Glúteos'] : [primary], secondaryMuscles: squat ? ['Posterior de coxa','Abdômen'] : secondary,
  equipment: e?.equipment ?? 'Não informado', difficulty:e?.difficulty ?? 'Não informado',
  description:e ? `Trabalha ${e.muscles.join(', ').toLowerCase()}. ${e.tip}` : tip || 'Confira a execução com um profissional antes de iniciar.',
- instructions: instructions[id] ?? (e ? [e.tip, 'Ajuste a carga para manter o controle durante toda a amplitude confortável.', 'Interrompa a execução se houver dor.'] : ['Peça orientação para ajustar a posição e a execução deste movimento.']),
+ instructions: instructions[id] ?? EXERCISE_INSTRUCTIONS[id] ?? (e ? [e.tip, 'Ajuste a carga para manter o controle durante toda a amplitude confortável.', 'Interrompa a execução se houver dor.'] : [tip || 'Peça orientação para ajustar a posição e a execução deste movimento.', 'Não inicie com carga sem confirmar a técnica com um profissional.']),
  tips: [e?.tip ?? tip, 'Não aumente a carga sacrificando a execução.'].filter(Boolean), images:e ? EXERCISE_IMAGES[id] ?? [] : [], ...(e ? EXERCISE_MOTION[id] : {}),
  alternatives:EXERCISE_CATALOG.filter(x=>x.name!==e?.name && x.group===e?.group).slice(0,4).map(x=>x.name) };
 }
