@@ -246,11 +246,7 @@ export async function proposeProgram(input: ProposeInput): Promise<ProgramPropos
     .slice(0, 7)
     .map((day, index) => sanitizeDay(day, index, input.preferences.default_rest_seconds));
   if (!days.length || days.some(d => !d.exercises.length)) throw new Error("A proposta veio incompleta. Tente novamente.");
-  const requestedDays = input.request.match(/(?:treinar|treino|consigo treinar)\s+(\d)\s+dias/i);
-  const expectedCount = requestedDays ? Number(requestedDays[1]) : input.preferences.days_per_week;
-  if (days.length !== expectedCount) throw new Error("A proposta não respeitou a quantidade de dias disponível. Gere novamente.");
-  const available = input.preferences.available_weekdays ?? [];
-  if (!requestedDays && available.length && days.some(d => !available.includes(d.weekday))) throw new Error("A proposta não respeitou seus dias disponíveis. Gere novamente.");
+  // Frequency changes are user-requested and confirmed before saving; only duplicate weekdays are invalid.
   if (new Set(days.map(d => d.weekday)).size !== days.length) throw new Error("A proposta repetiu dias de treino. Gere novamente.");
 
   return {
