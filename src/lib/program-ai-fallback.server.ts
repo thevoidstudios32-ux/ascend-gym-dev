@@ -48,9 +48,14 @@ export async function generateWithLovableAi(messages: AiMessage[]) {
     },
   });
 
+  const system = messages
+    .filter((m) => m.role === "system")
+    .map((m) => (typeof m.content === "string" ? m.content : JSON.stringify(m.content)))
+    .join("\n\n");
   const result = streamText({
     model: lovable.responses("openai/gpt-6-astra"),
-    messages: normalizeMessages(messages),
+    ...(system ? { system } : {}),
+    messages: normalizeMessages(messages.filter((m) => m.role !== "system")),
     maxRetries: 0,
     providerOptions: {
       openai: {

@@ -168,16 +168,8 @@ export const applyProgram = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const current = await supabase.from("ai_programs").select("planning_weeks,planning_model").eq("user_id",userId).eq("active",true).order("updated_at",{ascending:false}).limit(1).maybeSingle();
     if (current.error) throw new Error(current.error.message);
-    if (current.data?.planning_model === 2) {
-      const [profile,prefs] = await Promise.all([supabase.from("profiles").select("*").eq("id",userId).single(),supabase.from("training_preferences").select("*").eq("user_id",userId).maybeSingle()]);
-      const parsed = assessmentSchema.safeParse(assessmentInitial(profile.data,prefs.data));
-      if (!parsed.success) throw new Error("Atualize sua avaliação antes de alterar o programa.");
-      const allowed = new Set(buildAssessmentProgram(parsed.data).weeks?.flatMap(w => w.days.flatMap(d => d.exercises.map(e => e.name))) ?? []);
-      // The complete compatible catalog, not only the generated selection, is validated below.
-      const { compatibleAssessmentExercises } = await import("@/lib/training-assessment");
-      for (const e of compatibleAssessmentExercises(parsed.data)) allowed.add(e.name);
-      if (data.program.days.some(d => !parsed.data.available_weekdays.includes(d.weekday as typeof parsed.data.available_weekdays[number]) || d.exercises.some(e => !allowed.has(e.name)))) throw new Error("A proposta não respeita os equipamentos, nível, exclusões ou disponibilidade. Revise sua avaliação.");
-    }
+    // Coach proposals and manual edits are explicitly confirmed by the user; custom names and frequency changes are allowed.
+    if (new Set(data.program.days.map(d => d.weekday)).size !== data.program.days.length) throw new Error("O programa repete dias de treino.");
     const weeks = buildPlanningWeeks(data.program.days,current.data?.planning_weeks ?? 1);
     const { data: result,error } = await supabase.rpc("apply_program_revision",{ _program: { ...data.program,weeks }, _reason: data.reason });
     if (error) throw new Error(error.message);
