@@ -1,5 +1,4 @@
 import { createServerFn } from "@tanstack/react-start";
-import { assessmentInitial, assessmentSchema, buildAssessmentProgram } from "@/lib/training-assessment";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { buildProgramContext, programInsights, proposeProgram } from "@/lib/program.server";
