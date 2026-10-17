@@ -8,6 +8,7 @@
 - [ ] Testar geração, migração, persistência, isolamento e interface; entregar relatório objetivo
 
 ## Ampliar demonstrações reais
+- [ ] Pedido de 17/10: verificar os 26 exercícios do catálogo original ainda sem movimento e os 6 adicionados depois; conectar gravações licenciadas correspondentes, sem geração por IA, e testar reprodução
 - [ ] Pedido atual: instruções específicas para todo o catálogo, alternativa visível sem mídia e novas fotos reais verificadas
 - [ ] Auditar todo o catálogo, testar mídias existentes, corrigir falhas e registrar relatório com pendências verificadas
 - [ ] Pesquisar novamente fontes verificadas para os exercícios ainda sem movimento e conectar apenas correspondências reais licenciadas, sem geração por IA
