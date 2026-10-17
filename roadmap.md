@@ -9,7 +9,7 @@
 
 ## Ampliar demonstrações reais
 - [x] Conectar cinco gravações CDC verificadas (Chest press, Remada máquina, Cadeira extensora, Rosca scott, Tríceps máquina), com MP4/WebM/GIF/capa e créditos; catálogo agora com 33 demonstrações e 27 sem movimento
-- [ ] Validar reprodução das cinco novas demonstrações no navegador
+- [x] Validar reprodução das cinco novas demonstrações no navegador: vídeos WebM e GIFs carregaram nas fichas reais, sem erros de mídia e sem transbordamento em 390px; 13 testes passaram e build OK (sem alterar programas da conta)
 - [ ] Conectar as 27 restantes — faltam fontes baixáveis verificadas; flexão da Marinha bloqueada por HTTP 429, demais candidatos sem correspondência licenciada confirmada
 - [ ] Pedido de 17/10: verificar os 26 exercícios do catálogo original ainda sem movimento e os 6 adicionados depois; conectar gravações licenciadas correspondentes, sem geração por IA, e testar reprodução
 - [ ] Pedido atual: instruções específicas para todo o catálogo, alternativa visível sem mídia e novas fotos reais verificadas
