@@ -19,10 +19,10 @@ describe('Fichas de exercícios',()=>{
   expect(getExerciseInfo('Triceps corda').equipment).toBe('Cabo');
   expect(getExerciseInfo('Supino reto com halteres').videoUrl).toBeUndefined();
  });
- test('auditoria cobre 60 exercícios, 28 com movimento e sem IDs duplicados',()=>{
+ test('auditoria cobre 60 exercícios, 33 com movimento e sem IDs duplicados',()=>{
   expect(EXERCISE_CATALOG).toHaveLength(60);
-  expect(Object.keys(EXERCISE_MOTION)).toHaveLength(28);
-  expect(Object.keys(REVIEWED_EXERCISE_MOTION)).toHaveLength(6);
+  expect(Object.keys(EXERCISE_MOTION)).toHaveLength(33);
+  expect(Object.keys(REVIEWED_EXERCISE_MOTION)).toHaveLength(11);
   const infos=EXERCISE_CATALOG.map(e=>getExerciseInfo(e.name));
   expect(new Set(infos.map(e=>e.id)).size).toBe(60);
   for(const [id,motion] of Object.entries(EXERCISE_MOTION)){
@@ -30,6 +30,14 @@ describe('Fichas de exercícios',()=>{
    expect(motion.gifUrl).toContain('/__l5e/assets-v1/');
    expect(motion.posterUrl).toContain('/__l5e/assets-v1/');
    expect(motion.mediaCredit.sourceUrl).toStartWith('https://');
+  }
+ });
+ test('gravações CDC correspondem às cinco máquinas do catálogo',()=>{
+  for(const name of ['Chest press','Remada máquina','Cadeira extensora','Rosca scott','Tríceps máquina']){
+   const e=getExerciseInfo(name);expect(e.equipment).toBe('Máquina');
+   for(const url of [e.videoUrl,e.webmUrl,e.gifUrl,e.posterUrl])expect(url).toContain('/__l5e/assets-v1/');
+   expect(e.mediaCredit?.author).toBe('Centers for Disease Control and Prevention');
+   expect(e.mediaCredit?.license).toBe('Domínio público (EUA)');
   }
  });
  test('novas fontes permitem GIF fotográfico sem exigir vídeo artificial',()=>{
@@ -50,7 +58,7 @@ describe('Fichas de exercícios',()=>{
   }
  });
  test('não confunde variantes de movimento ou equipamento',()=>{
-  for(const name of ['Stiff','Rosca scott','Tríceps corda','Ponte de glúteo','Supino declinado','Cadeira extensora'])expect(getExerciseInfo(name).videoUrl).toBeUndefined();
+  for(const name of ['Stiff','Tríceps corda','Ponte de glúteo','Supino declinado'])expect(getExerciseInfo(name).videoUrl).toBeUndefined();
   expect(getExerciseInfo('Elevação pélvica').videoUrl).toBeDefined();
  });
  test('mídia real tem vídeo, GIF e créditos apenas no exercício correto',()=>{const e=getExerciseInfo('Supino reto');expect(e.videoUrl).toContain('/__l5e/assets-v1/');expect(e.gifUrl).toContain('/__l5e/assets-v1/');expect(e.mediaCredit?.license).toBe('CC BY-SA 4.0');expect(getExerciseInfo('Supino reto inventado').videoUrl).toBeUndefined();expect(getExerciseInfo('Supino reto inventado').gifUrl).toBeUndefined();});

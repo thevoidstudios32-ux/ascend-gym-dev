@@ -174,5 +174,55 @@
     "license": "CC BY 3.0",
     "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
     "adaptation": "Original photographic GIF reused; still extracted. No synthesis."
+  },
+  "chest-press": {
+    "author": "Centers for Disease Control and Prevention",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Muscle_Strengthening_at_the_Gym_-_Chest_Press.webm",
+    "license": "Domínio público (EUA)",
+    "licenseUrl": "https://commons.wikimedia.org/wiki/Template:PD-USGov-HHS-CDC",
+    "sourceMediaUrl": "https://upload.wikimedia.org/wikipedia/commons/7/70/Muscle_Strengthening_at_the_Gym_-_Chest_Press.webm",
+    "clipStartSeconds": 15,
+    "clipDurationSeconds": 9,
+    "adaptation": "Original CDC recording excerpted and resized; audio removed; MP4, WebM, GIF and still extracted. No synthesis."
+  },
+  "remada-maquina": {
+    "author": "Centers for Disease Control and Prevention",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Muscle_Strengthening_at_the_Gym_-_Row_Machine.webm",
+    "license": "Domínio público (EUA)",
+    "licenseUrl": "https://commons.wikimedia.org/wiki/Template:PD-USGov-HHS-CDC",
+    "sourceMediaUrl": "https://upload.wikimedia.org/wikipedia/commons/5/50/Muscle_Strengthening_at_the_Gym_-_Row_Machine.webm",
+    "clipStartSeconds": 18,
+    "clipDurationSeconds": 6,
+    "adaptation": "Original CDC recording excerpted and resized; audio removed; MP4, WebM, GIF and still extracted. No synthesis."
+  },
+  "cadeira-extensora": {
+    "author": "Centers for Disease Control and Prevention",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Muscle_Strengthening_at_the_Gym_-_Leg_Extension.webm",
+    "license": "Domínio público (EUA)",
+    "licenseUrl": "https://commons.wikimedia.org/wiki/Template:PD-USGov-HHS-CDC",
+    "sourceMediaUrl": "https://upload.wikimedia.org/wikipedia/commons/1/13/Muscle_Strengthening_at_the_Gym_-_Leg_Extension.webm",
+    "clipStartSeconds": 29,
+    "clipDurationSeconds": 7,
+    "adaptation": "Original CDC recording excerpted and resized; audio removed; MP4, WebM, GIF and still extracted. No synthesis."
+  },
+  "rosca-scott": {
+    "author": "Centers for Disease Control and Prevention",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Muscle_Strengthening_at_the_Gym_-_Bicep_Machine.webm",
+    "license": "Domínio público (EUA)",
+    "licenseUrl": "https://commons.wikimedia.org/wiki/Template:PD-USGov-HHS-CDC",
+    "sourceMediaUrl": "https://upload.wikimedia.org/wikipedia/commons/7/7f/Muscle_Strengthening_at_the_Gym_-_Bicep_Machine.webm",
+    "clipStartSeconds": 14,
+    "clipDurationSeconds": 12,
+    "adaptation": "Original CDC recording excerpted and resized; audio removed; MP4, WebM, GIF and still extracted. No synthesis."
+  },
+  "triceps-maquina": {
+    "author": "Centers for Disease Control and Prevention",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Muscle_Strengthening_at_the_Gym_-_Arm_Extension.webm",
+    "license": "Domínio público (EUA)",
+    "licenseUrl": "https://commons.wikimedia.org/wiki/Template:PD-USGov-HHS-CDC",
+    "sourceMediaUrl": "https://upload.wikimedia.org/wikipedia/commons/8/85/Muscle_Strengthening_at_the_Gym_-_Arm_Extension.webm",
+    "clipStartSeconds": 17,
+    "clipDurationSeconds": 7,
+    "adaptation": "Original CDC recording excerpted and resized; audio removed; MP4, WebM, GIF and still extracted. No synthesis."
   }
 }
