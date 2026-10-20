@@ -1,0 +1,14 @@
+{
+  "name": "ASCEND · Treino com IA",
+  "short_name": "ASCEND",
+  "description": "App de treino de academia grátis com Coach IA, registro de séries, cargas e RIR.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#B00020",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "/favicon.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/favicon.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
