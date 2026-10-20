@@ -1,5 +1,10 @@
 # Translation completion roadmap
 
+## Redesign da divulgação
+- [ ] Reformular /divulgar com identidade premium e demonstração verdadeira sem dados privados
+- [ ] Preservar instalação e compartilhamento, editar mensagem e copiar hashtags e termos
+- [ ] Validar ações e layout no celular e desktop
+
 ## Unificação da personalização e biblioteca
 - [ ] Unificar questionário para contas novas/antigas, converter respostas compatíveis e confirmar substituições
 - [ ] Persistir planejamento multissemanal, versão do modelo e preferências em transação sem alterar histórico
