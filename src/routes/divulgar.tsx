@@ -20,7 +20,7 @@ const FEATURES = [
   { icon: Utensils, title: "Nutrição", text: "Registro alimentar, calorias e acompanhamento da hidratação." },
   { icon: Users, title: "Gym Bros", text: "Compartilhe treinos e converse com a comunidade." },
 ];
-const DEMOS = ["Supino reto", "Cadeira extensora", "Remada máquina"];
+const DEMOS = ["Supino reto", "Cadeira extensora", "Remada máquina"] as const;
 type InstallEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> };
 export const Route = createFileRoute("/divulgar")({
   head: () => ({
@@ -43,7 +43,7 @@ function Divulgar() {
   const [canShare, setCanShare] = useState(false);
   const [message, setMessage] = useState(`${TEXT} ${HASHTAGS.slice(0, 4).join(" ")}`);
   const [copied, setCopied] = useState("");
-  const [demo, setDemo] = useState(DEMOS[0]);
+  const [demo, setDemo] = useState<string>(DEMOS[0]);
   const info = getExerciseInfo(demo);
   useEffect(() => {
     setCanShare(typeof navigator.share === "function");
