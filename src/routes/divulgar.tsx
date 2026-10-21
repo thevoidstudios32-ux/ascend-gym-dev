@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowDown, ArrowRight, ArrowUpRight, Check, Copy, Download, Dumbbell, Hash, Link2, MessageCircle, Search, Send, Share2, Sparkles, TrendingUp, Users, Utensils } from "lucide-react";
+import { ArrowDown, ArrowRight, ArrowUpRight, Check, Copy, Download, Dumbbell, Hash, Link2, MessageCircle, Send, Share2, Sparkles, TrendingUp, Users, Utensils } from "lucide-react";
 import { toast } from "sonner";
 import { AscendSymbol, AscendWordmark } from "@/components/brand";
 import { Button } from "@/components/ui/button";
