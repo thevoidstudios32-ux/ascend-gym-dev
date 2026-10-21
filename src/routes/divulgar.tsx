@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowDown, ArrowRight, ArrowUpRight, Check, Copy, Download, Dumbbell, Hash, Link2, MessageCircle, Search, Send, Share2, Sparkles, TrendingUp, Users, Utensils } from "lucide-react";
+import { ArrowDown, ArrowRight, ArrowUpRight, Check, Copy, Download, Dumbbell, Hash, Link2, MessageCircle, Send, Share2, Sparkles, TrendingUp, Users, Utensils } from "lucide-react";
 import { toast } from "sonner";
 import { AscendSymbol, AscendWordmark } from "@/components/brand";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,7 @@ const FEATURES = [
   { icon: Utensils, title: "Nutrição", text: "Registro alimentar, calorias e acompanhamento da hidratação." },
   { icon: Users, title: "Gym Bros", text: "Compartilhe treinos e converse com a comunidade." },
 ];
-const DEMOS = ["Supino reto", "Cadeira extensora", "Remada máquina"];
+const DEMOS = ["Supino reto", "Cadeira extensora", "Remada máquina"] as const;
 type InstallEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> };
 export const Route = createFileRoute("/divulgar")({
   head: () => ({
@@ -43,7 +43,7 @@ function Divulgar() {
   const [canShare, setCanShare] = useState(false);
   const [message, setMessage] = useState(`${TEXT} ${HASHTAGS.slice(0, 4).join(" ")}`);
   const [copied, setCopied] = useState("");
-  const [demo, setDemo] = useState(DEMOS[0]);
+  const [demo, setDemo] = useState<string>(DEMOS[0]);
   const info = getExerciseInfo(demo);
   useEffect(() => {
     setCanShare(typeof navigator.share === "function");
