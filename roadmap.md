@@ -1,9 +1,10 @@
 # Translation completion roadmap
 
 ## Redesign da divulgação
-- [ ] Reformular /divulgar com identidade premium e demonstração verdadeira sem dados privados
-- [ ] Preservar instalação e compartilhamento, editar mensagem e copiar hashtags e termos
-- [ ] Validar ações e layout no celular e desktop
+- [x] Reformular /divulgar com identidade premium e demonstração verdadeira sem dados privados
+- [x] Preservar instalação e compartilhamento, editar mensagem e copiar hashtags e termos
+- [x] Validar cópias, seis destinos, cadastro, orientação de instalação e layout em 320/390/492/1280px; 13 testes aprovados e build OK
+- [ ] Confirmar instalação e compartilhamento nativos em dispositivo compatível — o navegador de teste não oferece esses recursos
 
 ## Unificação da personalização e biblioteca
 - [ ] Unificar questionário para contas novas/antigas, converter respostas compatíveis e confirmar substituições
