@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 - Generate branded workout PDFs in the browser from the live program/custom workout hooks, keeping exports current without a second data source.
+- Keep landing background playback isolated in a client-safe component using CDN media pointers and a source-derived poster; pause outside the viewport or hidden tabs and skip video for reduced motion/data saving to avoid unnecessary loading.
 
 - Keep initial training assessment validation and catalog-based program generation in a shared client-safe module; reuse ai_programs and training_preferences so training, exports, and Coach share one source.
 - Gate new-user assessment in the app layout without changing the managed auth layout; existing onboarded accounts keep their programs and navigation.
