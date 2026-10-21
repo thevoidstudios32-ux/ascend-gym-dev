@@ -1,5 +1,9 @@
 # Translation completion roadmap
 
+## Vídeo de supino na página inicial
+- [x] Integrar exclusivamente o vídeo enviado ao fundo; MP4 713 KB, WebM 421 KB e poster 36 KB, sem áudio
+- [x] Verificar reprodução e loop de 8 s, pausa manual/fora da tela, retorno, cadastro, poster com falha e movimento reduzido; sem erros ou overflow em 320/390/886/1280px
+
 ## Redesign da divulgação
 - [x] Reformular /divulgar com identidade premium e demonstração verdadeira sem dados privados
 - [x] Preservar instalação e compartilhamento, editar mensagem e copiar hashtags e termos

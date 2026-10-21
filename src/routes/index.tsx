@@ -21,6 +21,8 @@ import {
   Zap,
 } from "lucide-react";
 import { AscendSymbol, AscendWordmark } from "@/components/brand";
+import { Button } from "@/components/ui/button";
+import { LandingHeroVideo, landingHeroPoster } from "@/components/landing-hero-video";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -39,7 +41,10 @@ export const Route = createFileRoute("/")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: "/" }],
+    links: [
+      { rel: "canonical", href: "/" },
+      { rel: "preload", as: "image", href: landingHeroPoster.url, fetchpriority: "high" },
+    ],
   }),
   component: Landing,
 });
@@ -112,30 +117,22 @@ function Landing() {
 
       <main>
         <section id="top" className="landing-hero">
-          <div className="landing-hero-orbit landing-hero-orbit-one" aria-hidden="true" />
-          <div className="landing-hero-orbit landing-hero-orbit-two" aria-hidden="true" />
-          <div className="landing-float-card landing-float-left" aria-hidden="true">
-            <span>SUPINO</span><strong>112,5 kg</strong><small>NOVO RECORDE</small>
-          </div>
-          <div className="landing-float-card landing-float-right" aria-hidden="true">
-            <span>SEQUÊNCIA</span><strong>48 dias</strong><small>NO RITMO</small>
-          </div>
+          <LandingHeroVideo />
 
           <div className="landing-hero-content">
-            <div className="landing-announcement"><span>Novo</span> seu treino agora aprende com você</div>
-            <p className="landing-overline">Este não é apenas mais um aplicativo de academia.</p>
+            <p className="landing-overline">ASCEND · Treino e evolução</p>
             <h1>
-              CADA REPETIÇÃO
-              <span>VIRA EVIDÊNCIA.</span>
+              Sua evolução não
+              <span>acontece por acaso.</span>
             </h1>
             <p className="landing-hero-copy">
               Treino, progresso, nutrição, comunidade e um Coach IA — um sistema que transforma
               seu esforço em evolução visível.
             </p>
             <div className="landing-hero-actions">
-              <SignupLink className="landing-button landing-button-primary">
-                Comece a subir <ArrowRight className="size-4" />
-              </SignupLink>
+              <Button asChild className="landing-button landing-button-primary">
+                <Link to="/auth" search={signupSearch}>Começar gratuitamente <ArrowRight className="size-4" /></Link>
+              </Button>
               <SignupLink className="landing-button landing-button-secondary">
                 Explore o ASCEND
               </SignupLink>
@@ -143,9 +140,7 @@ function Landing() {
           </div>
 
           <div className="landing-hero-bottom">
-            <span><i /> 12.408 sessões registradas hoje</span>
             <a href="#system">Descobrir <ArrowDown className="size-4" /></a>
-            <span>iOS · Android · Web</span>
           </div>
         </section>
 
