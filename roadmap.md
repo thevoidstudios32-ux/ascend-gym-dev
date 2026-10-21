@@ -1,5 +1,9 @@
 # Translation completion roadmap
 
+## Vídeo de supino na página inicial
+- [ ] Integrar exclusivamente o vídeo enviado ao fundo, otimizar MP4/WebM e extrair poster
+- [ ] Preservar cadastro e demais seções; verificar reprodução, loop, fallback e telas pequenas/grandes
+
 ## Redesign da divulgação
 - [x] Reformular /divulgar com identidade premium e demonstração verdadeira sem dados privados
 - [x] Preservar instalação e compartilhamento, editar mensagem e copiar hashtags e termos
