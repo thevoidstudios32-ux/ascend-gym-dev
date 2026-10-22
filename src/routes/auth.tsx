@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { AscendLogoFull } from "@/components/brand";
+import { acquisitionForSignup, trackSignupCta } from "@/lib/marketing-tracking";
 
 
 export const Route = createFileRoute("/auth")({
@@ -58,7 +59,8 @@ function AuthPage() {
           password,
           options: {
             emailRedirectTo: window.location.origin + "/app",
-            data: { name: name || email.split("@")[0] },
+            // acq: origem de marketing (só UTMs), usada se o e-mail for confirmado em outro aparelho.
+            data: { name: name || email.split("@")[0], acq: acquisitionForSignup() },
           },
         });
         if (error) throw error;
@@ -172,7 +174,10 @@ function AuthPage() {
         <p className="mt-5 text-center text-sm text-muted-foreground">
           {isSignup ? "Já tem conta?" : "Não tem conta?"}{" "}
           <button
-            onClick={() => setIsSignup((v) => !v)}
+            onClick={() => {
+              if (!isSignup) trackSignupCta("auth_toggle_signup");
+              setIsSignup((v) => !v);
+            }}
             className="font-bold text-primary hover:underline"
           >
             {isSignup ? "Entrar" : "Criar conta"}

@@ -3,7 +3,7 @@ import { TitleUnlockOverlay } from "@/components/title-unlock";
 import { BadgeUnlockOverlay } from "@/components/badge-unlock";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Apple,
   Camera,
@@ -28,6 +28,7 @@ import { AscendSymbol, AscendWordmark } from "@/components/brand";
 import { useT } from "@/lib/i18n";
 import { useDashboard } from "@/hooks/use-dashboard";
 import { TrainingOnboarding } from "@/components/training-onboarding";
+import { claimSignupAttribution } from "@/lib/marketing-tracking";
 
 
 export const Route = createFileRoute("/_authenticated/app")({
@@ -66,6 +67,10 @@ function AppLayout() {
   const { data: adminStatus } = useAdminStatus();
   const isAdmin = adminStatus?.isAdmin === true;
   useLoginTracking();
+  // Cadastro concluído: associa a origem de marketing ao usuário (uma vez; contas antigas são ignoradas).
+  useEffect(() => {
+    void claimSignupAttribution().catch(() => undefined);
+  }, []);
   const dashboard = useDashboard();
 
   async function signOut() {

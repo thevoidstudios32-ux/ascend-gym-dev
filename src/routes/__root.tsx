@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -11,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { LanguageProvider } from "@/lib/i18n";
+import { captureCampaignVisit } from "@/lib/marketing-tracking";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -136,6 +138,12 @@ function RootComponent() {
     });
     return () => data.subscription.unsubscribe();
   }, [router, queryClient]);
+
+  // Guarda a origem (UTM) da visita e conta visitas de campanha; não bloqueia a página.
+  const href = useRouterState({ select: (s) => s.location.href });
+  useEffect(() => {
+    void captureCampaignVisit();
+  }, [href]);
 
   return (
     <QueryClientProvider client={queryClient}>
