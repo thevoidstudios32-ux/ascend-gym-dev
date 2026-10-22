@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DivulgarRouteImport } from './routes/divulgar'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as V2RouteImport } from './routes/v2'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
@@ -56,6 +57,11 @@ const DivulgarRoute = DivulgarRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const V2Route = V2RouteImport.update({
+  id: '/v2',
+  path: '/v2',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
@@ -167,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/divulgar': typeof DivulgarRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/v2': typeof V2Route
   '/admin': typeof AuthenticatedAdminRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
   '/app/arena': typeof AuthenticatedAppArenaRoute
@@ -192,6 +199,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/divulgar': typeof DivulgarRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/v2': typeof V2Route
   '/admin': typeof AuthenticatedAdminRoute
   '/app/arena': typeof AuthenticatedAppArenaRoute
   '/app/coach': typeof AuthenticatedAppCoachRoute
@@ -218,6 +226,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/divulgar': typeof DivulgarRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/v2': typeof V2Route
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
   '/_authenticated/app/arena': typeof AuthenticatedAppArenaRoute
@@ -245,6 +254,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/divulgar'
     | '/sitemap.xml'
+    | '/v2'
     | '/admin'
     | '/app'
     | '/app/arena'
@@ -270,6 +280,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/divulgar'
     | '/sitemap.xml'
+    | '/v2'
     | '/admin'
     | '/app/arena'
     | '/app/coach'
@@ -295,6 +306,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/divulgar'
     | '/sitemap.xml'
+    | '/v2'
     | '/_authenticated/admin'
     | '/_authenticated/app'
     | '/_authenticated/app/arena'
@@ -322,6 +334,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   DivulgarRoute: typeof DivulgarRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  V2Route: typeof V2Route
   ApiAiChatRoute: typeof ApiAiChatRoute
 }
 
@@ -360,6 +373,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/v2': {
+      id: '/v2'
+      path: '/v2'
+      fullPath: '/v2'
+      preLoaderRoute: typeof V2RouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
@@ -558,6 +578,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   DivulgarRoute: DivulgarRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  V2Route: V2Route,
   ApiAiChatRoute: ApiAiChatRoute,
 }
 export const routeTree = rootRouteImport
