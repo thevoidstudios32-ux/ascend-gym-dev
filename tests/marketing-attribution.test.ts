@@ -1,5 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
+  clientIpFrom,
+  trackEventSchema,
   PENDING_MAX,
   addPending,
   loadPending,
@@ -146,5 +148,49 @@ describe("fila de envio (clique não se perde se a página recarregar)", () => {
     expect(loadPending(st, now).length).toBe(PENDING_MAX);
     const later = new Date("2026-11-05T00:00:00Z");
     expect(loadPending(st, later)).toEqual([]);
+  });
+});
+
+describe("entrada da função de servidor", () => {
+  const ok = {
+    p_event_id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    p_visitor_id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    p_event_type: "signup_cta_click",
+    p_cta: "landing_hero",
+    p_path: "/",
+    p_utm: { utm_source: "tiktok", utm_content: "video_1" },
+  };
+
+  test("aceita evento válido", () => {
+    expect(trackEventSchema.safeParse(ok).success).toBe(true);
+  });
+
+  test("recusa campos extras (ex.: tentar mandar o IP pelo navegador) e valores inválidos", () => {
+    expect(trackEventSchema.safeParse({ ...ok, p_client_ip: "1.2.3.4" }).success).toBe(false);
+    expect(
+      trackEventSchema.safeParse({ ...ok, p_utm: { ...ok.p_utm, email: "a@b.com" } }).success,
+    ).toBe(false);
+    expect(trackEventSchema.safeParse({ ...ok, p_event_type: "signup" }).success).toBe(false);
+    expect(trackEventSchema.safeParse({ ...ok, p_cta: "<script>" }).success).toBe(false);
+    expect(trackEventSchema.safeParse({ ...ok, p_event_id: "nao-e-uuid" }).success).toBe(false);
+    expect(
+      trackEventSchema.safeParse({ ...ok, p_utm: { utm_source: "x".repeat(101) } }).success,
+    ).toBe(false);
+  });
+});
+
+describe("IP do visitante", () => {
+  const headers = (h: Record<string, string>) => (name: string) => h[name];
+
+  test("usa o cabeçalho da Cloudflare, que o visitante não consegue forjar", () => {
+    expect(clientIpFrom(headers({ "cf-connecting-ip": "203.0.113.7" }))).toBe("203.0.113.7");
+    expect(clientIpFrom(headers({ "cf-connecting-ip": "2001:db8::1" }))).toBe("2001:db8::1");
+  });
+
+  test("ignora X-Forwarded-For e valores estranhos", () => {
+    expect(clientIpFrom(headers({ "x-forwarded-for": "1.2.3.4" }))).toBeNull();
+    expect(clientIpFrom(headers({ "cf-connecting-ip": "1.2.3.4; DROP TABLE" }))).toBeNull();
+    expect(clientIpFrom(headers({}), "198.51.100.2")).toBe("198.51.100.2");
+    expect(clientIpFrom(headers({}))).toBeNull();
   });
 });

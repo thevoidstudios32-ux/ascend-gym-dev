@@ -1,10 +1,13 @@
 /**
- * Envio dos eventos de marketing ao Supabase (visitas com UTM, cliques em cadastro,
- * origem do cadastro concluído). Nunca bloqueia a navegação nem lança erro: falhas
- * ficam na fila do navegador e são reenviadas na próxima página.
+ * Envio dos eventos de marketing (visitas com UTM e cliques em cadastro pela função de
+ * servidor; origem do cadastro concluído direto no Supabase com o login do usuário).
+ * Nunca bloqueia a navegação nem lança erro: falhas ficam na fila do navegador e são
+ * reenviadas na próxima página.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { trackMarketingEvent } from "@/lib/marketing.functions";
 import {
+  trackEventSchema,
   addPending,
   currentTouch,
   loadPending,
@@ -19,7 +22,7 @@ import {
   type PendingEvent,
 } from "@/lib/marketing-attribution";
 
-// As funções novas ainda não estão nos tipos gerados do Supabase (gerados após a migração).
+// claim_signup_attribution ainda não está nos tipos gerados do Supabase (gerados após a migração).
 // supabase.rpc devolve um "thenable" (não uma Promise com .catch): Promise.resolve normaliza.
 type RpcResult = { data: unknown; error: { message: string } | null };
 type RpcClient = { rpc: (f: string, a: Record<string, unknown>) => PromiseLike<RpcResult> };
@@ -69,8 +72,15 @@ export function flushPendingEvents(): Promise<void> {
   flushing = (async () => {
     const local = storage("local");
     for (const { queued_at: _q, ...args } of loadPending(local, new Date())) {
-      const { error } = await rpc("track_marketing_event", args);
-      if (error) break; // sem rede: tenta de novo na próxima página
+      const parsed = trackEventSchema.safeParse(args);
+      if (parsed.success) {
+        try {
+          await trackMarketingEvent({ data: parsed.data });
+        } catch {
+          break; // sem rede ou servidor indisponível: tenta de novo na próxima página
+        }
+      }
+      // enviado (gravado ou ignorado pelo servidor) ou inválido: sai da fila
       removePending(local, args.p_event_id, new Date());
     }
   })().finally(() => {
@@ -154,7 +164,6 @@ export async function claimSignupAttribution(): Promise<string | undefined> {
   if (local?.getItem(flag)) return "ja_verificado";
   const state = getState();
   const { data: result, error } = await rpc("claim_signup_attribution", {
-    p_visitor_id: state.visitorId,
     p_first: state.first ?? null,
     p_last: currentTouch(state, new Date()) ?? null,
   });

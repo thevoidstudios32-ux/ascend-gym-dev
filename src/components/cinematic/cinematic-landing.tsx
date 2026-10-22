@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import symbolAsset from "@/assets/branding/ascend-symbol-v2.png.asset.json";
 import wordmarkAsset from "@/assets/branding/ascend-wordmark-v2.png.asset.json";
+import { trackSignupCta } from "@/lib/marketing-tracking";
 import { useCinematic } from "./use-cinematic";
 import "./cinematic.css";
 
@@ -22,7 +23,7 @@ export function CinematicLanding() {
           <div className="cine-nav-links"><a href="#treino">Treino</a><a href="#alimentacao">Alimentação</a><a href="#evolucao">Evolução</a></div>
           <div className="cine-nav-actions">
             <Link className="cine-login" to="/auth">Entrar</Link>
-            <Link className="cine-btn cine-btn-sm" to="/auth" search={signup}>Criar conta <span className="cine-arrow" aria-hidden="true">→</span></Link>
+            <Link className="cine-btn cine-btn-sm" to="/auth" search={signup} onClick={() => trackSignupCta("v2_header")}>Criar conta <span className="cine-arrow" aria-hidden="true">→</span></Link>
           </div>
         </nav>
       </header>
@@ -35,7 +36,7 @@ export function CinematicLanding() {
             <h1 id="hero-title" className="cine-display"><span className="cine-line"><span>Treino com</span></span><span className="cine-line"><span>direção<em>.</em></span></span></h1>
             <p className="cine-lede">Treino personalizado, Coach IA, alimentação e progresso em um único sistema.</p>
             <div className="cine-actions">
-              <Link className="cine-btn" to="/auth" search={signup}>Criar minha conta <span className="cine-arrow" aria-hidden="true">→</span></Link>
+              <Link className="cine-btn" to="/auth" search={signup} onClick={() => trackSignupCta("v2_hero")}>Criar minha conta <span className="cine-arrow" aria-hidden="true">→</span></Link>
               <a className="cine-link" href="#problema">Ver como funciona</a>
             </div>
           </div>
@@ -133,7 +134,7 @@ export function CinematicLanding() {
               <span className="cine-line" data-reveal><span>de você começa</span></span>
               <span className="cine-line" data-reveal><span>no primeiro registro<em>.</em></span></span>
             </h2>
-            <Link className="cine-btn cine-btn-lg" data-reveal to="/auth" search={signup}>Criar minha conta <span className="cine-arrow" aria-hidden="true">→</span></Link>
+            <Link className="cine-btn cine-btn-lg" data-reveal to="/auth" search={signup} onClick={() => trackSignupCta("v2_final")}>Criar minha conta <span className="cine-arrow" aria-hidden="true">→</span></Link>
           </div>
         </section>
       </main>

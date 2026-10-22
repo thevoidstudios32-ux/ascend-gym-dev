@@ -10,6 +10,8 @@ export type CampaignMetric = {
   utm_content: string;
   visits: number;
   unique_visitors: number;
+  distinct_networks: number;
+  events_without_ip: number;
   signup_cta_clicks: number;
   signups_first_touch: number;
   signups_last_touch: number;
@@ -32,6 +34,8 @@ async function fetchMetrics(days: number): Promise<CampaignMetric[]> {
     ...r,
     visits: Number(r.visits),
     unique_visitors: Number(r.unique_visitors),
+    distinct_networks: Number(r.distinct_networks),
+    events_without_ip: Number(r.events_without_ip),
     signup_cta_clicks: Number(r.signup_cta_clicks),
     signups_first_touch: Number(r.signups_first_touch),
     signups_last_touch: Number(r.signups_last_touch),
@@ -67,8 +71,15 @@ export function MarketingMetrics() {
         Dados reais a partir da publicação do rastreamento; não há histórico anterior. Visitas =
         chegadas com UTM (recarregar em 30 min não conta de novo). Cadastros = contas novas
         confirmadas. "Primeira origem" é a primeira campanha que trouxe a pessoa; "campanha atual" é
-        a mais recente (até 30 dias).
+        a mais recente (até 30 dias). Visitas e cliques são estimativas (limitadas por rede, mas não
+        impossíveis de inflar); cadastros só contam contas reais e confirmadas, uma vez cada.
       </p>
+      {total("events_without_ip") > 0 ? (
+        <p className="text-xs text-destructive">
+          Atenção: {total("events_without_ip")} evento(s) chegaram sem o IP do visitante. O limite
+          por rede não está funcionando como esperado; verifique a configuração do servidor.
+        </p>
+      ) : null}
       {isLoading ? <p className="text-sm text-muted-foreground">Carregando…</p> : null}
       {error ? (
         <p className="text-sm text-destructive">Não foi possível carregar: {error.message}</p>
@@ -87,6 +98,7 @@ export function MarketingMetrics() {
                 <th className="p-2">Conteúdo (vídeo)</th>
                 <th className="p-2 text-right">Visitas</th>
                 <th className="p-2 text-right">Visitantes únicos</th>
+                <th className="p-2 text-right">Redes distintas</th>
                 <th className="p-2 text-right">Cliques em cadastro</th>
                 <th className="p-2 text-right">Cadastros (1ª origem)</th>
                 <th className="p-2 text-right">Cadastros (campanha atual)</th>
@@ -104,6 +116,7 @@ export function MarketingMetrics() {
                   <td className="p-2">{r.utm_content || "—"}</td>
                   <td className="p-2 text-right">{r.visits}</td>
                   <td className="p-2 text-right">{r.unique_visitors}</td>
+                  <td className="p-2 text-right">{r.distinct_networks}</td>
                   <td className="p-2 text-right">{r.signup_cta_clicks}</td>
                   <td className="p-2 text-right">{r.signups_first_touch}</td>
                   <td className="p-2 text-right">{r.signups_last_touch}</td>
@@ -114,6 +127,7 @@ export function MarketingMetrics() {
                   Total
                 </td>
                 <td className="p-2 text-right">{total("visits")}</td>
+                <td className="p-2 text-right">—</td>
                 <td className="p-2 text-right">—</td>
                 <td className="p-2 text-right">{total("signup_cta_clicks")}</td>
                 <td className="p-2 text-right">{total("signups_first_touch")}</td>

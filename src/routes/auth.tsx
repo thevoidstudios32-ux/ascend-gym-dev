@@ -171,6 +171,15 @@ function AuthPage() {
           </button>
         </form>
 
+        {isSignup ? (
+          <p className="mt-4 text-center text-[11px] leading-snug text-muted-foreground">
+            Para saber quais campanhas trazem novos atletas, registramos de qual link você veio
+            (parâmetros UTM) com um identificador anônimo deste navegador. Seu e-mail e nome não
+            entram nessa medição; o endereço IP só é usado para bloquear abusos e não é guardado
+            em formato legível.
+          </p>
+        ) : null}
+
         <p className="mt-5 text-center text-sm text-muted-foreground">
           {isSignup ? "Já tem conta?" : "Não tem conta?"}{" "}
           <button

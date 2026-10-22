@@ -7,6 +7,7 @@
  *
  * Módulo puro e client-safe: recebe Storage/relógio por parâmetro para poder ser testado.
  */
+import { z } from "zod";
 
 export const UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content"] as const;
 export type UtmKey = (typeof UTM_KEYS)[number];
@@ -89,6 +90,46 @@ export function currentTouch(state: AttributionState, now: Date): Touch | undefi
   if (!state.last) return undefined;
   const age = now.getTime() - new Date(state.last.at).getTime();
   return Number.isFinite(age) && age >= 0 && age <= LAST_TOUCH_TTL_MS ? state.last : undefined;
+}
+
+/* ------------------------------------------------------------------ envio pelo servidor */
+
+const utmValue = z.string().max(100).optional();
+
+/** Formato aceito pela função de servidor que registra visitas e cliques. */
+export const trackEventSchema = z
+  .object({
+    p_event_id: z.string().uuid(),
+    p_visitor_id: z.string().uuid(),
+    p_event_type: z.enum(["visit", "signup_cta_click"]),
+    p_cta: z
+      .string()
+      .regex(/^[a-z0-9_]{1,40}$/)
+      .nullable(),
+    p_path: z.string().max(200),
+    p_utm: z
+      .object({
+        utm_source: utmValue,
+        utm_medium: utmValue,
+        utm_campaign: utmValue,
+        utm_content: utmValue,
+      })
+      .strict(),
+  })
+  .strict();
+export type TrackEventInput = z.infer<typeof trackEventSchema>;
+
+/**
+ * IP do visitante, para o limite por rede. Só usa cabeçalhos definidos pela borda do host
+ * (Cloudflare) — nunca X-Forwarded-For, que o próprio visitante pode forjar.
+ */
+export function clientIpFrom(
+  header: (name: string) => string | undefined,
+  fallback?: string,
+): string | null {
+  const raw = header("cf-connecting-ip") ?? header("true-client-ip") ?? fallback ?? "";
+  const ip = raw.trim();
+  return /^[0-9a-fA-F:.]{3,45}$/.test(ip) ? ip : null;
 }
 
 /* ------------------------------------------------------------------ fila de envio
