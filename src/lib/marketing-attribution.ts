@@ -120,16 +120,69 @@ export const trackEventSchema = z
 export type TrackEventInput = z.infer<typeof trackEventSchema>;
 
 /**
- * IP do visitante, para o limite por rede. Só usa cabeçalhos definidos pela borda do host
- * (Cloudflare) — nunca X-Forwarded-For, que o próprio visitante pode forjar.
+ * Bloco de rede do visitante, para o limite por rede. Usa somente o cabeçalho que a borda
+ * da Cloudflare define e sobrescreve (cf-connecting-ip) ou o endereço da conexão. Nunca usa
+ * cabeçalhos que o visitante possa enviar por conta própria (X-Forwarded-For, True-Client-IP).
  */
-export function clientIpFrom(
+export function clientNetworkFrom(
   header: (name: string) => string | undefined,
-  fallback?: string,
+  connectionIp?: string,
 ): string | null {
-  const raw = header("cf-connecting-ip") ?? header("true-client-ip") ?? fallback ?? "";
-  const ip = raw.trim();
-  return /^[0-9a-fA-F:.]{3,45}$/.test(ip) ? ip : null;
+  return ipBucket(header("cf-connecting-ip") ?? connectionIp);
+}
+
+/**
+ * Reduz o IP ao bloco usado no limite: IPv4 inteiro; IPv6 só os primeiros 64 bits (/64),
+ * pois um único assinante costuma receber um /64 inteiro e poderia trocar de endereço à
+ * vontade. Também diminui a precisão do dado guardado. Retorna null se não for um IP válido.
+ */
+export function ipBucket(raw: string | null | undefined): string | null {
+  let ip = (raw ?? "").trim().toLowerCase();
+  const zone = ip.indexOf("%");
+  if (zone >= 0) ip = ip.slice(0, zone);
+  const mapped = /^::ffff:(\d{1,3}(?:\.\d{1,3}){3})$/.exec(ip);
+  if (mapped?.[1]) ip = mapped[1];
+  const v4 = ipv4Octets(ip);
+  if (v4) return v4.join(".");
+  if (!/^[0-9a-f:.]{2,45}$/.test(ip)) return null;
+  const halves = ip.split("::");
+  if (halves.length > 2) return null;
+  const toGroups = (s: string | undefined) => (s ? s.split(":") : []);
+  const head = toGroups(halves[0]);
+  const tail = toGroups(halves[1]);
+  // IPv4 embutido no final (ex.: 64:ff9b::192.0.2.1) vira dois grupos de 16 bits
+  const lastList = halves.length === 2 ? tail : head;
+  const last = lastList[lastList.length - 1];
+  if (last?.includes(".")) {
+    const o = ipv4Octets(last);
+    if (!o) return null;
+    lastList.splice(
+      -1,
+      1,
+      ((o[0]! << 8) | o[1]!).toString(16),
+      ((o[2]! << 8) | o[3]!).toString(16),
+    );
+  }
+  let groups: string[];
+  if (halves.length === 2) {
+    const missing = 8 - head.length - tail.length;
+    if (missing < 1) return null;
+    groups = [...head, ...Array<string>(missing).fill("0"), ...tail];
+  } else {
+    groups = head;
+  }
+  if (groups.length !== 8 || !groups.every((g) => /^[0-9a-f]{1,4}$/.test(g))) return null;
+  return `${groups
+    .slice(0, 4)
+    .map((g) => parseInt(g, 16).toString(16))
+    .join(":")}::/64`;
+}
+
+function ipv4Octets(s: string): number[] | null {
+  const m = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(s);
+  if (!m) return null;
+  const o = m.slice(1).map(Number);
+  return o.every((n) => n <= 255) ? o : null;
 }
 
 /* ------------------------------------------------------------------ fila de envio

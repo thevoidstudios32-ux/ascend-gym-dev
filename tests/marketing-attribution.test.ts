@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
-  clientIpFrom,
+  clientNetworkFrom,
+  ipBucket,
   trackEventSchema,
   PENDING_MAX,
   addPending,
@@ -179,18 +180,59 @@ describe("entrada da função de servidor", () => {
   });
 });
 
-describe("IP do visitante", () => {
+describe("rede do visitante (limite por rede)", () => {
   const headers = (h: Record<string, string>) => (name: string) => h[name];
 
-  test("usa o cabeçalho da Cloudflare, que o visitante não consegue forjar", () => {
-    expect(clientIpFrom(headers({ "cf-connecting-ip": "203.0.113.7" }))).toBe("203.0.113.7");
-    expect(clientIpFrom(headers({ "cf-connecting-ip": "2001:db8::1" }))).toBe("2001:db8::1");
+  test("usa só o cabeçalho da Cloudflare ou o endereço da conexão", () => {
+    expect(clientNetworkFrom(headers({ "cf-connecting-ip": "203.0.113.7" }))).toBe("203.0.113.7");
+    expect(clientNetworkFrom(headers({}), "198.51.100.2")).toBe("198.51.100.2");
+    expect(clientNetworkFrom(headers({ "cf-connecting-ip": "203.0.113.7" }), "10.0.0.1")).toBe(
+      "203.0.113.7",
+    );
   });
 
-  test("ignora X-Forwarded-For e valores estranhos", () => {
-    expect(clientIpFrom(headers({ "x-forwarded-for": "1.2.3.4" }))).toBeNull();
-    expect(clientIpFrom(headers({ "cf-connecting-ip": "1.2.3.4; DROP TABLE" }))).toBeNull();
-    expect(clientIpFrom(headers({}), "198.51.100.2")).toBe("198.51.100.2");
-    expect(clientIpFrom(headers({}))).toBeNull();
+  test("ignora cabeçalhos que o visitante pode inventar (True-Client-IP, X-Forwarded-For)", () => {
+    expect(clientNetworkFrom(headers({ "true-client-ip": "10.0.0.9" }))).toBeNull();
+    expect(clientNetworkFrom(headers({ "x-forwarded-for": "1.2.3.4" }))).toBeNull();
+    expect(clientNetworkFrom(headers({ "true-client-ip": "10.0.0.9" }), "198.51.100.2")).toBe(
+      "198.51.100.2",
+    );
+    expect(clientNetworkFrom(headers({ "cf-connecting-ip": "1.2.3.4; DROP TABLE" }))).toBeNull();
+    expect(clientNetworkFrom(headers({}))).toBeNull();
+  });
+
+  test("IPv6: todos os endereços do mesmo bloco /64 viram a mesma rede", () => {
+    const net = "2001:db8:abcd:12::/64";
+    for (const ip of [
+      "2001:db8:abcd:12::1",
+      "2001:db8:abcd:12::ffff",
+      "2001:0db8:abcd:0012:ffff:ffff:ffff:ffff",
+      "2001:DB8:ABCD:12:1:2:3:4",
+      "2001:db8:abcd:12::1%eth0",
+    ])
+      expect(ipBucket(ip)).toBe(net);
+    expect(ipBucket("2001:db8:abcd:13::1")).toBe("2001:db8:abcd:13::/64");
+  });
+
+  test("IPv4 continua inteiro; IPv4 dentro de IPv6 é tratado como IPv4", () => {
+    expect(ipBucket("203.0.113.7")).toBe("203.0.113.7");
+    expect(ipBucket("203.0.113.8")).toBe("203.0.113.8");
+    expect(ipBucket("::ffff:203.0.113.7")).toBe("203.0.113.7");
+    expect(ipBucket("64:ff9b::192.0.2.1")).toBe("64:ff9b:0:0::/64");
+    expect(ipBucket("::1")).toBe("0:0:0:0::/64");
+  });
+
+  test("valores inválidos não viram rede", () => {
+    for (const bad of [
+      "",
+      "abc",
+      "1.2.3.256",
+      "1.2.3",
+      "1::2::3",
+      "1:2:3:4:5:6:7:8:9",
+      "12345::1",
+      "::g",
+    ])
+      expect(ipBucket(bad)).toBeNull();
   });
 });

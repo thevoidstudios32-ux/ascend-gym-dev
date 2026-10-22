@@ -18,6 +18,27 @@ export type CampaignMetric = {
 };
 
 type RpcResult = { data: CampaignMetric[] | null; error: { message: string } | null };
+type Health = { cap_hits: number; events_without_ip: number };
+type HealthResult = { data: Health[] | null; error: { message: string } | null };
+
+/** Sinais de saúde do rastreamento (somente admin): teto global atingido e eventos sem IP. */
+async function fetchHealth(days: number): Promise<Health> {
+  const to = new Date();
+  const from = new Date(to.getTime() - days * 24 * 60 * 60 * 1000);
+  const client = supabase as unknown as {
+    rpc: (f: string, a: Record<string, unknown>) => Promise<HealthResult>;
+  };
+  const { data, error } = await client.rpc("get_marketing_health", {
+    p_from: from.toISOString(),
+    p_to: to.toISOString(),
+  });
+  if (error) throw new Error(error.message);
+  const row = data?.[0];
+  return {
+    cap_hits: Number(row?.cap_hits ?? 0),
+    events_without_ip: Number(row?.events_without_ip ?? 0),
+  };
+}
 
 async function fetchMetrics(days: number): Promise<CampaignMetric[]> {
   const to = new Date();
@@ -49,6 +70,11 @@ export function MarketingMetrics() {
     queryFn: () => fetchMetrics(days),
     retry: false,
   });
+  const health = useQuery({
+    queryKey: ["admin-marketing-health", days],
+    queryFn: () => fetchHealth(days),
+    retry: false,
+  });
   const total = (k: keyof CampaignMetric) => (data ?? []).reduce((s, r) => s + (r[k] as number), 0);
 
   return (
@@ -74,6 +100,13 @@ export function MarketingMetrics() {
         a mais recente (até 30 dias). Visitas e cliques são estimativas (limitadas por rede, mas não
         impossíveis de inflar); cadastros só contam contas reais e confirmadas, uma vez cada.
       </p>
+      {health.data && health.data.cap_hits > 0 ? (
+        <p className="text-xs text-destructive">
+          Atenção: o teto de 5.000 eventos por hora foi atingido {health.data.cap_hits} vez(es)
+          neste período. Os eventos reais não foram perdidos (ficaram na fila do navegador para nova
+          tentativa), mas isso indica tráfego anormal ou abuso.
+        </p>
+      ) : null}
       {total("events_without_ip") > 0 ? (
         <p className="text-xs text-destructive">
           Atenção: {total("events_without_ip")} evento(s) chegaram sem o IP do visitante. O limite

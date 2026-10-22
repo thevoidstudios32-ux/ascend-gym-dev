@@ -77,7 +77,7 @@ export function flushPendingEvents(): Promise<void> {
         try {
           await trackMarketingEvent({ data: parsed.data });
         } catch {
-          break; // sem rede ou servidor indisponível: tenta de novo na próxima página
+          break; // sem rede, servidor indisponível ou teto global: tenta de novo na próxima página
         }
       }
       // enviado (gravado ou ignorado pelo servidor) ou inválido: sai da fila

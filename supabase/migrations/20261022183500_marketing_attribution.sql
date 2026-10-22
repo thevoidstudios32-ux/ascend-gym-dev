@@ -5,13 +5,16 @@
 -- Privacidade:
 --  * Nenhum e-mail, nome, IP em claro ou user-agent é gravado.
 --  * visitor_id é um UUID aleatório do navegador e NÃO é ligado à conta do usuário.
---  * O IP chega pelo servidor do site e só é guardado como hash SHA-256 com um sal diário
---    aleatório; sais com mais de 2 dias são apagados, tornando hashes antigos não vinculáveis.
+--  * O servidor do site envia só o BLOCO de rede do visitante (IPv4 inteiro ou IPv6 /64),
+--    que é guardado apenas como hash SHA-256 com um sal diário aleatório; sais com mais de
+--    2 dias são apagados, tornando hashes antigos não vinculáveis.
 --  * Só caminhos de páginas públicas são registrados.
 --  * Eventos com mais de 13 meses são apagados automaticamente.
 -- Segurança:
 --  * Tabelas sem acesso direto para anon/authenticated (RLS ativo, sem políticas de escrita).
---  * Visitas/cliques só entram pela função do servidor (service_role), que limita por IP.
+--  * Visitas/cliques só entram pela função do servidor (service_role), que limita por rede.
+--  * Teto global atingido não descarta eventos reais: a função responde 'retry' e o
+--    navegador mantém o evento na fila; cada ocorrência é contada para o painel.
 --  * Funções SECURITY DEFINER com search_path vazio e nomes totalmente qualificados.
 
 CREATE SCHEMA IF NOT EXISTS app_private;
@@ -29,6 +32,13 @@ CREATE TABLE IF NOT EXISTS app_private.marketing_salts (
   salt uuid NOT NULL DEFAULT gen_random_uuid()
 );
 REVOKE ALL ON app_private.marketing_salts FROM PUBLIC, anon, authenticated;
+
+-- Quantas vezes por hora o teto global foi atingido (sinal de abuso ou de tráfego alto).
+CREATE TABLE IF NOT EXISTS app_private.marketing_cap_hits (
+  hour timestamptz PRIMARY KEY,
+  hits integer NOT NULL DEFAULT 0
+);
+REVOKE ALL ON app_private.marketing_cap_hits FROM PUBLIC, anon, authenticated;
 
 -- ---------------------------------------------------------------- eventos anônimos
 CREATE TABLE IF NOT EXISTS public.marketing_events (
@@ -75,12 +85,15 @@ CREATE POLICY "own acquisition read" ON public.user_acquisition
   FOR SELECT TO authenticated USING (auth.uid() = user_id);
 
 -- ---------------------------------------------------------------- registrar evento (só servidor)
--- Chamado pela função de servidor do site (service_role), que informa o IP do visitante.
--- Retorna true se gravou; false se ignorou (inválido, duplicado ou acima de um limite).
+-- Chamado pela função de servidor do site (service_role), que informa o bloco de rede do
+-- visitante (IPv4 inteiro ou IPv6 /64). Retorna:
+--   'saved'   gravado;
+--   'ignored' descartado (inválido, duplicado ou acima do limite da rede/navegador);
+--   'retry'   teto global atingido: NÃO gravado; o navegador deve tentar de novo depois.
 CREATE OR REPLACE FUNCTION public.track_marketing_event(
   p_event_id uuid, p_visitor_id uuid, p_event_type text, p_cta text, p_path text, p_utm jsonb,
-  p_client_ip text
-) RETURNS boolean
+  p_client_network text
+) RETURNS text
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
 DECLARE
   v_source text := app_private.clean_utm(p_utm ->> 'utm_source');
@@ -89,16 +102,16 @@ DECLARE
   v_content text := app_private.clean_utm(p_utm ->> 'utm_content');
   v_cta text := CASE WHEN p_cta ~ '^[a-z0-9_]{1,40}$' THEN p_cta END;
   v_path text := split_part(coalesce(p_path, ''), '?', 1);
-  v_ip text := NULLIF(left(btrim(coalesce(p_client_ip, '')), 64), '');
+  v_network text := NULLIF(left(btrim(coalesce(p_client_network, '')), 64), '');
   v_salt uuid;
   v_ip_hash text;
 BEGIN
   IF p_event_id IS NULL OR p_visitor_id IS NULL OR p_event_type NOT IN ('visit', 'signup_cta_click') THEN
-    RETURN false;
+    RETURN 'ignored';
   END IF;
   -- Só contamos como "visita de campanha" quem chega com utm_source.
   IF p_event_type = 'visit' AND v_source IS NULL THEN
-    RETURN false;
+    RETURN 'ignored';
   END IF;
   IF v_path NOT IN ('/', '/auth', '/divulgar', '/v2') THEN
     v_path := NULL;  -- páginas internas não são registradas
@@ -111,27 +124,32 @@ BEGIN
     SELECT s.salt INTO v_salt FROM app_private.marketing_salts s WHERE s.day = current_date;
     DELETE FROM app_private.marketing_salts s WHERE s.day < current_date - 2;
     DELETE FROM public.marketing_events e WHERE e.created_at < now() - interval '13 months';
+    DELETE FROM app_private.marketing_cap_hits h WHERE h.hour < now() - interval '13 months';
   END IF;
-  IF v_ip IS NOT NULL THEN
-    v_ip_hash := encode(sha256(convert_to(v_salt::text || '|' || v_ip, 'UTF8')), 'hex');
+  IF v_network IS NOT NULL THEN
+    v_ip_hash := encode(sha256(convert_to(v_salt::text || '|' || v_network, 'UTF8')), 'hex');
   END IF;
 
   -- Serializa eventos da mesma rede (ou sem IP): as verificações abaixo não sofrem corrida.
   PERFORM pg_advisory_xact_lock(hashtextextended('ascend_mkt:' || coalesce(v_ip_hash, 'sem_ip'), 0));
 
-  -- Limite global contra abuso em massa: 5.000 eventos por hora.
+  -- Teto global contra abuso em massa: 5.000 eventos por hora. Não descarta o evento:
+  -- registra a ocorrência e pede nova tentativa (o navegador mantém o evento na fila).
   IF (SELECT count(*) FROM public.marketing_events e WHERE e.created_at > now() - interval '1 hour') >= 5000 THEN
-    RETURN false;
+    INSERT INTO app_private.marketing_cap_hits AS h (hour, hits) VALUES (date_trunc('hour', now()), 1)
+    ON CONFLICT (hour) DO UPDATE SET hits = h.hits + 1;
+    RETURN 'retry';
   END IF;
-  -- Limite por rede (IP): 60 eventos por hora; sem IP informado, todos dividem a mesma cota.
+  -- Limite por rede (IPv4 ou IPv6 /64): 60 eventos por hora; sem rede informada, todos
+  -- dividem a mesma cota (o painel mostra esses eventos como "sem IP").
   IF (SELECT count(*) FROM public.marketing_events e
       WHERE e.ip_hash IS NOT DISTINCT FROM v_ip_hash AND e.created_at > now() - interval '1 hour') >= 60 THEN
-    RETURN false;
+    RETURN 'ignored';
   END IF;
   -- Limite por navegador: 60 eventos por hora.
   IF (SELECT count(*) FROM public.marketing_events e
       WHERE e.visitor_id = p_visitor_id AND e.created_at > now() - interval '1 hour') >= 60 THEN
-    RETURN false;
+    RETURN 'ignored';
   END IF;
   -- Mesma visita de campanha repetida em 30 min (recarregar a página) não conta de novo.
   IF p_event_type = 'visit' AND EXISTS (
@@ -140,7 +158,7 @@ BEGIN
       AND e.utm_source IS NOT DISTINCT FROM v_source AND e.utm_medium IS NOT DISTINCT FROM v_medium
       AND e.utm_campaign IS NOT DISTINCT FROM v_campaign AND e.utm_content IS NOT DISTINCT FROM v_content
   ) THEN
-    RETURN false;
+    RETURN 'ignored';
   END IF;
   -- Clique duplo no mesmo botão em 10 s conta uma vez.
   IF p_event_type = 'signup_cta_click' AND EXISTS (
@@ -148,13 +166,13 @@ BEGIN
     WHERE e.visitor_id = p_visitor_id AND e.event_type = 'signup_cta_click'
       AND e.cta IS NOT DISTINCT FROM v_cta AND e.created_at > now() - interval '10 seconds'
   ) THEN
-    RETURN false;
+    RETURN 'ignored';
   END IF;
   INSERT INTO public.marketing_events
     (event_id, visitor_id, ip_hash, event_type, cta, path, utm_source, utm_medium, utm_campaign, utm_content)
   VALUES (p_event_id, p_visitor_id, v_ip_hash, p_event_type, v_cta, v_path, v_source, v_medium, v_campaign, v_content)
   ON CONFLICT (event_id) DO NOTHING;
-  RETURN FOUND;
+  RETURN CASE WHEN FOUND THEN 'saved' ELSE 'ignored' END;
 END;
 $$;
 REVOKE ALL ON FUNCTION public.track_marketing_event(uuid, uuid, text, text, text, jsonb, text)
@@ -280,3 +298,24 @@ END;
 $$;
 REVOKE ALL ON FUNCTION public.get_marketing_campaign_metrics(timestamptz, timestamptz) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.get_marketing_campaign_metrics(timestamptz, timestamptz) TO authenticated;
+
+-- ---------------------------------------------------------------- saúde do rastreamento (somente admin)
+-- cap_hits: tentativas recusadas temporariamente por teto global (eventos ficaram na fila).
+-- events_without_ip: eventos gravados sem bloco de rede (o servidor não recebeu o IP).
+CREATE OR REPLACE FUNCTION public.get_marketing_health(p_from timestamptz, p_to timestamptz)
+RETURNS TABLE (cap_hits bigint, events_without_ip bigint)
+LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = '' AS $$
+BEGIN
+  IF NOT (app_private.has_role(auth.uid(), 'admin'::public.app_role)
+          OR app_private.has_role(auth.uid(), 'super_admin'::public.app_role)) THEN
+    RAISE EXCEPTION 'ACCESS DENIED';
+  END IF;
+  RETURN QUERY SELECT
+    (SELECT coalesce(sum(h.hits), 0)::bigint FROM app_private.marketing_cap_hits h
+      WHERE h.hour >= date_trunc('hour', p_from) AND h.hour < p_to),
+    (SELECT count(*) FROM public.marketing_events e
+      WHERE e.ip_hash IS NULL AND e.created_at >= p_from AND e.created_at < p_to);
+END;
+$$;
+REVOKE ALL ON FUNCTION public.get_marketing_health(timestamptz, timestamptz) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.get_marketing_health(timestamptz, timestamptz) TO authenticated;
