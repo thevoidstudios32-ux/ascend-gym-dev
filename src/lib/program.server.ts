@@ -81,8 +81,34 @@ function str(v: unknown, max: number, fallback = "") {
 }
 
 function num(v: unknown, min: number, max: number, fallback: number) {
-  const n = Number(v);
+  let n = Number(v);
+  if (!Number.isFinite(n) && typeof v === "string") {
+    // A reserva pode devolver "90 segundos"; extrai o número em vez de descartar.
+    const match = v.match(/\d+(?:[.,]\d+)?/);
+    if (match) n = Number(match[0].replace(",", "."));
+  }
   return Math.min(max, Math.max(min, Number.isFinite(n) ? Math.round(n) : fallback));
+}
+
+/** A reserva costuma devolver o dia por extenso; converte para o código do programa. */
+const WEEKDAY_ALIASES: Record<string, string> = {
+  "segunda": "SEG", "segunda-feira": "SEG", "seg": "SEG",
+  "terça": "TER", "terca": "TER", "terça-feira": "TER", "terca-feira": "TER", "ter": "TER",
+  "quarta": "QUA", "quarta-feira": "QUA", "qua": "QUA",
+  "quinta": "QUI", "quinta-feira": "QUI", "qui": "QUI",
+  "sexta": "SEX", "sexta-feira": "SEX", "sex": "SEX",
+  "sábado": "SÁB", "sabado": "SÁB", "sáb": "SÁB", "sab": "SÁB",
+  "domingo": "DOM", "dom": "DOM",
+};
+
+function weekdayCode(raw: unknown, index: number): string {
+  if (typeof raw === "string") {
+    const trimmed = raw.trim();
+    if ((WEEKDAYS as readonly string[]).includes(trimmed)) return trimmed;
+    const alias = WEEKDAY_ALIASES[trimmed.toLowerCase()];
+    if (alias) return alias;
+  }
+  return WEEKDAYS[index % 7] ?? "SEG";
 }
 
 function list(v: unknown): unknown[] {
@@ -143,7 +169,7 @@ function parseCoachResponse(raw: unknown): any | null {
   return null;
 }
 
-function sanitizeDay(raw: any, index: number, defaultRestSeconds = 90): ProgramDay {
+export function sanitizeDay(raw: any, index: number, defaultRestSeconds = 90): ProgramDay {
   const exercises: ProgramExercise[] = list(raw?.exercises).slice(0, 12).map((e: any) => ({
     name: str(e?.name, 80, "Exercício"),
     emoji: str(e?.emoji, 4, "🏋️"),
@@ -154,7 +180,7 @@ function sanitizeDay(raw: any, index: number, defaultRestSeconds = 90): ProgramD
     purpose: str(e?.purpose, 200),
   }));
 
-  const weekday = WEEKDAYS.includes(raw?.weekday) ? raw.weekday : (WEEKDAYS[index % 7] ?? "SEG");
+  const weekday = weekdayCode(raw?.weekday, index);
   const intensity = ["pesado", "moderado", "leve", "recovery"].includes(raw?.intensity)
     ? raw.intensity
     : "moderado";
