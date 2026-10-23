@@ -139,7 +139,7 @@ export function useCinematic(rootRef: RefObject<HTMLDivElement | null>) {
     const header = root.querySelector("[data-header]");
     const hero = root.querySelector("#topo");
     if (header && hero && hasIO) {
-      const ho = new IntersectionObserver((entries) => { header.classList.toggle("is-scrolled", !entries[0].isIntersecting); }, { rootMargin: "-72px 0px 0px 0px" });
+      const ho = new IntersectionObserver((entries) => { const e = entries[0]; if (e) header.classList.toggle("is-scrolled", !e.isIntersecting); }, { rootMargin: "-72px 0px 0px 0px" });
       ho.observe(hero); observers.push(ho);
     }
 
