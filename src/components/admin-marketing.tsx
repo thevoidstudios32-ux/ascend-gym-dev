@@ -138,15 +138,16 @@ export function MarketingMetrics() {
       </div>
       {health.data && health.data.global_cap_hits > 0 ? (
         <p className="text-xs text-destructive">
-          Atenção: o teto de 5.000 eventos por hora foi atingido {health.data.global_cap_hits}{" "}
-          vez(es) neste período. Os eventos reais não foram perdidos (ficaram na fila do navegador
-          para nova tentativa), mas isso indica tráfego anormal ou abuso.
+          Atenção: {health.data.global_cap_hits} envio(s) foram adiados neste período porque o teto
+          de 5.000 eventos por hora foi atingido. Os eventos reais não foram perdidos (ficaram na
+          fila do navegador para nova tentativa), mas isso indica tráfego anormal ou abuso.
         </p>
       ) : null}
       {health.data && health.data.network_limit_hits > 0 ? (
         <p className="text-xs text-muted-foreground">
-          Uma mesma rede atingiu o limite de 60 eventos por hora {health.data.network_limit_hits}{" "}
-          vez(es). Os eventos ficaram na fila para nova tentativa (comum em redes móveis com CGNAT).
+          {health.data.network_limit_hits} envio(s) foram adiados porque uma rede atingiu o limite
+          de 60 eventos por hora. Os eventos ficaram na fila para nova tentativa (comum em redes
+          móveis com CGNAT). Cada nova tentativa adiada também é contada.
         </p>
       ) : null}
       {health.data &&

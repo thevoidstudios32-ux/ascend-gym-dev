@@ -205,8 +205,6 @@ function parseIp(raw: string | null | undefined): ParsedIp | null {
   let ip = (raw ?? "").trim().toLowerCase();
   const zone = ip.indexOf("%");
   if (zone >= 0) ip = ip.slice(0, zone);
-  const mapped = /^::ffff:(\d{1,3}(?:\.\d{1,3}){3})$/.exec(ip);
-  if (mapped?.[1]) ip = mapped[1];
   const v4 = ipv4Octets(ip);
   if (v4) return { family: 4, octets: v4 };
   if (!/^[0-9a-f:.]{2,45}$/.test(ip)) return null;
@@ -237,7 +235,14 @@ function parseIp(raw: string | null | undefined): ParsedIp | null {
     groups = head;
   }
   if (groups.length !== 8 || !groups.every((g) => /^[0-9a-f]{1,4}$/.test(g))) return null;
-  return { family: 6, groups: groups.map((g) => parseInt(g, 16)) };
+  const n = groups.map((g) => parseInt(g, 16));
+  // IPv4 mapeado em IPv6 (::ffff:0:0/96), em qualquer grafia (::ffff:1.2.3.4 ou ::ffff:102:304),
+  // é um IPv4: tratado como IPv4 (rede e faixas não confiáveis corretas).
+  if (n.slice(0, 5).every((g) => g === 0) && n[5] === 0xffff) {
+    const [hi = 0, lo = 0] = n.slice(6);
+    return { family: 4, octets: [hi >> 8, hi & 0xff, lo >> 8, lo & 0xff] };
+  }
+  return { family: 6, groups: n };
 }
 
 function ipv4Octets(s: string): number[] | null {

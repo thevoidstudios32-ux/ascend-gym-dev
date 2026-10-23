@@ -166,6 +166,13 @@ describe("entrada da função de servidor", () => {
     expect(trackEventSchema.safeParse(ok).success).toBe(true);
   });
 
+  test("o navegador não consegue enviar rede nem estado do IP (quem define é o servidor)", () => {
+    expect(trackEventSchema.safeParse({ ...ok, p_ip_status: "ok" }).success).toBe(false);
+    expect(trackEventSchema.safeParse({ ...ok, p_client_network: "203.0.113.7" }).success).toBe(
+      false,
+    );
+  });
+
   test("recusa campos extras (ex.: tentar mandar o IP pelo navegador) e valores inválidos", () => {
     expect(trackEventSchema.safeParse({ ...ok, p_client_ip: "1.2.3.4" }).success).toBe(false);
     expect(
@@ -243,6 +250,20 @@ describe("rede do visitante (limite por rede)", () => {
         }),
       ),
     ).toEqual(ok("203.0.113.7", "ipv4"));
+  });
+
+  test("IPv4 mapeado em IPv6 é IPv4, em qualquer grafia (não vira um bloco IPv6 comum)", () => {
+    for (const ip of ["::ffff:203.0.113.7", "::ffff:cb00:7107", "0:0:0:0:0:ffff:cb00:7107"])
+      expect(clientNetworkFrom(headers({ "cf-connecting-ip": ip }))).toEqual(
+        ok("203.0.113.7", "ipv4"),
+      );
+    // privado continua não confiável mesmo em hexadecimal (::ffff:a00:1 = 10.0.0.1)
+    expect(clientNetworkFrom(headers({ "cf-connecting-ip": "::ffff:a00:1" }))).toEqual({
+      status: "untrusted",
+      network: null,
+      family: "ipv4",
+    });
+    expect(ipBucket("::ffff:cb00:7108")).toBe("203.0.113.8");
   });
 
   test("IP de infraestrutura não representa o visitante: 'untrusted', sem rede", () => {
