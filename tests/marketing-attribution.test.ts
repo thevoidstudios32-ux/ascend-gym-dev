@@ -183,22 +183,102 @@ describe("entrada da função de servidor", () => {
 describe("rede do visitante (limite por rede)", () => {
   const headers = (h: Record<string, string>) => (name: string) => h[name];
 
-  test("usa só o cabeçalho da Cloudflare ou o endereço da conexão", () => {
-    expect(clientNetworkFrom(headers({ "cf-connecting-ip": "203.0.113.7" }))).toBe("203.0.113.7");
-    expect(clientNetworkFrom(headers({}), "198.51.100.2")).toBe("198.51.100.2");
-    expect(clientNetworkFrom(headers({ "cf-connecting-ip": "203.0.113.7" }), "10.0.0.1")).toBe(
-      "203.0.113.7",
+  const ok = (network: string, family: "ipv4" | "ipv6") => ({ status: "ok", network, family });
+
+  test("IPv4 público vindo da Cloudflare: rede = IP inteiro", () => {
+    expect(clientNetworkFrom(headers({ "cf-connecting-ip": "203.0.113.7" }))).toEqual(
+      ok("203.0.113.7", "ipv4"),
     );
   });
 
-  test("ignora cabeçalhos que o visitante pode inventar (True-Client-IP, X-Forwarded-For)", () => {
-    expect(clientNetworkFrom(headers({ "true-client-ip": "10.0.0.9" }))).toBeNull();
-    expect(clientNetworkFrom(headers({ "x-forwarded-for": "1.2.3.4" }))).toBeNull();
-    expect(clientNetworkFrom(headers({ "true-client-ip": "10.0.0.9" }), "198.51.100.2")).toBe(
-      "198.51.100.2",
+  test("IPv6 público: rede = bloco /64", () => {
+    expect(clientNetworkFrom(headers({ "cf-connecting-ip": "2804:14c:abcd:ef01::1234" }))).toEqual(
+      ok("2804:14c:abcd:ef01::/64", "ipv6"),
     );
-    expect(clientNetworkFrom(headers({ "cf-connecting-ip": "1.2.3.4; DROP TABLE" }))).toBeNull();
-    expect(clientNetworkFrom(headers({}))).toBeNull();
+  });
+
+  test("CGNAT: pessoas diferentes atrás do mesmo IPv4 público caem na mesma rede (o banco adia, não descarta)", () => {
+    const a = clientNetworkFrom(headers({ "cf-connecting-ip": "203.0.113.50" }));
+    const b = clientNetworkFrom(headers({ "cf-connecting-ip": "203.0.113.50" }));
+    expect(a).toEqual(ok("203.0.113.50", "ipv4"));
+    expect(b).toEqual(a);
+  });
+
+  test("IP ausente: estado 'missing', sem rede inventada", () => {
+    expect(clientNetworkFrom(headers({}))).toEqual({
+      status: "missing",
+      network: null,
+      family: null,
+    });
+    expect(clientNetworkFrom(headers({ "cf-connecting-ip": "   " }))).toEqual({
+      status: "missing",
+      network: null,
+      family: null,
+    });
+  });
+
+  test("IP inválido: estado 'invalid', sem rede", () => {
+    for (const bad of ["1.2.3.4; DROP TABLE", "abc", "1.2.3.256", "1::2::3"])
+      expect(clientNetworkFrom(headers({ "cf-connecting-ip": bad }))).toEqual({
+        status: "invalid",
+        network: null,
+        family: null,
+      });
+  });
+
+  test("cabeçalhos que o visitante pode inventar são ignorados (sem cf-connecting-ip → 'missing')", () => {
+    const forged = headers({
+      "true-client-ip": "198.51.100.9",
+      "x-forwarded-for": "198.51.100.10",
+      "x-real-ip": "198.51.100.11",
+    });
+    expect(clientNetworkFrom(forged)).toEqual({ status: "missing", network: null, family: null });
+    // com cf-connecting-ip presente, os forjados também não interferem
+    expect(
+      clientNetworkFrom(
+        headers({
+          "cf-connecting-ip": "203.0.113.7",
+          "true-client-ip": "198.51.100.9",
+          "x-real-ip": "198.51.100.12",
+        }),
+      ),
+    ).toEqual(ok("203.0.113.7", "ipv4"));
+  });
+
+  test("IP de infraestrutura não representa o visitante: 'untrusted', sem rede", () => {
+    const cases: [string, "ipv4" | "ipv6"][] = [
+      ["2a06:98c0:3600::103", "ipv6"], // subrequisição de Worker entre zonas (documentado pela Cloudflare)
+      ["2a06:98c7:ffff::1", "ipv6"], // ainda dentro de 2a06:98c0::/29
+      ["127.0.0.1", "ipv4"],
+      ["::1", "ipv6"],
+      ["10.1.2.3", "ipv4"],
+      ["172.20.0.1", "ipv4"],
+      ["192.168.0.10", "ipv4"],
+      ["100.64.1.2", "ipv4"], // lado interno de CGNAT (não é um IP público)
+      ["169.254.1.1", "ipv4"],
+      ["fd00::1", "ipv6"],
+      ["fe80::1%eth0", "ipv6"],
+      ["::ffff:10.0.0.1", "ipv4"],
+    ];
+    for (const [ip, family] of cases)
+      expect(clientNetworkFrom(headers({ "cf-connecting-ip": ip }))).toEqual({
+        status: "untrusted",
+        network: null,
+        family,
+      });
+    // vizinhos públicos fora das faixas continuam válidos
+    expect(clientNetworkFrom(headers({ "cf-connecting-ip": "2a06:98c8::1" })).status).toBe("ok");
+    expect(clientNetworkFrom(headers({ "cf-connecting-ip": "100.128.0.1" })).status).toBe("ok");
+    expect(clientNetworkFrom(headers({ "cf-connecting-ip": "172.32.0.1" })).status).toBe("ok");
+  });
+
+  test("reserva: sem cabeçalho, usa o endereço da conexão (no Cloudflare é o mesmo cabeçalho)", () => {
+    expect(clientNetworkFrom(headers({}), "198.51.100.2")).toEqual(ok("198.51.100.2", "ipv4"));
+    expect(clientNetworkFrom(headers({}), "127.0.0.1").status).toBe("untrusted");
+    expect(clientNetworkFrom(headers({}), undefined).status).toBe("missing");
+    expect(clientNetworkFrom(headers({ "cf-connecting-ip": "203.0.113.7" }), "10.0.0.1")).toEqual(
+      ok("203.0.113.7", "ipv4"),
+    );
   });
 
   test("IPv6: todos os endereços do mesmo bloco /64 viram a mesma rede", () => {

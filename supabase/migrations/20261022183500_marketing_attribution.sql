@@ -8,13 +8,17 @@
 --  * O servidor do site envia só o BLOCO de rede do visitante (IPv4 inteiro ou IPv6 /64),
 --    que é guardado apenas como hash SHA-256 com um sal diário aleatório; sais com mais de
 --    2 dias são apagados, tornando hashes antigos não vinculáveis.
+--  * Quando o IP não está disponível ou não é confiável, nenhuma rede é inventada: o evento
+--    é gravado com ip_status ('missing' | 'invalid' | 'untrusted') e sem hash.
 --  * Só caminhos de páginas públicas são registrados.
 --  * Eventos com mais de 13 meses são apagados automaticamente.
 -- Segurança:
 --  * Tabelas sem acesso direto para anon/authenticated (RLS ativo, sem políticas de escrita).
 --  * Visitas/cliques só entram pela função do servidor (service_role), que limita por rede.
---  * Teto global atingido não descarta eventos reais: a função responde 'retry' e o
---    navegador mantém o evento na fila; cada ocorrência é contada para o painel.
+--  * Limites temporários (teto global ou limite da rede) não descartam eventos reais: a
+--    função responde 'retry' e o navegador mantém o evento na fila; cada ocorrência é
+--    contada para o painel. Sem IP confiável não há limite por rede (não se agrupam
+--    visitantes desconhecidos); valem o limite por navegador e o teto global.
 --  * Funções SECURITY DEFINER com search_path vazio e nomes totalmente qualificados.
 
 CREATE SCHEMA IF NOT EXISTS app_private;
@@ -33,10 +37,12 @@ CREATE TABLE IF NOT EXISTS app_private.marketing_salts (
 );
 REVOKE ALL ON app_private.marketing_salts FROM PUBLIC, anon, authenticated;
 
--- Quantas vezes por hora o teto global foi atingido (sinal de abuso ou de tráfego alto).
+-- Quantas vezes por hora cada limite foi atingido (sinal de abuso, CGNAT ou tráfego alto).
 CREATE TABLE IF NOT EXISTS app_private.marketing_cap_hits (
-  hour timestamptz PRIMARY KEY,
-  hits integer NOT NULL DEFAULT 0
+  hour timestamptz NOT NULL,
+  kind text NOT NULL CHECK (kind IN ('global', 'network')),
+  hits integer NOT NULL DEFAULT 0,
+  PRIMARY KEY (hour, kind)
 );
 REVOKE ALL ON app_private.marketing_cap_hits FROM PUBLIC, anon, authenticated;
 
@@ -45,7 +51,8 @@ CREATE TABLE IF NOT EXISTS public.marketing_events (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   event_id uuid NOT NULL UNIQUE,                       -- gerado no navegador: reenvio não duplica
   visitor_id uuid NOT NULL,
-  ip_hash text CHECK (ip_hash IS NULL OR ip_hash ~ '^[0-9a-f]{64}$'),  -- NULL = servidor não informou IP
+  ip_hash text CHECK (ip_hash IS NULL OR ip_hash ~ '^[0-9a-f]{64}$'),  -- NULL = sem IP confiável
+  ip_status text NOT NULL CHECK (ip_status IN ('ok', 'missing', 'invalid', 'untrusted')),
   event_type text NOT NULL CHECK (event_type IN ('visit', 'signup_cta_click')),
   cta text CHECK (cta IS NULL OR cta ~ '^[a-z0-9_]{1,40}$'),
   path text CHECK (path IS NULL OR path IN ('/', '/auth', '/divulgar', '/v2')),
@@ -53,7 +60,9 @@ CREATE TABLE IF NOT EXISTS public.marketing_events (
   utm_medium text CHECK (utm_medium IS NULL OR char_length(utm_medium) <= 100),
   utm_campaign text CHECK (utm_campaign IS NULL OR char_length(utm_campaign) <= 100),
   utm_content text CHECK (utm_content IS NULL OR char_length(utm_content) <= 100),
-  created_at timestamptz NOT NULL DEFAULT now()
+  created_at timestamptz NOT NULL DEFAULT now(),
+  -- só 'ok' tem rede; os demais estados nunca têm hash de rede
+  CONSTRAINT marketing_events_ip_consistency CHECK ((ip_status = 'ok') = (ip_hash IS NOT NULL))
 );
 CREATE INDEX IF NOT EXISTS marketing_events_created_idx ON public.marketing_events (created_at);
 CREATE INDEX IF NOT EXISTS marketing_events_visitor_idx ON public.marketing_events (visitor_id, created_at);
@@ -85,14 +94,15 @@ CREATE POLICY "own acquisition read" ON public.user_acquisition
   FOR SELECT TO authenticated USING (auth.uid() = user_id);
 
 -- ---------------------------------------------------------------- registrar evento (só servidor)
--- Chamado pela função de servidor do site (service_role), que informa o bloco de rede do
--- visitante (IPv4 inteiro ou IPv6 /64). Retorna:
+-- Chamado pela função de servidor do site (service_role), que informa a rede do visitante
+-- (IPv4 inteiro ou IPv6 /64) e o estado do IP. Retorna:
 --   'saved'   gravado;
---   'ignored' descartado (inválido, duplicado ou acima do limite da rede/navegador);
---   'retry'   teto global atingido: NÃO gravado; o navegador deve tentar de novo depois.
+--   'ignored' descartado (inválido, duplicado ou acima do limite do navegador);
+--   'retry'   teto global ou limite da rede atingido: NÃO gravado agora; o navegador
+--             mantém o evento na fila e tenta de novo depois com o mesmo event_id.
 CREATE OR REPLACE FUNCTION public.track_marketing_event(
   p_event_id uuid, p_visitor_id uuid, p_event_type text, p_cta text, p_path text, p_utm jsonb,
-  p_client_network text
+  p_client_network text, p_ip_status text
 ) RETURNS text
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
 DECLARE
@@ -113,6 +123,11 @@ BEGIN
   IF p_event_type = 'visit' AND v_source IS NULL THEN
     RETURN 'ignored';
   END IF;
+  -- Coerência: só 'ok' traz rede; os demais estados não podem trazer rede.
+  IF p_ip_status IS NULL OR p_ip_status NOT IN ('ok', 'missing', 'invalid', 'untrusted')
+     OR (p_ip_status = 'ok') <> (v_network IS NOT NULL) THEN
+    RETURN 'ignored';
+  END IF;
   IF v_path NOT IN ('/', '/auth', '/divulgar', '/v2') THEN
     v_path := NULL;  -- páginas internas não são registradas
   END IF;
@@ -126,25 +141,29 @@ BEGIN
     DELETE FROM public.marketing_events e WHERE e.created_at < now() - interval '13 months';
     DELETE FROM app_private.marketing_cap_hits h WHERE h.hour < now() - interval '13 months';
   END IF;
-  IF v_network IS NOT NULL THEN
+  IF p_ip_status = 'ok' THEN
     v_ip_hash := encode(sha256(convert_to(v_salt::text || '|' || v_network, 'UTF8')), 'hex');
   END IF;
 
-  -- Serializa eventos da mesma rede (ou sem IP): as verificações abaixo não sofrem corrida.
-  PERFORM pg_advisory_xact_lock(hashtextextended('ascend_mkt:' || coalesce(v_ip_hash, 'sem_ip'), 0));
+  -- Serializa eventos da mesma rede (ou, sem IP confiável, do mesmo navegador): as
+  -- verificações abaixo não sofrem corrida e visitantes sem IP não são agrupados.
+  PERFORM pg_advisory_xact_lock(hashtextextended(CASE WHEN v_ip_hash IS NULL
+    THEN 'ascend_mkt:v:' || p_visitor_id::text ELSE 'ascend_mkt:n:' || v_ip_hash END, 0));
 
   -- Teto global contra abuso em massa: 5.000 eventos por hora. Não descarta o evento:
   -- registra a ocorrência e pede nova tentativa (o navegador mantém o evento na fila).
   IF (SELECT count(*) FROM public.marketing_events e WHERE e.created_at > now() - interval '1 hour') >= 5000 THEN
-    INSERT INTO app_private.marketing_cap_hits AS h (hour, hits) VALUES (date_trunc('hour', now()), 1)
-    ON CONFLICT (hour) DO UPDATE SET hits = h.hits + 1;
+    INSERT INTO app_private.marketing_cap_hits AS h (hour, kind, hits) VALUES (date_trunc('hour', now()), 'global', 1)
+    ON CONFLICT (hour, kind) DO UPDATE SET hits = h.hits + 1;
     RETURN 'retry';
   END IF;
-  -- Limite por rede (IPv4 ou IPv6 /64): 60 eventos por hora; sem rede informada, todos
-  -- dividem a mesma cota (o painel mostra esses eventos como "sem IP").
-  IF (SELECT count(*) FROM public.marketing_events e
-      WHERE e.ip_hash IS NOT DISTINCT FROM v_ip_hash AND e.created_at > now() - interval '1 hour') >= 60 THEN
-    RETURN 'ignored';
+  -- Limite por rede (IPv4 ou IPv6 /64): 60 eventos por hora. Não descarta: pede nova
+  -- tentativa (CGNAT pode pôr muitas pessoas reais atrás de um IP). Só vale com IP confiável.
+  IF v_ip_hash IS NOT NULL AND (SELECT count(*) FROM public.marketing_events e
+      WHERE e.ip_hash = v_ip_hash AND e.created_at > now() - interval '1 hour') >= 60 THEN
+    INSERT INTO app_private.marketing_cap_hits AS h (hour, kind, hits) VALUES (date_trunc('hour', now()), 'network', 1)
+    ON CONFLICT (hour, kind) DO UPDATE SET hits = h.hits + 1;
+    RETURN 'retry';
   END IF;
   -- Limite por navegador: 60 eventos por hora.
   IF (SELECT count(*) FROM public.marketing_events e
@@ -169,15 +188,15 @@ BEGIN
     RETURN 'ignored';
   END IF;
   INSERT INTO public.marketing_events
-    (event_id, visitor_id, ip_hash, event_type, cta, path, utm_source, utm_medium, utm_campaign, utm_content)
-  VALUES (p_event_id, p_visitor_id, v_ip_hash, p_event_type, v_cta, v_path, v_source, v_medium, v_campaign, v_content)
+    (event_id, visitor_id, ip_hash, ip_status, event_type, cta, path, utm_source, utm_medium, utm_campaign, utm_content)
+  VALUES (p_event_id, p_visitor_id, v_ip_hash, p_ip_status, p_event_type, v_cta, v_path, v_source, v_medium, v_campaign, v_content)
   ON CONFLICT (event_id) DO NOTHING;
   RETURN CASE WHEN FOUND THEN 'saved' ELSE 'ignored' END;
 END;
 $$;
-REVOKE ALL ON FUNCTION public.track_marketing_event(uuid, uuid, text, text, text, jsonb, text)
+REVOKE ALL ON FUNCTION public.track_marketing_event(uuid, uuid, text, text, text, jsonb, text, text)
   FROM PUBLIC, anon, authenticated;
-GRANT EXECUTE ON FUNCTION public.track_marketing_event(uuid, uuid, text, text, text, jsonb, text) TO service_role;
+GRANT EXECUTE ON FUNCTION public.track_marketing_event(uuid, uuid, text, text, text, jsonb, text, text) TO service_role;
 
 -- ---------------------------------------------------------------- associar origem ao cadastro
 -- Chamado pelo app depois do login. Grava UMA vez por usuário e só para contas criadas
@@ -248,7 +267,7 @@ GRANT EXECUTE ON FUNCTION public.claim_signup_attribution(jsonb, jsonb) TO authe
 -- ---------------------------------------------------------------- métricas agregadas (somente admin)
 -- Nenhum identificador de usuário é retornado: apenas contagens por campanha.
 -- distinct_networks = hashes de IP distintos (com sal diário, aproxima "redes por dia").
--- events_without_ip > 0 indica que o servidor não está recebendo o IP do visitante.
+-- events_without_ip = eventos sem IP confiável (ausente, inválido ou de infraestrutura).
 CREATE OR REPLACE FUNCTION public.get_marketing_campaign_metrics(p_from timestamptz, p_to timestamptz)
 RETURNS TABLE (
   utm_source text, utm_medium text, utm_campaign text, utm_content text,
@@ -268,7 +287,7 @@ BEGIN
            count(*) FILTER (WHERE e.event_type = 'visit') AS v,
            count(DISTINCT e.visitor_id) FILTER (WHERE e.event_type = 'visit') AS uv,
            count(DISTINCT e.ip_hash) FILTER (WHERE e.event_type = 'visit') AS dn,
-           count(*) FILTER (WHERE e.ip_hash IS NULL) AS wi,
+           count(*) FILTER (WHERE e.ip_status <> 'ok') AS wi,
            count(*) FILTER (WHERE e.event_type = 'signup_cta_click') AS k
     FROM public.marketing_events e
     WHERE e.created_at >= p_from AND e.created_at < p_to
@@ -300,21 +319,31 @@ REVOKE ALL ON FUNCTION public.get_marketing_campaign_metrics(timestamptz, timest
 GRANT EXECUTE ON FUNCTION public.get_marketing_campaign_metrics(timestamptz, timestamptz) TO authenticated;
 
 -- ---------------------------------------------------------------- saúde do rastreamento (somente admin)
--- cap_hits: tentativas recusadas temporariamente por teto global (eventos ficaram na fila).
--- events_without_ip: eventos gravados sem bloco de rede (o servidor não recebeu o IP).
+-- global_cap_hits / network_limit_hits: tentativas adiadas por limite (eventos ficaram na fila).
+-- ip_missing / ip_invalid / ip_untrusted: eventos gravados sem IP confiável, por motivo.
 CREATE OR REPLACE FUNCTION public.get_marketing_health(p_from timestamptz, p_to timestamptz)
-RETURNS TABLE (cap_hits bigint, events_without_ip bigint)
+RETURNS TABLE (global_cap_hits bigint, network_limit_hits bigint,
+               ip_missing bigint, ip_invalid bigint, ip_untrusted bigint)
 LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = '' AS $$
 BEGIN
   IF NOT (app_private.has_role(auth.uid(), 'admin'::public.app_role)
           OR app_private.has_role(auth.uid(), 'super_admin'::public.app_role)) THEN
     RAISE EXCEPTION 'ACCESS DENIED';
   END IF;
-  RETURN QUERY SELECT
-    (SELECT coalesce(sum(h.hits), 0)::bigint FROM app_private.marketing_cap_hits h
-      WHERE h.hour >= date_trunc('hour', p_from) AND h.hour < p_to),
-    (SELECT count(*) FROM public.marketing_events e
-      WHERE e.ip_hash IS NULL AND e.created_at >= p_from AND e.created_at < p_to);
+  RETURN QUERY
+  WITH h AS (
+    SELECT coalesce(sum(c.hits) FILTER (WHERE c.kind = 'global'), 0)::bigint AS g,
+           coalesce(sum(c.hits) FILTER (WHERE c.kind = 'network'), 0)::bigint AS n
+    FROM app_private.marketing_cap_hits c
+    WHERE c.hour >= date_trunc('hour', p_from) AND c.hour < p_to
+  ), ev AS (
+    SELECT count(*) FILTER (WHERE m.ip_status = 'missing') AS mi,
+           count(*) FILTER (WHERE m.ip_status = 'invalid') AS iv,
+           count(*) FILTER (WHERE m.ip_status = 'untrusted') AS un
+    FROM public.marketing_events m
+    WHERE m.created_at >= p_from AND m.created_at < p_to
+  )
+  SELECT h.g, h.n, ev.mi, ev.iv, ev.un FROM h, ev;
 END;
 $$;
 REVOKE ALL ON FUNCTION public.get_marketing_health(timestamptz, timestamptz) FROM PUBLIC, anon;

@@ -120,15 +120,39 @@ export const trackEventSchema = z
 export type TrackEventInput = z.infer<typeof trackEventSchema>;
 
 /**
- * Bloco de rede do visitante, para o limite por rede. Usa somente o cabeçalho que a borda
- * da Cloudflare define e sobrescreve (cf-connecting-ip) ou o endereço da conexão. Nunca usa
- * cabeçalhos que o visitante possa enviar por conta própria (X-Forwarded-For, True-Client-IP).
+ * Estado do IP do visitante, informado ao banco junto com a rede:
+ *  - ok: IP público válido vindo da borda da Cloudflare → limite por rede se aplica;
+ *  - missing: cabeçalho ausente → sem rede (não há como identificar a rede);
+ *  - invalid: valor que não é um IP → sem rede;
+ *  - untrusted: IP de infraestrutura (Worker da Cloudflare, rede privada/local, CGNAT
+ *    interno) que não representa o visitante → sem rede.
+ * Sem IP confiável NÃO se inventa rede nem se agrupa visitantes: o limite por rede deixa
+ * de valer para o evento e o painel mostra quantos eventos chegaram assim.
+ */
+export type IpStatus = "ok" | "missing" | "invalid" | "untrusted";
+export type NetworkInfo = {
+  status: IpStatus;
+  network: string | null;
+  family: "ipv4" | "ipv6" | null;
+};
+
+/**
+ * Rede do visitante, para o limite por rede. Usa somente o cabeçalho que a borda da
+ * Cloudflare define (cf-connecting-ip); no runtime Cloudflare o "endereço da conexão"
+ * (getRequestIP) é esse mesmo cabeçalho. Nunca usa cabeçalhos que o visitante possa enviar
+ * por conta própria (X-Forwarded-For, X-Real-IP, True-Client-IP).
  */
 export function clientNetworkFrom(
   header: (name: string) => string | undefined,
   connectionIp?: string,
-): string | null {
-  return ipBucket(header("cf-connecting-ip") ?? connectionIp);
+): NetworkInfo {
+  const raw = (header("cf-connecting-ip") ?? connectionIp ?? "").trim();
+  if (!raw) return { status: "missing", network: null, family: null };
+  const ip = parseIp(raw);
+  if (!ip) return { status: "invalid", network: null, family: null };
+  const family = ip.family === 4 ? "ipv4" : "ipv6";
+  if (isUntrustedIp(ip)) return { status: "untrusted", network: null, family };
+  return { status: "ok", network: bucketOf(ip), family };
 }
 
 /**
@@ -137,13 +161,54 @@ export function clientNetworkFrom(
  * vontade. Também diminui a precisão do dado guardado. Retorna null se não for um IP válido.
  */
 export function ipBucket(raw: string | null | undefined): string | null {
+  const ip = parseIp(raw);
+  return ip ? bucketOf(ip) : null;
+}
+
+type ParsedIp = { family: 4; octets: number[] } | { family: 6; groups: number[] };
+
+function bucketOf(ip: ParsedIp): string {
+  if (ip.family === 4) return ip.octets.join(".");
+  return `${ip.groups
+    .slice(0, 4)
+    .map((g) => g.toString(16))
+    .join(":")}::/64`;
+}
+
+/** Faixas que não representam um visitante real na borda da Cloudflare. */
+function isUntrustedIp(ip: ParsedIp): boolean {
+  if (ip.family === 4) {
+    const [a = 0, b = 0] = ip.octets;
+    return (
+      a === 0 || // "esta rede"
+      a === 10 || // privada
+      a === 127 || // loopback
+      (a === 100 && b >= 64 && b <= 127) || // 100.64.0.0/10, lado interno de CGNAT
+      (a === 169 && b === 254) || // link-local
+      (a === 172 && b >= 16 && b <= 31) || // privada
+      (a === 192 && b === 168) || // privada
+      a >= 224 // multicast/reservado
+    );
+  }
+  const [g0 = 0, g1 = 0] = ip.groups;
+  return (
+    ip.groups.every((g) => g === 0) || // ::
+    (ip.groups.slice(0, 7).every((g) => g === 0) && ip.groups[7] === 1) || // ::1
+    (g0 & 0xfe00) === 0xfc00 || // fc00::/7 local única
+    (g0 & 0xffc0) === 0xfe80 || // fe80::/10 link-local
+    (g0 & 0xff00) === 0xff00 || // multicast
+    (g0 === 0x2a06 && (g1 & 0xfff8) === 0x98c0) // 2a06:98c0::/29 Cloudflare (subrequisições de Workers)
+  );
+}
+
+function parseIp(raw: string | null | undefined): ParsedIp | null {
   let ip = (raw ?? "").trim().toLowerCase();
   const zone = ip.indexOf("%");
   if (zone >= 0) ip = ip.slice(0, zone);
   const mapped = /^::ffff:(\d{1,3}(?:\.\d{1,3}){3})$/.exec(ip);
   if (mapped?.[1]) ip = mapped[1];
   const v4 = ipv4Octets(ip);
-  if (v4) return v4.join(".");
+  if (v4) return { family: 4, octets: v4 };
   if (!/^[0-9a-f:.]{2,45}$/.test(ip)) return null;
   const halves = ip.split("::");
   if (halves.length > 2) return null;
@@ -172,10 +237,7 @@ export function ipBucket(raw: string | null | undefined): string | null {
     groups = head;
   }
   if (groups.length !== 8 || !groups.every((g) => /^[0-9a-f]{1,4}$/.test(g))) return null;
-  return `${groups
-    .slice(0, 4)
-    .map((g) => parseInt(g, 16).toString(16))
-    .join(":")}::/64`;
+  return { family: 6, groups: groups.map((g) => parseInt(g, 16)) };
 }
 
 function ipv4Octets(s: string): number[] | null {
