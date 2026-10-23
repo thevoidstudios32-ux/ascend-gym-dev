@@ -16,7 +16,7 @@ export const Route = createFileRoute("/v2")({
       { name: "twitter:card", content: "summary_large_image" },
       { name: "robots", content: "noindex" },
     ],
-    links: [{ rel: "preload", as: "image", href: heroPoster.url, fetchpriority: "high" }],
+    links: [{ rel: "preload", as: "image", href: heroPoster.url, fetchPriority: "high" }],
   }),
   component: CinematicLanding,
 });
