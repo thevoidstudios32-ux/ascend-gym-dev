@@ -9,7 +9,9 @@ type Dict = Record<string, string>;
 type Pattern = { re: RegExp; names: string[]; target: string };
 
 const ATTRS = ["placeholder", "title", "aria-label", "alt"] as const;
-const SKIP = "script,style,noscript,textarea,input,code,pre,[contenteditable='true'],[data-no-translate]";
+// o texto dentro destes elementos nunca é trocado; em inputs/textareas só o placeholder/title/aria-label
+const SKIP_ATTRS = "script,style,noscript,code,pre,[contenteditable='true'],[data-no-translate]";
+const SKIP = `${SKIP_ATTRS},textarea,input`;
 const MONTHS_EN: Record<string, string> = {
   janeiro: "January", fevereiro: "February", março: "March", abril: "April", maio: "May", junho: "June",
   julho: "July", agosto: "August", setembro: "September", outubro: "October", novembro: "November", dezembro: "December",
@@ -82,7 +84,7 @@ export function translateText(text: string): string | null {
   return lead + out + trail;
 }
 
-const skipped = (el: Element | null) => !el || !!el.closest(SKIP);
+const skipped = (el: Element | null, selector = SKIP) => !el || !!el.closest(selector);
 
 function handleText(node: Text) {
   if (skipped(node.parentElement)) return;
@@ -97,7 +99,7 @@ function handleText(node: Text) {
 }
 
 function handleAttrs(el: Element) {
-  if (skipped(el)) return;
+  if (skipped(el, SKIP_ATTRS)) return;
   for (const name of ATTRS) {
     const value = el.getAttribute(name);
     if (!value) continue;
@@ -118,8 +120,8 @@ function walk(root: Node) {
   if (root.nodeType === Node.TEXT_NODE) return handleText(root as Text);
   if (root.nodeType !== Node.ELEMENT_NODE) return;
   const el = root as Element;
-  if (el.matches(SKIP)) return;
   handleAttrs(el);
+  if (el.matches(SKIP)) return;
   el.querySelectorAll("[placeholder],[title],[aria-label],img[alt]").forEach(handleAttrs);
   const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
   while (walker.nextNode()) handleText(walker.currentNode as Text);
