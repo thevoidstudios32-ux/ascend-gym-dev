@@ -96,7 +96,7 @@ function AppLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-ember md:flex">
+    <div className="app-shell min-h-screen bg-ember md:flex">
       <aside
         className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-border bg-surface/50 p-4 backdrop-blur-xl transition-[width] duration-300 md:flex ${
           collapsed ? "w-20 items-center" : "w-56"

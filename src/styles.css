@@ -1123,3 +1123,17 @@
 /* parágrafo das seções centralizadas: caixa centralizada, não só o texto */
 .landing-section-intro-centered p { margin-inline: auto; }
 .landing-section h2.is-editorial { font-family: var(--font-sans); font-size: clamp(2.4rem, 4.6vw, 4.25rem); font-weight: 600; line-height: 1.04; letter-spacing: -0.025em; text-transform: none; }
+
+/* Acabamento premium do app (pacote B): cantos firmes, sem brilho vermelho, textos legíveis e toques maiores.
+   Vale só dentro do app logado (.app-shell); a landing não é afetada. */
+.app-shell { background-image: none; }
+.app-shell .rounded-lg { border-radius: 4px; }
+.app-shell .rounded-xl, .app-shell .rounded-2xl, .app-shell .card { border-radius: 6px; }
+.app-shell .rounded-3xl, .app-shell .panel, .app-shell .glass { border-radius: 8px; }
+/* sem pílulas em botões e campos; avatares e contadores continuam redondos */
+.app-shell :is(button, a, select, input, textarea).rounded-full { border-radius: 4px; }
+.app-shell .shadow-glow { box-shadow: none; }
+.app-shell .text-\[9px\], .app-shell .text-\[10px\] { font-size: 11px; }
+/* área de toque maior em botões só com ícone, sem mudar o layout */
+.app-shell button:has(> svg:only-child):not(.absolute):not(.fixed):not(.sticky) { position: relative; }
+.app-shell button:has(> svg:only-child)::after { content: ""; position: absolute; inset: -8px; }
