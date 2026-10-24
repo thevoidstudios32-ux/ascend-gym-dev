@@ -751,7 +751,7 @@ function CoachInsightsArea({
 
   return (
     <section className="panel p-4 sm:p-5">
-      <h2 className="text-xs font-black tracking-[0.18em] text-muted-foreground">AI COACH INSIGHTS</h2>
+      <h2 className="text-xs font-black tracking-[0.18em] text-muted-foreground">INSIGHTS DO COACH IA</h2>
       <div className="mt-3 grid gap-2 sm:grid-cols-3">
         {insights.map((i) => (
           <div key={i.label} className="rounded-xl bg-elevated p-3">

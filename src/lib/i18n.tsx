@@ -3,6 +3,8 @@
    Sem tradução cadastrada, o próprio texto em português é usado (fallback seguro). */
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { EN } from "./i18n/en";
+import { PT_FIXES } from "./i18n/pt-fixes";
+import { startAutoTranslate, stopAutoTranslate } from "./i18n/auto-translate";
 import { supabase } from "@/integrations/supabase/client";
 
 export type Lang = "pt" | "en";
@@ -76,6 +78,14 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     if (typeof document !== "undefined") {
       document.documentElement.lang = lang === "en" ? "en" : "pt-BR";
     }
+  }, [lang]);
+
+  // Textos escritos direto nas telas (sem t()) também mudam de idioma: no inglês tudo
+  // que tem tradução é trocado; no português só os rótulos que estão em inglês no código.
+  useEffect(() => {
+    if (lang === "en") startAutoTranslate(EN, { months: true });
+    else startAutoTranslate(PT_FIXES);
+    return () => stopAutoTranslate();
   }, [lang]);
 
   const setLang = useCallback((l: Lang) => {

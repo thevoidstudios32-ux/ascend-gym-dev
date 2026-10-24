@@ -4,6 +4,7 @@ import { home } from "./home";
 import { workouts } from "./workouts";
 import { social } from "./social";
 import { health } from "./health";
+import { ui } from "./ui";
 
 export const EN: Record<string, string> = {
   ...common,
@@ -11,4 +12,5 @@ export const EN: Record<string, string> = {
   ...workouts,
   ...social,
   ...health,
+  ...ui,
 };

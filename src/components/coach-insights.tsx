@@ -29,7 +29,7 @@ export function CoachInsights({
 
   const metrics: { icon: AscendIconName; text: string }[] = [];
   if (data) {
-    if (data.streak !== null && data.streak > 0) metrics.push({ icon: "streak", text: `${data.streak} DIAS DE STREAK` });
+    if (data.streak !== null && data.streak > 0) metrics.push({ icon: "streak", text: `${data.streak} DIAS DE SEQUÊNCIA` });
     if (data.workoutsThisWeek !== null)
       metrics.push({
         icon: "workout",
@@ -42,7 +42,7 @@ export function CoachInsights({
 
   return (
     <section className="panel p-4 sm:p-5">
-      <h2 className="text-xs font-black tracking-[0.18em] text-muted-foreground">YOUR COACH INSIGHTS</h2>
+      <h2 className="text-xs font-black tracking-[0.18em] text-muted-foreground">INSIGHTS DO SEU COACH</h2>
 
       {isLoading ? (
         <div className="mt-3 space-y-2">
