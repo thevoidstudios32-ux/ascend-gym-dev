@@ -179,6 +179,7 @@ export async function generateNudges(supabase: DB, userId: string) {
       },
     ],
     summary,
+    { userId, feature: "social-nudges" },
   );
 
   return reply
