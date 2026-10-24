@@ -18,7 +18,7 @@ export function ProfileBadges({ userId, own = false }: { userId: string | null; 
   return (
     <section className="panel space-y-3 p-5">
       <header className="flex items-center justify-between gap-3">
-        <h2 className="text-display text-lg text-foreground">BADGES</h2>
+        <h2 className="text-display text-lg text-foreground">SELOS</h2>
         <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
           {owned.length} conquistado{owned.length === 1 ? "" : "s"}
         </span>

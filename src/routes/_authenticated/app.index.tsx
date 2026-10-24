@@ -12,7 +12,7 @@ import { CountUp, LoadingPage, ProgressBar, StatCard } from "@/components/ui-kit
 import { useDashboard, useExtras } from "@/hooks/use-dashboard";
 import { useProgram, useStartProgramDay } from "@/hooks/use-program";
 import { WEEKDAYS } from "@/lib/program";
-import { useT } from "@/lib/i18n";
+import { useI18n, useT } from "@/lib/i18n";
 import {
   computeStreak,
   levelFromXp,
@@ -62,6 +62,7 @@ function greeting() {
 
 function Dashboard({ data }: { data: DashboardData }) {
   const t = useT();
+  const { lang } = useI18n();
   const { data: extras } = useExtras();
   const { data: titles } = useTitles();
   const [titlesOpen, setTitlesOpen] = useState(false);
@@ -105,12 +106,12 @@ function Dashboard({ data }: { data: DashboardData }) {
       const iso = todayISO(d);
       return {
         iso,
-        letter: ["D", "S", "T", "Q", "Q", "S", "S"][d.getDay()]!,
+        letter: (lang === "en" ? ["S", "M", "T", "W", "T", "F", "S"] : ["D", "S", "T", "Q", "Q", "S", "S"])[d.getDay()]!,
         done: doneSet.has(iso),
         isToday: iso === today,
       };
     });
-  }, [doneSet, today]);
+  }, [doneSet, today, lang]);
 
   const totals = useMemo(() => {
     const cal = data.workouts.reduce((a, w) => a + (w.calories ?? 0), 0);
