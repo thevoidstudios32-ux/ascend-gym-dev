@@ -23,3 +23,4 @@
 - Allow photographic GIF-only demonstrations in the motion registry and reset media state on exercise changes; do not fabricate videos or carry a failed playback state into another exercise.
 - Use the unified assessment for all account generations; retain partial compatible answers and persist accepted multiweek plans through authenticated transactional RPCs to preserve history and prevent stale replacements.
 - Keep weekly prescriptions inside the active program; starting a week reuses one program/day-linked custom workout and exports consume those same weeks to avoid parallel sources.
+- Keep AI calls behind feature-specific authenticated server functions, with the daily usage gate in aiChat before every provider and fallback; the generic chat API is retired to avoid unrestricted prompts.

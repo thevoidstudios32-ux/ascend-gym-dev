@@ -161,6 +161,19 @@ export async function aiChat(input: AiChatInput): Promise<any> {
     throw new AiError("Requisição inválida: sem mensagens.", 400);
   }
 
+  if (input.meta?.userId) {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { count, error } = await supabaseAdmin
+      .from("ai_usage_logs")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", input.meta.userId)
+      .gte("created_at", new Date(Date.now() - 24 * 60 * 60 * 1_000).toISOString());
+    if (error) throw new AiError("Não foi possível verificar o limite diário do Coach IA. Tente novamente.", 503);
+    if ((count ?? 0) >= Number(process.env["AI_DAILY_LIMIT"] ?? 60)) {
+      throw new AiError("Limite diário do Coach IA atingido. Tente novamente amanhã.", 429);
+    }
+  }
+
   const { key, base, textModel, visionModel } = config();
   const models = fallbackModels(input.vision ? visionModel : textModel);
   const feature = input.meta?.feature ?? "outros";
