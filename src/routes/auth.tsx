@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { AscendLogoFull } from "@/components/brand";
+import { acquisitionForSignup, trackSignupCta } from "@/lib/marketing-tracking";
 
 
 export const Route = createFileRoute("/auth")({
@@ -58,7 +59,8 @@ function AuthPage() {
           password,
           options: {
             emailRedirectTo: window.location.origin + "/app",
-            data: { name: name || email.split("@")[0] },
+            // acq: origem de marketing (só UTMs), usada se o e-mail for confirmado em outro aparelho.
+            data: { name: name || email.split("@")[0], acq: acquisitionForSignup() },
           },
         });
         if (error) throw error;
@@ -169,10 +171,22 @@ function AuthPage() {
           </button>
         </form>
 
+        {isSignup ? (
+          <p className="mt-4 text-center text-[11px] leading-snug text-muted-foreground">
+            Para saber quais campanhas trazem novos atletas, registramos de qual link você veio
+            (parâmetros UTM) com um identificador anônimo deste navegador. Seu e-mail e nome não
+            entram nessa medição; o endereço IP só é usado para bloquear abusos e não é guardado
+            em formato legível.
+          </p>
+        ) : null}
+
         <p className="mt-5 text-center text-sm text-muted-foreground">
           {isSignup ? "Já tem conta?" : "Não tem conta?"}{" "}
           <button
-            onClick={() => setIsSignup((v) => !v)}
+            onClick={() => {
+              if (!isSignup) trackSignupCta("auth_toggle_signup");
+              setIsSignup((v) => !v);
+            }}
             className="font-bold text-primary hover:underline"
           >
             {isSignup ? "Entrar" : "Criar conta"}

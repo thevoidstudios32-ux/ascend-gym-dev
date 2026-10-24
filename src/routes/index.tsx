@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { AscendSymbol, AscendWordmark } from "@/components/brand";
 import { Button } from "@/components/ui/button";
+import { trackSignupCta } from "@/lib/marketing-tracking";
 import { LandingHeroVideo, landingHeroPoster } from "@/components/landing-hero-video";
 
 export const Route = createFileRoute("/")({
@@ -73,9 +74,17 @@ const feed = [
   { initial: "T", name: "teo.ascende", action: "Conquista desbloqueada", detail: "100 treinos registrados", likes: "521" },
 ];
 
-function SignupLink({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+function SignupLink({
+  children,
+  className = "",
+  cta = "landing_link",
+}: {
+  children: React.ReactNode;
+  className?: string;
+  cta?: string;
+}) {
   return (
-    <Link to="/auth" search={signupSearch} className={className}>
+    <Link to="/auth" search={signupSearch} className={className} onClick={() => trackSignupCta(cta)}>
       {children}
     </Link>
   );
@@ -141,7 +150,7 @@ function Landing() {
             </p>
             <div className="landing-hero-actions">
               <Button asChild className="landing-button landing-button-primary">
-                <Link to="/auth" search={signupSearch}>Começar gratuitamente <ArrowRight className="size-4" /></Link>
+                <Link to="/auth" search={signupSearch} onClick={() => trackSignupCta("landing_hero")}>Começar gratuitamente <ArrowRight className="size-4" /></Link>
               </Button>
               <SignupLink className="landing-button landing-button-secondary">
                 Explore o ASCEND
@@ -277,7 +286,7 @@ function Landing() {
           <p>Sua próxima versão está esperando.</p>
           <h2>PRONTO PARA<br /><span>SUBIR?</span></h2>
           <p>Comece grátis. Sem cartão. Seu primeiro programa fica pronto em menos de um minuto.</p>
-          <SignupLink className="landing-button landing-button-primary landing-button-large">Criar minha conta <ArrowRight className="size-5" /></SignupLink>
+          <SignupLink className="landing-button landing-button-primary landing-button-large" cta="landing_final">Criar minha conta <ArrowRight className="size-5" /></SignupLink>
           <span>iOS · Android · Web</span>
         </section>
       </main>

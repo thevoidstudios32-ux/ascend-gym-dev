@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ExerciseMedia } from "@/components/exercise-media";
 import { MuscleMap } from "@/components/muscle-map";
 import { getExerciseInfo } from "@/lib/exercise-detail";
+import { trackSignupCta } from "@/lib/marketing-tracking";
 
 const SITE = "https://ascendgym.dev";
 const URL = `${SITE}/?utm_source=compartilhar`;
@@ -35,7 +36,7 @@ export const Route = createFileRoute("/divulgar")({
   }), component: Divulgar,
 });
 function Signup({ label = "Experimentar grátis", className = "" }: { label?: string; className?: string }) {
-  return <Button asChild className={`promo-button ${className}`}><Link to="/auth" search={{ mode: "signup" }}>{label}<ArrowUpRight /></Link></Button>;
+  return <Button asChild className={`promo-button ${className}`}><Link to="/auth" search={{ mode: "signup" }} onClick={() => trackSignupCta("divulgar_button")}>{label}<ArrowUpRight /></Link></Button>;
 }
 function Divulgar() {
   const [installEvt, setInstallEvt] = useState<InstallEvent | null>(null);
@@ -125,6 +126,6 @@ function Divulgar() {
         <div className="promo-searches">{SEARCHES.map((term, i) => <Button key={term} variant="ghost" className="promo-search" onClick={() => copy(term, term)}><span className="font-mono text-xs text-muted-foreground">0{i + 1}</span><span>{term}</span>{copied === term ? <Check className="ml-auto text-primary" /> : <Copy className="ml-auto text-muted-foreground" />}</Button>)}</div>
       </div></section>
     </main>
-    <footer className="promo-wrap promo-footer"><Link to="/" aria-label="ASCEND — início"><AscendWordmark className="h-4" /></Link><p>ASCEND · The Void Studios</p><div className="flex gap-6"><Link to="/">Início</Link><Link to="/auth" search={{ mode: "signup" }}>Criar conta<ArrowUpRight className="ml-1 inline size-3" /></Link></div></footer>
+    <footer className="promo-wrap promo-footer"><Link to="/" aria-label="ASCEND — início"><AscendWordmark className="h-4" /></Link><p>ASCEND · The Void Studios</p><div className="flex gap-6"><Link to="/">Início</Link><Link to="/auth" search={{ mode: "signup" }} onClick={() => trackSignupCta("divulgar_footer")}>Criar conta<ArrowUpRight className="ml-1 inline size-3" /></Link></div></footer>
   </div>;
 }

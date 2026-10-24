@@ -4,6 +4,7 @@ import {
   Activity,
   ArrowLeft,
   BarChart3,
+  Megaphone,
   Palette,
   ShieldAlert,
   ShieldCheck,
@@ -23,6 +24,7 @@ import {
 } from "recharts";
 import { ContentManagement } from "@/components/admin-content";
 import { BadgeManagement } from "@/components/admin-badges";
+import { MarketingMetrics } from "@/components/admin-marketing";
 import { UserAvatar } from "@/components/user-avatar";
 import { CountUp } from "@/components/ui-kit";
 import { levelFromXp } from "@/lib/ascend";
@@ -58,7 +60,7 @@ const PERIODS: { label: string; value: Period }[] = [
 function AdminPanel() {
   const navigate = useNavigate();
   const status = useAdminStatus();
-  const [tab, setTab] = useState<"dashboard" | "users" | "content" | "badges" | "audit">("dashboard");
+  const [tab, setTab] = useState<"dashboard" | "users" | "marketing" | "content" | "badges" | "audit">("dashboard");
   const [days, setDays] = useState<Period>(30);
 
   useEffect(() => {
@@ -107,6 +109,7 @@ function AdminPanel() {
           [
             { id: "dashboard", label: "Dashboard", icon: BarChart3 },
             { id: "users", label: "Users", icon: Users },
+            { id: "marketing", label: "Marketing", icon: Megaphone },
             { id: "content", label: "Content", icon: Palette },
             { id: "badges", label: "Badges", icon: ShieldCheck },
             { id: "audit", label: "Audit", icon: Activity },
@@ -128,6 +131,7 @@ function AdminPanel() {
 
       {tab === "dashboard" ? <Dashboard days={days} setDays={setDays} /> : null}
       {tab === "users" ? <UsersTab days={days} /> : null}
+      {tab === "marketing" ? <MarketingMetrics /> : null}
       {tab === "content" ? <ContentManagement /> : null}
       {tab === "badges" ? <BadgeManagement /> : null}
       {tab === "audit" ? <AuditTab /> : null}
