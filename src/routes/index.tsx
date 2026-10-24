@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowDown,
@@ -90,11 +91,20 @@ function SectionLabel({ number, children }: { number: string; children: React.Re
 }
 
 function Landing() {
+  // Menu transparente sobre a hero; ganha fundo e linha ao rolar.
+  const header = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const update = () => header.current?.classList.toggle("is-scrolled", window.scrollY > 24);
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, []);
+
   return (
     <div className="landing-page">
       <div className="landing-grain" aria-hidden="true" />
 
-      <header className="landing-header">
+      <header ref={header} className="landing-header">
         <nav className="landing-nav" aria-label="Navegação principal">
           <a href="#top" aria-label="ASCEND — início" className="landing-brand">
             <AscendSymbol className="h-6" />
@@ -166,7 +176,7 @@ function Landing() {
         <section id="product" className="landing-section landing-product">
           <div className="landing-section-intro landing-section-intro-centered">
             <SectionLabel number="02">A interface</SectionLabel>
-            <h2>CONSTRUÍDO COMO<br /><span>UM INSTRUMENTO.</span></h2>
+            <h2 className="is-editorial">Construído como<br />um instrumento.</h2>
             <p>Cada tela responde a uma pergunta: estou melhorando? Densa onde importa, silenciosa no resto.</p>
           </div>
           <SignupLink className="landing-dashboard" aria-label="Criar conta e conhecer o painel ASCEND">
@@ -194,7 +204,7 @@ function Landing() {
 
         <section id="training" className="landing-section landing-training">
           <div className="landing-split-heading">
-            <div><SectionLabel number="03">Treino inteligente</SectionLabel><h2>TREINE COM<br /><span>PROPÓSITO.</span></h2></div>
+            <div><SectionLabel number="03">Treino inteligente</SectionLabel><h2 className="is-white">TREINE COM<br /><span>PROPÓSITO.</span></h2></div>
             <p>O ASCEND transforma cada sessão em um sistema mensurável. Carga, repetições, volume e recordes deixam de ser achismo.</p>
           </div>
           <SignupLink className="landing-workout-panel">
@@ -214,7 +224,7 @@ function Landing() {
         <section id="coach" className="landing-section landing-coach">
           <div className="landing-coach-copy">
             <SectionLabel number="04">Coach IA</SectionLabel>
-            <h2>SEU COACH.<br /><span>SEMPRE EVOLUINDO.</span></h2>
+            <h2 className="is-editorial">Seu coach.<br />Sempre evoluindo.</h2>
             <p>Ele lê cada série, noite de sono e refeição — então mostra, em linguagem direta, o que fazer a seguir.</p>
             <SignupLink className="landing-text-link">Conhecer meu Coach IA <ArrowRight className="size-4" /></SignupLink>
           </div>
@@ -229,7 +239,7 @@ function Landing() {
 
         <section id="progress" className="landing-section landing-progress">
           <div className="landing-split-heading">
-            <div><SectionLabel number="05">Progresso</SectionLabel><h2>VEJA O ESFORÇO<br /><span>VIRAR RESULTADO.</span></h2></div>
+            <div><SectionLabel number="05">Progresso</SectionLabel><h2>VEJA O ESFORÇO<br />VIRAR <em>RESULTADO.</em></h2></div>
             <p>Sem métricas de vaidade. Só as linhas que importam, avançando junto com você.</p>
           </div>
           <SignupLink className="landing-progress-panel">
@@ -242,7 +252,7 @@ function Landing() {
         <section id="community" className="landing-section landing-community">
           <div className="landing-community-copy">
             <SectionLabel number="06">Gym Bros</SectionLabel>
-            <h2>PROGRESSO É<br /><span>CONTAGIANTE.</span></h2>
+            <h2 className="is-editorial">Progresso é<br />contagiante.</h2>
             <p>Uma comunidade construída em torno do trabalho, não da pose. Siga quem impulsiona você e deixe que vejam sua subida.</p>
             <div className="landing-community-points"><span><Users className="size-5" /><b>Círculos</b> Treine com pessoas, não plateias.</span><span><ShieldCheck className="size-5" /><b>Respeito</b> Conquistado pelo trabalho.</span><span><Medal className="size-5" /><b>Conquistas</b> Esforço comprovado por dados.</span></div>
           </div>
@@ -254,7 +264,7 @@ function Landing() {
         </section>
 
         <section id="achievements" className="landing-section landing-achievements">
-          <div className="landing-section-intro landing-section-intro-centered"><SectionLabel number="07">Conquistas</SectionLabel><h2>CONQUISTADAS.<br /><span>NUNCA COMPRADAS.</span></h2><p>Cada emblema nasce de dados reais de treino. Alguns são quase impossíveis de alcançar.</p></div>
+          <div className="landing-section-intro landing-section-intro-centered"><SectionLabel number="07">Conquistas</SectionLabel><h2 className="is-muted">CONQUISTADAS.<br /><span>NUNCA COMPRADAS.</span></h2><p>Cada emblema nasce de dados reais de treino. Alguns são quase impossíveis de alcançar.</p></div>
           <div className="landing-badges">
             {[{ icon: ShieldCheck, tier: "IDENTIDADE", title: "Atleta verificado", rate: "12,4%" },{ icon: Flame, tier: "LIMITADO", title: "Early Ascender", rate: "3,1%" },{ icon: Trophy, tier: "LENDÁRIO", title: "Fundador", rate: "0,4%" },{ icon: Sparkles, tier: "MÍTICO", title: "The Void", rate: "0,1%" }].map((badge) => (
               <SignupLink className="landing-badge" key={badge.title}><span>{badge.tier}</span><badge.icon className="size-9" /><h3>{badge.title}</h3><small>{badge.rate} dos atletas</small></SignupLink>

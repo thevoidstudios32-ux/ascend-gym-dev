@@ -1110,3 +1110,14 @@
 .landing-hero, .landing-section, .landing-footer { padding-inline: var(--landing-gutter); }
 .landing-header { padding-inline: var(--landing-gutter); }
 .landing-nav { border-radius: 4px; }
+
+/* Acabamento premium (pacote 2): menu fixo de ponta a ponta e títulos variados. */
+.landing-header { padding: 0; border-bottom: 1px solid transparent; transition: background-color 250ms ease, border-color 250ms ease; }
+.landing-header.is-scrolled { background: color-mix(in oklab, var(--background) 92%, transparent); backdrop-filter: blur(14px); border-bottom-color: var(--landing-line); }
+.landing-nav { width: 100%; height: 4.5rem; border: 0; border-radius: 0; padding: 0 var(--landing-gutter); background: transparent; backdrop-filter: none; box-shadow: none; }
+@media (max-width: 640px) { .landing-nav { height: 3.75rem; } }
+/* títulos: menos vermelho e ritmo variado entre as seções */
+.landing-section h2.is-white span { color: var(--foreground); }
+.landing-section h2.is-muted span { color: color-mix(in oklab, var(--foreground) 42%, transparent); }
+.landing-section h2 em { font-style: normal; color: var(--primary); }
+.landing-section h2.is-editorial { font-family: var(--font-sans); font-size: clamp(2.4rem, 4.6vw, 4.25rem); font-weight: 600; line-height: 1.04; letter-spacing: -0.025em; text-transform: none; }
