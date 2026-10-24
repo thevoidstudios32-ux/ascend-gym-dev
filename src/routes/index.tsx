@@ -122,7 +122,7 @@ function Landing() {
           <div className="landing-hero-content">
             <p className="landing-overline">ASCEND · Treino e evolução</p>
             <h1>
-              Sua evolução não
+              Sua evolução não{" "}
               <span>acontece por acaso.</span>
             </h1>
             <p className="landing-hero-copy">
