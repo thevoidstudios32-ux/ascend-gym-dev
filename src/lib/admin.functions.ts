@@ -64,7 +64,10 @@ export const trackLogin = createServerFn({ method: "POST" })
           }
         : {}),
     };
-    await supabase.from("profiles").update(patch).eq("id", userId);
+    // Campos de sistema: o usuário não tem permissão de coluna para eles, então
+    // a gravação é feita pelo client de serviço, sempre restrita ao próprio userId.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("profiles").update(patch).eq("id", userId);
 
     return { tracked: isNewSession };
   });
@@ -73,7 +76,8 @@ export const trackLogin = createServerFn({ method: "POST" })
 export const touchPresence = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await context.supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin
       .from("profiles")
       .update({ last_seen_at: new Date().toISOString() })
       .eq("id", context.userId);
