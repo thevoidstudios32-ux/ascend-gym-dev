@@ -120,6 +120,13 @@
       "when": 1791765784116,
       "tag": "0016_program_day_upsert_index",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1792803855280,
+      "tag": "0017_targeted_security_fixes",
+      "breakpoints": true
     }
   ]
 }
