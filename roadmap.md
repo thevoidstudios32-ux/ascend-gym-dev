@@ -1,5 +1,10 @@
 # Translation completion roadmap
 
+## Correções pontuais de segurança
+- [x] Aplicar a migração única de políticas, permissões e travas de XP; zerar XP negativo existente
+- [x] Remover o endpoint genérico de chat e aplicar cota diária antes dos provedores
+- [ ] Validar as regras alteradas e resolver chamada social sem identificação respeitando o limite de arquivos solicitado
+
 ## Vídeo de supino na página inicial
 - [x] Integrar exclusivamente o vídeo enviado ao fundo; MP4 713 KB, WebM 421 KB e poster 36 KB, sem áudio
 - [x] Verificar reprodução e loop de 8 s, pausa manual/fora da tela, retorno, cadastro, poster com falha e movimento reduzido; sem erros ou overflow em 320/390/886/1280px
