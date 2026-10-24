@@ -28,7 +28,6 @@ import { Route as AuthenticatedAppPerfilRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAppProgressoRouteImport } from './routes/_authenticated/app.progresso'
 import { Route as AuthenticatedAppShapeRouteImport } from './routes/_authenticated/app.shape'
 import { Route as AuthenticatedAppTreinosRouteImport } from './routes/_authenticated/app.treinos'
-import { Route as ApiAiChatRouteImport } from './routes/api/ai/chat'
 import { Route as AuthenticatedAppBrosIndexRouteImport } from './routes/_authenticated/app.bros.index'
 import { Route as AuthenticatedAppBrosIdRouteImport } from './routes/_authenticated/app.bros.$id'
 import { Route as AuthenticatedAppPersonalizadoIdRouteImport } from './routes/_authenticated/app.personalizado.$id'
@@ -133,11 +132,6 @@ const AuthenticatedAppTreinosRoute = AuthenticatedAppTreinosRouteImport.update({
   path: '/treinos',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
-const ApiAiChatRoute = ApiAiChatRouteImport.update({
-  id: '/api/ai/chat',
-  path: '/api/ai/chat',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthenticatedAppBrosIndexRoute =
   AuthenticatedAppBrosIndexRouteImport.update({
     id: '/bros/',
@@ -186,7 +180,6 @@ export interface FileRoutesByFullPath {
   '/app/progresso': typeof AuthenticatedAppProgressoRoute
   '/app/shape': typeof AuthenticatedAppShapeRoute
   '/app/treinos': typeof AuthenticatedAppTreinosRoute
-  '/api/ai/chat': typeof ApiAiChatRoute
   '/app/': typeof AuthenticatedAppIndexRoute
   '/app/bros/$id': typeof AuthenticatedAppBrosIdRoute
   '/app/personalizado/$id': typeof AuthenticatedAppPersonalizadoIdRoute
@@ -211,7 +204,6 @@ export interface FileRoutesByTo {
   '/app/progresso': typeof AuthenticatedAppProgressoRoute
   '/app/shape': typeof AuthenticatedAppShapeRoute
   '/app/treinos': typeof AuthenticatedAppTreinosRoute
-  '/api/ai/chat': typeof ApiAiChatRoute
   '/app': typeof AuthenticatedAppIndexRoute
   '/app/bros/$id': typeof AuthenticatedAppBrosIdRoute
   '/app/personalizado/$id': typeof AuthenticatedAppPersonalizadoIdRoute
@@ -239,7 +231,6 @@ export interface FileRoutesById {
   '/_authenticated/app/progresso': typeof AuthenticatedAppProgressoRoute
   '/_authenticated/app/shape': typeof AuthenticatedAppShapeRoute
   '/_authenticated/app/treinos': typeof AuthenticatedAppTreinosRoute
-  '/api/ai/chat': typeof ApiAiChatRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/_authenticated/app/bros/$id': typeof AuthenticatedAppBrosIdRoute
   '/_authenticated/app/personalizado/$id': typeof AuthenticatedAppPersonalizadoIdRoute
@@ -267,7 +258,6 @@ export interface FileRouteTypes {
     | '/app/progresso'
     | '/app/shape'
     | '/app/treinos'
-    | '/api/ai/chat'
     | '/app/'
     | '/app/bros/$id'
     | '/app/personalizado/$id'
@@ -292,7 +282,6 @@ export interface FileRouteTypes {
     | '/app/progresso'
     | '/app/shape'
     | '/app/treinos'
-    | '/api/ai/chat'
     | '/app'
     | '/app/bros/$id'
     | '/app/personalizado/$id'
@@ -319,7 +308,6 @@ export interface FileRouteTypes {
     | '/_authenticated/app/progresso'
     | '/_authenticated/app/shape'
     | '/_authenticated/app/treinos'
-    | '/api/ai/chat'
     | '/_authenticated/app/'
     | '/_authenticated/app/bros/$id'
     | '/_authenticated/app/personalizado/$id'
@@ -335,7 +323,6 @@ export interface RootRouteChildren {
   DivulgarRoute: typeof DivulgarRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   V2Route: typeof V2Route
-  ApiAiChatRoute: typeof ApiAiChatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -473,13 +460,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppTreinosRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
-    '/api/ai/chat': {
-      id: '/api/ai/chat'
-      path: '/api/ai/chat'
-      fullPath: '/api/ai/chat'
-      preLoaderRoute: typeof ApiAiChatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_authenticated/app/bros/': {
       id: '/_authenticated/app/bros/'
       path: '/bros'
@@ -579,7 +559,6 @@ const rootRouteChildren: RootRouteChildren = {
   DivulgarRoute: DivulgarRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   V2Route: V2Route,
-  ApiAiChatRoute: ApiAiChatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
