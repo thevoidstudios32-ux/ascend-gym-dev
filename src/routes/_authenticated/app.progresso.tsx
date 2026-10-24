@@ -104,7 +104,7 @@ function ProgressoPage() {
 
   return (
     <div className="animate-rise space-y-5">
-      <PageHeader title="ESTATÍSTICAS" subtitle="Volume, recordes, peso e metas do dia." />
+      <PageHeader title="PROGRESSO" subtitle="Volume, recordes, peso e metas do dia." />
 
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard

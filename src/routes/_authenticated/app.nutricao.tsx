@@ -206,7 +206,7 @@ function NutricaoPage() {
       ) : null}
 
       <header>
-        <h1 className="text-display text-4xl">ALIMENTAÇÃO</h1>
+        <h1 className="text-display text-4xl">NUTRIÇÃO</h1>
         <p className="text-sm text-muted-foreground">Metas calculadas a partir do seu perfil e objetivo.</p>
       </header>
 

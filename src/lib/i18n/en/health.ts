@@ -1,6 +1,8 @@
 /* Traduções EN — nutrição, shape tracker, progresso e coach. */
 export const health: Record<string, string> = {
   ALIMENTAÇÃO: "NUTRITION",
+  NUTRIÇÃO: "NUTRITION",
+  PROGRESSO: "PROGRESS",
   "Metas calculadas a partir do seu perfil e objetivo.": "Targets calculated from your profile and goal.",
   "Calorias de hoje": "Today's calories",
   restam: "remaining",
