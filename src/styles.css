@@ -1080,3 +1080,33 @@
 }
 @media (max-width: 360px) { .promo-hero h1 { font-size: 46px; } .promo-features { grid-template-columns: minmax(0,1fr); } }
 @media (prefers-reduced-motion: reduce) { .promo-page *, .promo-page *::before, .promo-page *::after { animation: none !important; transition: none !important; scroll-behavior: auto; } }
+
+/* Acabamento premium (pacote 1): formas firmes, menos brilho, rótulos legíveis e mais respiro. */
+.landing-page { --landing-gutter: max(clamp(1.5rem, 5vw, 4.5rem), calc((100vw - 76rem) / 2)); --landing-radius: 3px; }
+/* um só raio: cantos firmes em botões, campos e painéis (sem pílulas) */
+.landing-button, .landing-hero-actions .landing-button, .landing-announcement, .landing-announcement span, .landing-coach-input { border-radius: var(--landing-radius); }
+.landing-dashboard { border-radius: 4px; }
+.landing-dashboard-side span { border-radius: var(--landing-radius); }
+/* vermelho chapado no botão principal, sem degradê nem sombra brilhante */
+.landing-button-primary { background: var(--primary); box-shadow: none; }
+.landing-button-primary:hover { background: color-mix(in oklab, var(--primary) 86%, var(--foreground)); box-shadow: none; }
+/* sem névoas vermelhas atrás das seções nem brilhos decorativos */
+.landing-product, .landing-coach, .landing-achievements, .landing-final { background-image: none; }
+.landing-scan-line, .landing-hero-bottom i { box-shadow: none; }
+/* numeração de seção discreta, sem círculo */
+.landing-kicker span:first-child { width: auto; height: auto; border: 0; border-radius: 0; color: var(--landing-dim); }
+/* sem indicadores "ao vivo" de painel de demonstração */
+.landing-feed-top > span:last-child, .landing-coach-head i { display: none; }
+/* ícones neutros; o vermelho fica para o destaque ao passar o mouse */
+.landing-system-card svg, .landing-community-points svg { color: color-mix(in oklab, var(--foreground) 72%, transparent); transition: color 200ms ease; }
+.landing-system-card:hover svg { color: var(--primary); }
+/* rótulos legíveis: mínimo de 12px, com mais espaço entre letras */
+.landing-announcement, .landing-hero-bottom, .landing-float-card span, .landing-float-card small, .landing-kicker, .landing-card-number,
+.landing-dashboard-top small, .landing-dashboard small, .landing-stat-row span, .landing-panel-head small, .landing-workout-row i,
+.landing-workout-labels, .landing-coach-analysis small, .landing-coach-metrics span, .landing-progress-summary small,
+.landing-progress-stats small, .landing-feed-top, .landing-feed-post small, .landing-feed-post > span, .landing-badge > span,
+.landing-badge small, .landing-final > p:first-of-type, .landing-final > span, .landing-footer small, .landing-button-small { font-size: 0.75rem; letter-spacing: 0.04em; }
+/* mais respiro lateral, alinhado entre menu, hero, seções e rodapé */
+.landing-hero, .landing-section, .landing-footer { padding-inline: var(--landing-gutter); }
+.landing-header { padding-inline: var(--landing-gutter); }
+.landing-nav { border-radius: 4px; }
