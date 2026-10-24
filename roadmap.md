@@ -3,7 +3,8 @@
 ## Correções pontuais de segurança
 - [x] Aplicar a migração única de políticas, permissões e travas de XP; zerar XP negativo existente
 - [x] Remover o endpoint genérico de chat e aplicar cota diária antes dos provedores
-- [ ] Validar as regras alteradas e resolver chamada social sem identificação respeitando o limite de arquivos solicitado
+- [x] Validar permissões e funções aplicadas, limpeza de XP, quatro testes da cota e build OK
+- [ ] Identificar usuário na chamada de nudges sociais — bloqueado pelo escopo explícito: social.server.ts não está entre os arquivos autorizados
 
 ## Vídeo de supino na página inicial
 - [x] Integrar exclusivamente o vídeo enviado ao fundo; MP4 713 KB, WebM 421 KB e poster 36 KB, sem áudio
