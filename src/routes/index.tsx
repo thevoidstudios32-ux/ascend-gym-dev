@@ -64,7 +64,7 @@ const workoutRows = [
   ["Supino reto", "100×8 · 105×6 · 110×5", "112,5 kg", "+2,5 kg"],
   ["Supino inclinado", "32×10 · 34×10 · 34×9", "34 kg", "+2 kg"],
   ["Paralelas com peso", "20×8 · 20×8 · 22,5×7", "+22,5 kg", "NOVO PR"],
-  ["Crucifixo no cabo", "18×12 · 18×12 · 20×10", "20 kg", "estável"],
+  ["Crucifixo no cabo", "18×12 · 18×12 · 20×10", "20 kg", "Estável"],
 ];
 
 const feed = [
@@ -177,7 +177,7 @@ function Landing() {
           <div className="landing-section-intro landing-section-intro-centered">
             <SectionLabel number="02">A interface</SectionLabel>
             <h2 className="is-editorial">Construído como<br />um instrumento.</h2>
-            <p>Cada tela responde a uma pergunta: estou melhorando? Densa onde importa, silenciosa no resto.</p>
+            <p>Cada tela responde a uma pergunta: estou melhorando? Detalhe onde importa, silêncio no resto.</p>
           </div>
           <SignupLink className="landing-dashboard" aria-label="Criar conta e conhecer o painel ASCEND">
             <aside className="landing-dashboard-side">
@@ -205,7 +205,7 @@ function Landing() {
         <section id="training" className="landing-section landing-training">
           <div className="landing-split-heading">
             <div><SectionLabel number="03">Treino inteligente</SectionLabel><h2 className="is-white">TREINE COM<br /><span>PROPÓSITO.</span></h2></div>
-            <p>O ASCEND transforma cada sessão em um sistema mensurável. Carga, repetições, volume e recordes deixam de ser achismo.</p>
+            <p>O ASCEND transforma cada sessão em dados mensuráveis. Carga, repetições, volume e recordes deixam de ser achismo.</p>
           </div>
           <SignupLink className="landing-workout-panel">
             <div className="landing-panel-head"><div><span>Push A · Hipertrofia</span><small>Semana 38 · Sessão 47</small></div><strong><Clock3 className="size-4" /> 01:02:01</strong></div>
@@ -274,7 +274,7 @@ function Landing() {
 
         <section className="landing-final">
           <AscendSymbol className="h-14" />
-          <p>A próxima versão de você está esperando.</p>
+          <p>Sua próxima versão está esperando.</p>
           <h2>PRONTO PARA<br /><span>SUBIR?</span></h2>
           <p>Comece grátis. Sem cartão. Seu primeiro programa fica pronto em menos de um minuto.</p>
           <SignupLink className="landing-button landing-button-primary landing-button-large">Criar minha conta <ArrowRight className="size-5" /></SignupLink>
@@ -286,7 +286,7 @@ function Landing() {
         <div><AscendSymbol className="h-7" /><AscendWordmark className="h-3" /></div>
         <p>Treino. Progresso. Nutrição. Comunidade.</p>
         <SignupLink>Entrar no ASCEND <ArrowRight className="size-4" /></SignupLink>
-        <small>© 2026 ASCEND · FEITO PARA QUEM RECUSA FICAR IGUAL.</small>
+        <small>© 2026 ASCEND · FEITO PARA QUEM SE RECUSA A FICAR IGUAL.</small>
       </footer>
     </div>
   );

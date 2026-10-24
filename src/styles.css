@@ -1120,4 +1120,6 @@
 .landing-section h2.is-white span { color: var(--foreground); }
 .landing-section h2.is-muted span { color: color-mix(in oklab, var(--foreground) 42%, transparent); }
 .landing-section h2 em { font-style: normal; color: var(--primary); }
+/* parágrafo das seções centralizadas: caixa centralizada, não só o texto */
+.landing-section-intro-centered p { margin-inline: auto; }
 .landing-section h2.is-editorial { font-family: var(--font-sans); font-size: clamp(2.4rem, 4.6vw, 4.25rem); font-weight: 600; line-height: 1.04; letter-spacing: -0.025em; text-transform: none; }
