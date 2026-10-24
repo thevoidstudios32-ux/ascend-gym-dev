@@ -322,7 +322,7 @@ function Dashboard({ data }: { data: DashboardData }) {
           {
             to: "/app/nutricao",
             icon: Apple,
-            title: t("Alimentação"),
+            title: t("Nutrição"),
             d: t("Calorias, macros e água"),
           },
           {
